@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/plugins/fracture_analysis_2d" >
+        <file>icon.png</file>
+    </qresource>
+</RCC>

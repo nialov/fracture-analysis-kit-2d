@@ -1,0 +1,28 @@
+from . import target_area_analysis_qgis as taaq
+from . import fracture_analysis_kit_qgis_tools as qgis_tools
+from . import logging_tool
+
+
+
+def main_single_target_area(results_folder, name, trace_layer, branch_layer, node_layer, area_layer, debug_logger):
+    # SETUP PLOTTING DIRECTORIES
+    plotting_directory = qgis_tools.plotting_directories(results_folder, name)
+    # SETUP DEBUG LOGGER
+    debug_logger.initialize_logging(plotting_directory)
+    debug_logger.write_to_log('\n------DIRECTORIES MADE, DEBUG LOGGER INITIALIZED FOR RUN------\n')
+    # START ANALYSIS FOR SINGLE TARGET AREA
+    sta_analysis = taaq.TargetAreaAnalysis(plotting_directory, name, trace_layer, branch_layer, node_layer, area_layer, debug_logger)
+    sta_analysis.plots()
+    return sta_analysis
+
+def main_multi_target_area(table_df, results_folder, analysis_name, gname_list, set_list, debug_logger):
+    # SETUP PLOTTING DIRECTORIES
+    plotting_directory = qgis_tools.plotting_directories(results_folder, analysis_name)
+    # SETUP DEBUG LOGGER
+    debug_logger.initialize_logging(plotting_directory)
+    # START ANALYSIS FOR MULTI TARGET AREA
+    mta_analysis = taaq.MultiTargetAreaAnalysis(table_df, plotting_directory, analysis_name, gname_list, set_list, debug_logger)
+    mta_analysis.plot_results()
+    return mta_analysis
+
+
