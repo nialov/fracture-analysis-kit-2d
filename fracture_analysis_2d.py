@@ -38,8 +38,10 @@ from .fracture_analysis_kit import main_target_analysis
 from .fracture_analysis_kit import logging_tool
 import time
 import pandas as pd
+import logging
 
 debug_logger = logging_tool.DebugLogger()
+
 
 class FractureAnalysis2D:
     """QGIS Plugin Implementation."""
@@ -80,7 +82,7 @@ class FractureAnalysis2D:
         self.polygon_layers = None
         self.point_layers = None
         self.table_df = pd.DataFrame(columns=['Trace', 'Branch', 'Node', 'Area', 'Name', 'Group'])
-        self.gname_df = pd.DataFrame(columns=['Name', 'Cut Off'])
+        self.gname_df = pd.DataFrame(columns=['Group', 'Cut Off'])
         # Debug logger
         self.debug_logger = debug_logger
         # TODO: Implement sets
@@ -216,7 +218,7 @@ class FractureAnalysis2D:
 
     def populate_groups(self):
         # Get group name list
-        gname_list = self.gname_df.Name.tolist()
+        gname_list = self.gname_df.Group.tolist()
         # Clear contents
         self.dlg.comboBox_tab2_gnames.clear()
         self.dlg.comboBox_tab2_gnames.addItems(gname_list)
@@ -253,7 +255,7 @@ class FractureAnalysis2D:
 
     def run_multi_target_analysis(self):
         # Get group name list
-        gname_list = self.gname_df.Name.tolist()
+        gname_list = self.gname_df.Group.tolist()
         # Output folder
         results_folder = self.dlg.lineEdit_tab2_folder.text()
         # Analysis name
@@ -279,7 +281,7 @@ class FractureAnalysis2D:
         self.dlg.tableWidget_tab2_gnames.setItem(curr_row, 0, QTableWidgetItem(group_name))
         self.dlg.tableWidget_tab2_gnames.setItem(curr_row, 1, QTableWidgetItem(cut_off))
         # Append to DataFrame
-        self.gname_df = self.table_df.append({'Name': group_name, 'Cut Off': cut_off}, ignore_index=True)
+        self.gname_df = self.gname_df.append({'Group': group_name, 'Cut Off': cut_off}, ignore_index=True)
         # Populate names to target area group button
         self.populate_groups()
         # Clear name and cut_off text boxes
@@ -322,6 +324,7 @@ class FractureAnalysis2D:
                 vector_layers.append(layer)
                 layer_features_iter = layer.getFeatures()
                 # TODO: Use yield?
+                # Find feature type by checking the geometry of the first item in the geometry column of the layer
                 for feature in layer_features_iter:
                     if 'String' in str(feature.geometry()):
                         line_layers.append(layer)
@@ -379,7 +382,7 @@ class FractureAnalysis2D:
             _ = main_target_analysis.main_single_target_area(
                 results_folder, name, trace_layer, branch_layer, node_layer, area_layer, self.debug_logger)
 
-            self.debug_logger.write_to_log_time('table_df:' + str(self.table_df))
+            # self.debug_logger.write_to_log_time('table_df:' + str(self.table_df))
 
 
             # Push finish message

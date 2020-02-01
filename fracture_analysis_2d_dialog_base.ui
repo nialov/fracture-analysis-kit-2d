@@ -22,6 +22,18 @@
      <height>641</height>
     </rect>
    </property>
+   <property name="toolTip">
+    <string/>
+   </property>
+   <property name="toolTipDuration">
+    <number>-1</number>
+   </property>
+   <property name="statusTip">
+    <string/>
+   </property>
+   <property name="whatsThis">
+    <string/>
+   </property>
    <property name="currentIndex">
     <number>1</number>
    </property>
@@ -100,6 +112,15 @@
        <width>341</width>
        <height>32</height>
       </rect>
+     </property>
+     <property name="toolTip">
+      <string comment="what is it" extracomment="what is it">what is it</string>
+     </property>
+     <property name="statusTip">
+      <string>what is it</string>
+     </property>
+     <property name="whatsThis">
+      <string>what is it</string>
      </property>
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -318,7 +339,7 @@
       </property>
      </column>
     </widget>
-    <widget class="QWidget" name="">
+    <widget class="QWidget" name="layoutWidget">
      <property name="geometry">
       <rect>
        <x>20</x>
@@ -343,7 +364,7 @@
       <item row="0" column="1">
        <widget class="QLineEdit" name="lineEdit_tab2_analysis_name">
         <property name="text">
-         <string/>
+         <string>test_</string>
         </property>
        </widget>
       </item>
@@ -362,7 +383,7 @@
       <item row="1" column="1">
        <widget class="QLineEdit" name="lineEdit_tab2_folder">
         <property name="text">
-         <string/>
+         <string>D:\QGIS_Files\test_plots</string>
         </property>
        </widget>
       </item>
@@ -382,7 +403,7 @@
       </item>
      </layout>
     </widget>
-    <widget class="QWidget" name="">
+    <widget class="QWidget" name="layoutWidget">
      <property name="geometry">
       <rect>
        <x>390</x>
@@ -407,7 +428,7 @@
       <item row="0" column="1">
        <widget class="QLineEdit" name="lineEdit_gname">
         <property name="text">
-         <string/>
+         <string>kb</string>
         </property>
        </widget>
       </item>
@@ -424,7 +445,11 @@
        </widget>
       </item>
       <item row="1" column="1">
-       <widget class="QLineEdit" name="lineEdit_tab2_cutoff"/>
+       <widget class="QLineEdit" name="lineEdit_tab2_cutoff">
+        <property name="text">
+         <string>50</string>
+        </property>
+       </widget>
       </item>
       <item row="2" column="1">
        <widget class="QPushButton" name="pushButton_gname_add">
@@ -440,7 +465,7 @@
       </item>
      </layout>
     </widget>
-    <widget class="QWidget" name="">
+    <widget class="QWidget" name="layoutWidget">
      <property name="geometry">
       <rect>
        <x>10</x>
@@ -544,7 +569,7 @@
       <item row="4" column="1">
        <widget class="QLineEdit" name="lineEdit_tab2_tan">
         <property name="text">
-         <string/>
+         <string>kb10</string>
         </property>
        </widget>
       </item>

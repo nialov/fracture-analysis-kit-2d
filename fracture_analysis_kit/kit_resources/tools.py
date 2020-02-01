@@ -2,6 +2,7 @@ import glob
 import math
 import os
 from pathlib import Path
+import logging
 
 import geopandas as gpd
 import matplotlib.patheffects as path_effects
@@ -29,34 +30,6 @@ buffer_value = 0.001
 snap_value = 0.001
 
 
-# def plot_ternary_xyi_point(nodeframe, name):
-#     xcount = len(nodeframe.loc[nodeframe['c'] == 'X'])
-#     ycount = len(nodeframe.loc[nodeframe['c'] == 'Y'])
-#     icount = len(nodeframe.loc[nodeframe['c'] == 'I'])
-#
-#     sumcount = xcount + ycount + icount
-#
-#     xp = 100 * xcount / sumcount
-#     yp = 100 * ycount / sumcount
-#     ip = 100 * icount / sumcount
-#
-#     point = [(xp, yp, ip)]
-#
-#     # Scatter Plot
-#     scale = 100
-#     figure, tax = ternary.figure(scale=scale)
-#     figure.set_size_inches(10, 10)
-#     tax.scatter(point, marker='s', color='red', label=name)
-#     tax.legend()
-#
-#     tax.set_title("I-X-Y-plot", fontsize=20)
-#     tax.boundary(linewidth=2.0)
-#     tax.gridlines(multiple=10, color="blue")
-#     tax.ticks(axis='lbr', linewidth=1, multiple=10)
-#     tax.clear_matplotlib_ticks()
-#     tax.get_axes().axis('off')
-
-
 def initialize_branch_frame(filename):
     branchframe = gpd.read_file(filename)
     branchframe['azimu'] = branchframe.geometry.apply(calc_azimu)
@@ -81,14 +54,14 @@ def initialize_node_frame(filename):
     return nodeframe
 
 
-def initialize_normalisation(filelist):
-    norm_list = []
-    for i in range(len(filelist)):
-        name = filelist[i]
-        normalisation_str = input("Enter normalisation for " + name + ":")
-        normalisation = float(normalisation_str)
-        norm_list.append(normalisation)
-    return norm_list
+# def initialize_normalisation(filelist):
+#     norm_list = []
+#     for i in range(len(filelist)):
+#         name = filelist[i]
+#         normalisation_str = input("Enter normalisation for " + name + ":")
+#         normalisation = float(normalisation_str)
+#         norm_list.append(normalisation)
+#     return norm_list
 
 
 def initialize_area_frame(filename):
@@ -141,11 +114,6 @@ def get_filenames_branches_or_traces(directory):
 
 
 def calc_azimu(line):
-    # DEBUGGING LOG
-    # with open(r'C:\QGIS_Files\log\log.txt', mode='a') as logfile:
-    #     logfile.write('\n----------------------------\n')
-    #     logfile.write(f'line str: {str(line)}\n line dir str:{str(dir(line))}')
-    #     logfile.write('\n----------------------------\n')
     try:
         coord_list = list(line.coords)
     except NotImplementedError:
@@ -154,10 +122,7 @@ def calc_azimu(line):
         try:
             coord_list = list(line.coords)
         except NotImplementedError:
-            with open(r'C:\QGIS_Files\log\log.txt', mode='a') as logfile:
-                logfile.write('\n----------------------------\n')
-                logfile.write(f'nan in calc_azimu. line: {line}')
-                logfile.write('\n----------------------------\n')
+            # logging.exception('error in calc_azimu')
             return np.NaN
     start_x = coord_list[0][0]
     start_y = coord_list[0][1]
@@ -191,132 +156,132 @@ def get_filenames_branches_traces_and_areas(branchdirectory,
     return branchfiles, areafiles
 
 
-def get_filenames_branches_traces_and_areas_coded_old(linedirectory, areadirectory, code):
-    # Gets both branches and traces + their areas
-    branchfiles = list(glob.glob(
-        os.path.join(linedirectory, '*' + code + '*branches.shp')))  # Only gets based on code e.g. 'KL' or 'KB'
-    tracefiles = list(glob.glob(os.path.join(linedirectory, '*' + code + '*tulkinta.shp')))
-    tracefiles_2 = list(glob.glob(os.path.join(linedirectory, '*' + code + '*traces.shp')))
-    linefiles = branchfiles + tracefiles + tracefiles_2
-    linefiles = sorted(linefiles)
-
-    areafiles = list(glob.glob(os.path.join(areadirectory, '*' + code + '*tulkinta_alue.shp')))
-    areafiles_2 = list(glob.glob(os.path.join(areadirectory, '*' + code + '*area_*.shp')))
-    areafiles = areafiles + areafiles_2
-    areafiles = sorted(areafiles)
-    # if len(branchfiles)+len(areafiles) == 0:
-    #   raise Exception('No branch or areafiles found. Check spelling and directories.')
-    if len(linefiles) != len(areafiles):
-        print(linefiles, areafiles)
-        raise Exception('Unequal amount of areafiles and linefiles found')
-    return linefiles, areafiles
-
-
-def get_filenames_nodes_coded_old(nodedirectory, code):  # Gets nodefiles using code
-    nodefiles = list(glob.glob(os.path.join(nodedirectory, code + '*nodes.shp')))
-    nodefiles = sorted(nodefiles)
-
-    if len(nodefiles) == 0:
-        raise Exception('No nodefiles found. Check spelling and directories.')
-
-    return nodefiles
+# def get_filenames_branches_traces_and_areas_coded_old(linedirectory, areadirectory, code):
+#     # Gets both branches and traces + their areas
+#     branchfiles = list(glob.glob(
+#         os.path.join(linedirectory, '*' + code + '*branches.shp')))  # Only gets based on code e.g. 'KL' or 'KB'
+#     tracefiles = list(glob.glob(os.path.join(linedirectory, '*' + code + '*tulkinta.shp')))
+#     tracefiles_2 = list(glob.glob(os.path.join(linedirectory, '*' + code + '*traces.shp')))
+#     linefiles = branchfiles + tracefiles + tracefiles_2
+#     linefiles = sorted(linefiles)
+#
+#     areafiles = list(glob.glob(os.path.join(areadirectory, '*' + code + '*tulkinta_alue.shp')))
+#     areafiles_2 = list(glob.glob(os.path.join(areadirectory, '*' + code + '*area_*.shp')))
+#     areafiles = areafiles + areafiles_2
+#     areafiles = sorted(areafiles)
+#     # if len(branchfiles)+len(areafiles) == 0:
+#     #   raise Exception('No branch or areafiles found. Check spelling and directories.')
+#     if len(linefiles) != len(areafiles):
+#         print(linefiles, areafiles)
+#         raise Exception('Unequal amount of areafiles and linefiles found')
+#     return linefiles, areafiles
 
 
-def get_filenames_branches_traces_and_areas_coded(linedirectory, areadirectory, code):
-    # Gets both branches and traces + their areas
-    branchfiles = glob.glob(linedirectory + '/{}_*branches.shp'.format(code)) \
-                  + glob.glob(linedirectory + '/{}[0-9]_*branches.shp'.format(code)) \
-                  + glob.glob(linedirectory + '/{}[0-9][0-9]_*branches.shp'.format(code))
-
-    tracefiles = glob.glob(linedirectory + '/{}_*tulkinta.shp'.format(code)) \
-                 + glob.glob(linedirectory + '/{}[0-9]_*tulkinta.shp'.format(code)) \
-                 + glob.glob(linedirectory + '/{}[0-9][0-9]_*tulkinta.shp'.format(code))
-
-    tracefiles_alt = glob.glob(linedirectory + '/{}_*traces.shp'.format(code)) \
-                     + glob.glob(linedirectory + '/{}[0-9]_*traces.shp'.format(code)) \
-                     + glob.glob(linedirectory + '/{}[0-9][0-9]_*traces.shp'.format(code))
-
-    linefiles = branchfiles + tracefiles + tracefiles_alt
-    if len(linefiles) != len(branchfiles) \
-            and len(linefiles) != len(tracefiles) \
-            and len(linefiles) != len(tracefiles_alt):
-        print('-----------error-----------')
-        print('linefiles:', linefiles)
-        print('--------------------------')
-        print('branchfiles:', branchfiles)
-        print('--------------------------')
-        print('tracefiles_alt:', tracefiles_alt)
-        raise Exception(
-            'Amount of linefiles doesnt equal exactly with the amount of one of either trace- or branchfiles')
-    linefiles = sorted(linefiles)
-
-    areafiles = glob.glob(areadirectory + '/{}_*tulkinta_alue.shp'.format(code)) \
-                + glob.glob(areadirectory + '/{}[0-9]_*tulkinta_alue.shp'.format(code)) \
-                + glob.glob(areadirectory + '/{}[0-9][0-9]_*tulkinta_alue.shp'.format(code))
-
-    areafiles_alt = glob.glob(areadirectory + '/{}_*area_*.shp'.format(code)) \
-                    + glob.glob(areadirectory + '/{}[0-9]_*area_*.shp'.format(code)) \
-                    + glob.glob(areadirectory + '/{}[0-9][0-9]_*area_*.shp'.format(code))
-
-    areafiles = areafiles + areafiles_alt
-    areafiles = sorted(areafiles)
-    # if len(branchfiles)+len(areafiles) == 0:
-    #   raise Exception('No branch or areafiles found. Check spelling and directories.')
-    if len(linefiles) != len(areafiles):
-        print(linefiles, areafiles)
-        raise Exception('Unequal amount of areafiles and linefiles found')
-    return linefiles, areafiles
+# def get_filenames_nodes_coded_old(nodedirectory, code):  # Gets nodefiles using code
+#     nodefiles = list(glob.glob(os.path.join(nodedirectory, code + '*nodes.shp')))
+#     nodefiles = sorted(nodefiles)
+#
+#     if len(nodefiles) == 0:
+#         raise Exception('No nodefiles found. Check spelling and directories.')
+#
+#     return nodefiles
 
 
-def get_filenames_nodes_coded(nodedirectory, code):  # Gets nodefiles using code
-    nodefiles = glob.glob(nodedirectory + '/{}_*nodes.shp'.format(code)) \
-                + glob.glob(nodedirectory + '/{}[0-9]_*nodes.shp'.format(code)) \
-                + glob.glob(nodedirectory + '/{}[0-9][0-9]_*nodes.shp'.format(code))
+# def get_filenames_branches_traces_and_areas_coded(linedirectory, areadirectory, code):
+#     # Gets both branches and traces + their areas
+#     branchfiles = glob.glob(linedirectory + '/{}_*branches.shp'.format(code)) \
+#                   + glob.glob(linedirectory + '/{}[0-9]_*branches.shp'.format(code)) \
+#                   + glob.glob(linedirectory + '/{}[0-9][0-9]_*branches.shp'.format(code))
+#
+#     tracefiles = glob.glob(linedirectory + '/{}_*tulkinta.shp'.format(code)) \
+#                  + glob.glob(linedirectory + '/{}[0-9]_*tulkinta.shp'.format(code)) \
+#                  + glob.glob(linedirectory + '/{}[0-9][0-9]_*tulkinta.shp'.format(code))
+#
+#     tracefiles_alt = glob.glob(linedirectory + '/{}_*traces.shp'.format(code)) \
+#                      + glob.glob(linedirectory + '/{}[0-9]_*traces.shp'.format(code)) \
+#                      + glob.glob(linedirectory + '/{}[0-9][0-9]_*traces.shp'.format(code))
+#
+#     linefiles = branchfiles + tracefiles + tracefiles_alt
+#     if len(linefiles) != len(branchfiles) \
+#             and len(linefiles) != len(tracefiles) \
+#             and len(linefiles) != len(tracefiles_alt):
+#         print('-----------error-----------')
+#         print('linefiles:', linefiles)
+#         print('--------------------------')
+#         print('branchfiles:', branchfiles)
+#         print('--------------------------')
+#         print('tracefiles_alt:', tracefiles_alt)
+#         raise Exception(
+#             'Amount of linefiles doesnt equal exactly with the amount of one of either trace- or branchfiles')
+#     linefiles = sorted(linefiles)
+#
+#     areafiles = glob.glob(areadirectory + '/{}_*tulkinta_alue.shp'.format(code)) \
+#                 + glob.glob(areadirectory + '/{}[0-9]_*tulkinta_alue.shp'.format(code)) \
+#                 + glob.glob(areadirectory + '/{}[0-9][0-9]_*tulkinta_alue.shp'.format(code))
+#
+#     areafiles_alt = glob.glob(areadirectory + '/{}_*area_*.shp'.format(code)) \
+#                     + glob.glob(areadirectory + '/{}[0-9]_*area_*.shp'.format(code)) \
+#                     + glob.glob(areadirectory + '/{}[0-9][0-9]_*area_*.shp'.format(code))
+#
+#     areafiles = areafiles + areafiles_alt
+#     areafiles = sorted(areafiles)
+#     # if len(branchfiles)+len(areafiles) == 0:
+#     #   raise Exception('No branch or areafiles found. Check spelling and directories.')
+#     if len(linefiles) != len(areafiles):
+#         print(linefiles, areafiles)
+#         raise Exception('Unequal amount of areafiles and linefiles found')
+#     return linefiles, areafiles
 
-    nodefiles = sorted(nodefiles)
 
-    if len(nodefiles) == 0:
-        raise Exception('No nodefiles found. Check spelling and directories.')
-
-    return nodefiles
-
-
-def get_filenames_nodes_coded_excp(nodedirectory, code):  # Gets nodefiles using code
-    nodefiles = list(glob.glob(os.path.join(nodedirectory, code + '*nodes.shp')))
-    nodefiles = sorted(nodefiles)
-    return nodefiles
-
-
-def get_area_normalisations(areafiles):
-    area_list = []
-    for file in areafiles:
-        areaframe = gpd.read_file(file)
-        area = areaframe['Shape_Area'].iloc[0]
-        area_list.append(area)
-    area_array = np.array(area_list)
-    max_area = area_array.max()
-    norm_array = area_array / max_area
-    norm_list = norm_array.tolist()
-    return norm_list
+# def get_filenames_nodes_coded(nodedirectory, code):  # Gets nodefiles using code
+#     nodefiles = glob.glob(nodedirectory + '/{}_*nodes.shp'.format(code)) \
+#                 + glob.glob(nodedirectory + '/{}[0-9]_*nodes.shp'.format(code)) \
+#                 + glob.glob(nodedirectory + '/{}[0-9][0-9]_*nodes.shp'.format(code))
+#
+#     nodefiles = sorted(nodefiles)
+#
+#     if len(nodefiles) == 0:
+#         raise Exception('No nodefiles found. Check spelling and directories.')
+#
+#     return nodefiles
 
 
-def get_area_normalisations_frames(areaframes):  # returns list with normalisations
-    area_list = []  # order important!
-    for frame in areaframes:
-        # TODO: Test area sum
-        if isinstance(frame, gpd.GeoDataFrame):
-            area = sum([polygon.area for polygon in frame.geometry])
-        else:
-            try:
-                area = frame['Shape_Area'].sum()
-            except KeyError:
-                area = frame['SHAPE_Area'].sum()
-        area_list.append(area)
-    area_array = np.array(area_list)
-    max_area = area_array.max()
-    norm_array = area_array / max_area
-    norm_list = norm_array.tolist()
-    return norm_list
+# def get_filenames_nodes_coded_excp(nodedirectory, code):  # Gets nodefiles using code
+#     nodefiles = list(glob.glob(os.path.join(nodedirectory, code + '*nodes.shp')))
+#     nodefiles = sorted(nodefiles)
+#     return nodefiles
+
+
+# def get_area_normalisations(areafiles):
+#     area_list = []
+#     for file in areafiles:
+#         areaframe = gpd.read_file(file)
+#         area = areaframe['Shape_Area'].iloc[0]
+#         area_list.append(area)
+#     area_array = np.array(area_list)
+#     max_area = area_array.max()
+#     norm_array = area_array / max_area
+#     norm_list = norm_array.tolist()
+#     return norm_list
+
+
+# def get_area_normalisations_frames(areaframes):  # returns list with normalisations
+#     area_list = []  # order important!
+#     for frame in areaframes:
+#         # TODO: Test area sum
+#         if isinstance(frame, gpd.GeoDataFrame):
+#             area = sum([polygon.area for polygon in frame.geometry])
+#         else:
+#             try:
+#                 area = frame['Shape_Area'].sum()
+#             except KeyError:
+#                 area = frame['SHAPE_Area'].sum()
+#         area_list.append(area)
+#     area_array = np.array(area_list)
+#     max_area = area_array.max()
+#     norm_array = area_array / max_area
+#     norm_list = norm_array.tolist()
+#     return norm_list
 
 
 def unify_frames(frames):  # Appends multiple dataframes together
@@ -326,23 +291,23 @@ def unify_frames(frames):  # Appends multiple dataframes together
     return unifiedframe
 
 
-def unify(linedirectory, areadirectory, code):
-    linefiles, areafiles = get_filenames_branches_traces_and_areas_coded(linedirectory, areadirectory, code)
-    if len(linefiles) == 0:  # If no such files with certain code
-        lineframe = []  # Returns an empty list
-        areaframe = []
-        return lineframe, areaframe
-    lineframes = []
-    areaframes = []
-    for i in range(len(linefiles)):
-        lineframe = initialize_trace_frame(linefiles[i])
-        areaframe = initialize_area_frame(areafiles[i])
-        lineframes.append(lineframe)
-        areaframes.append(areaframe)
-    lineframe = unify_frames(lineframes)
-    areaframe = unify_frames(areaframes)
-
-    return lineframe, areaframe
+# def unify(linedirectory, areadirectory, code):
+#     linefiles, areafiles = get_filenames_branches_traces_and_areas_coded(linedirectory, areadirectory, code)
+#     if len(linefiles) == 0:  # If no such files with certain code
+#         lineframe = []  # Returns an empty list
+#         areaframe = []
+#         return lineframe, areaframe
+#     lineframes = []
+#     areaframes = []
+#     for i in range(len(linefiles)):
+#         lineframe = initialize_trace_frame(linefiles[i])
+#         areaframe = initialize_area_frame(areafiles[i])
+#         lineframes.append(lineframe)
+#         areaframes.append(areaframe)
+#     lineframe = unify_frames(lineframes)
+#     areaframe = unify_frames(areaframes)
+#
+#     return lineframe, areaframe
 
 
 def flatten_list(l):
@@ -437,7 +402,7 @@ def plot_azimuth_plot(two_halves, weights=False):
 
 def length_distribution_plot(length_distribution):
     ld = length_distribution
-    name = ld.code
+    name = ld.name
     lineframe = ld.lineframe_main
     #    lineframe.to_csv(r'F:\Users\nikke\2D_Fracture_Analysis_Kit\test\{}_non_cut.csv'.format(name), sep=';') DEBUG
     lineframe = pd.DataFrame(lineframe)
@@ -455,7 +420,7 @@ def length_distribution_plot_with_fit(length_distribution):
     fig, ax = plt.subplots()
 
     ld = length_distribution
-    name = ld.code
+    name = ld.name
     lineframe = ld.lineframe_main_cut
     lineframe = pd.DataFrame(lineframe)
     lineframe.plot.scatter(x='length', y='y', logx=True, logy=True, xlim=(ld.left, ld.right), ylim=(ld.bottom, ld.top),
@@ -478,7 +443,7 @@ def length_distribution_plot_with_fit(length_distribution):
 
 def length_distribution_plot_sets(length_distribution):
     ld = length_distribution
-    name = ld.code
+    name = ld.name
     setframes = ld.setframes
     setframes_cut = ld.setframes_cut
     for setframe in setframes:
@@ -567,22 +532,7 @@ def find_color_topology_plot(name):
 def find_order_topology_plot(name):
     # NOT FOR GENERAL USE TODO: Plot according to list nro
     order = 10
-    if 'KB' in name:
-        order = 5
-        if find_detailed_topology_plot(name):
-            order -= 4
-    if 'KL' in name:
-        order = 6
-        if find_detailed_topology_plot(name):
-            order -= 4
-    if 'HHIslands' in name:
-        order = 7
-        if find_detailed_topology_plot(name):
-            order -= 4
-    if 'Hastholmen' in name:
-        order = 8
-    if 'Loviisa' in name:
-        order = 9
+
     return order
 
 
@@ -689,34 +639,34 @@ def tern_plot_branch_lines(tax):
     tax.plot(points, linewidth=1.5, marker='o', color='k', linestyle="dashed", markersize=3, zorder=-5, alpha=0.6)
 
 
-def match_filenames_based_on_code(linefiles, nodefiles, areafiles):
-    if len(linefiles) == 0 == len(nodefiles) == len(areafiles):
-        print('all 0')  # DEBUGGING
-        raise Exception('All 0 in match_filenames_based_on_code')
-    matched_files = []
-    for lf, nf, af in zip(linefiles, nodefiles, areafiles):
-        found_match = False
-        lf_filename = Path(lf).stem
-        lf_code = lf_filename.split('_')[0]
-        nf_filename = Path(nf).stem
-        nf_code = nf_filename.split('_')[0]
-        af_filename = Path(af).stem
-        af_code = af_filename.split('_')[0]
-        if lf_code == nf_code == af_code:
-            matched_files.append((lf, nf, af))
-            found_match = True
-        else:
-            for nf_2 in nodefiles:
-                nf_2_code = Path(nf_2).stem.split('_')[0]
-                if lf_code == nf_2_code:
-                    for af_2 in areafiles:
-                        af_2_code = Path(af_2).stem.split('_')[0]
-                        if lf_code == nf_2_code == af_2_code:
-                            matched_files.append((lf, nf_2, af_2))
-                            found_match = True
-        if not found_match:
-            raise Exception('ERROR: Couldnt match all filenames based on code. Check spelling of filenames.')
-    return matched_files
+# def match_filenames_based_on_code(linefiles, nodefiles, areafiles):
+#     if len(linefiles) == 0 == len(nodefiles) == len(areafiles):
+#         print('all 0')  # DEBUGGING
+#         raise Exception('All 0 in match_filenames_based_on_code')
+#     matched_files = []
+#     for lf, nf, af in zip(linefiles, nodefiles, areafiles):
+#         found_match = False
+#         lf_filename = Path(lf).stem
+#         lf_code = lf_filename.split('_')[0]
+#         nf_filename = Path(nf).stem
+#         nf_code = nf_filename.split('_')[0]
+#         af_filename = Path(af).stem
+#         af_code = af_filename.split('_')[0]
+#         if lf_code == nf_code == af_code:
+#             matched_files.append((lf, nf, af))
+#             found_match = True
+#         else:
+#             for nf_2 in nodefiles:
+#                 nf_2_code = Path(nf_2).stem.split('_')[0]
+#                 if lf_code == nf_2_code:
+#                     for af_2 in areafiles:
+#                         af_2_code = Path(af_2).stem.split('_')[0]
+#                         if lf_code == nf_2_code == af_2_code:
+#                             matched_files.append((lf, nf_2, af_2))
+#                             found_match = True
+#         if not found_match:
+#             raise Exception('ERROR: Couldnt match all filenames based on code. Check spelling of filenames.')
+#     return matched_files
 
 
 def aniso_get_class_as_value(c):
@@ -765,32 +715,16 @@ def calc_sum_isotropy(branchframe):
     return arr_sum
 
 
-def calc_y_distribution(lineframe_main, norm):
-    """Calculates cumulative numbers for distribution
+def calc_y_distribution(lineframe_main, area):
 
-    Parameters
-    ----------
-    lineframe_main : initialized dataframe
-         initialized lineframe with proper columns
-
-    norm : float
-        float used to normalize y-axis values
-
-    Returns
-    -------
-    lineframe_main
-        normalized lineframe
-
-
-    """
     lineframe_main = lineframe_main.sort_values(by=['length'], ascending=False)
     nrows = len(lineframe_main.index)
-    y = np.arange(1, nrows + 1, 1) / norm
+    y = np.arange(1, nrows + 1, 1) / area
     lineframe_main['y'] = y
     return lineframe_main
 
 
-def calc_cut_off_length(lineframe_main, cut_off):
+def calc_cut_off_length(lineframe_main, cut_off: float):
     """Calculates minimum length for distribution
 
     Parameters
@@ -809,7 +743,7 @@ def calc_cut_off_length(lineframe_main, cut_off):
 
     """
 
-    if cut_off == 1:
+    if cut_off == 1.0:
         min_length = lineframe_main.length.min()
     else:
         largest_length = lineframe_main.length.max()
@@ -890,46 +824,19 @@ def define_set(azimuth, list_of_tuples):  # Uses HALVED azimuth: 0-180
     return set_num
 
 
-def construct_length_distribution_base(lineframe: pd.DataFrame, areaframe: pd.DataFrame, code: str, cut_off=1, norm=1, filename=None,
+def construct_length_distribution_base(lineframe: pd.DataFrame, areaframe: pd.DataFrame, name: str, group:str, cut_off=1, norm=1,
                                        using_branches=False):
-    """Constructs a length distribution object with given parameters
 
-
-    Parameters
-    ----------
-    lineframe : dataframe
-         initialized DataFrame with line lengths
-
-    areaframe : dataframe
-        initialized DataFrame with areas
-
-    code : string
-        string that identifies/classifies target areas from each other
-
-    cut_off : float
-        float used to cut lengths
-
-    norm : float
-        float used to normalize y-axis values
-
-    Returns
-    -------
-    ld
-        length distribution object with given parameters as attributes
-        :param filename:
-
-
-    """
-    ld = ta.TargetAreaLines(lineframe, areaframe, code, cut_off, norm, filename, using_branches)
+    ld = ta.TargetAreaLines(lineframe, areaframe, name, group, using_branches, cut_off)
     return ld
 
 
-def construct_node_data_base(nodeframe, code, filename=None):
-    node_data_base = ta.TargetAreaNodes(nodeframe, code, filename)
+def construct_node_data_base(nodeframe, name, group):
+    node_data_base = ta.TargetAreaNodes(nodeframe, name, group)
     return node_data_base
 
 
-def unify_lds(list_of_lds, group=None):
+def unify_lds(list_of_lds: list, group: str):
     """Unifies/adds multiple length distribution objects together
 
 
@@ -946,20 +853,17 @@ def unify_lds(list_of_lds, group=None):
 
 
     """
-    df = pd.DataFrame(columns=['lineframe_main', 'lineframe_main_cut', 'areaframe', 'code'])
+    df = pd.DataFrame(columns=['lineframe_main', 'lineframe_main_cut', 'areaframe', 'name'])
     for ld in list_of_lds:
         df = df.append({'lineframe_main': ld.lineframe_main, 'lineframe_main_cut': ld.lineframe_main_cut,
-                        'areaframe': ld.areaframe, 'code': ld.code}
+                        'areaframe': ld.areaframe, 'name': ld.name}
                        , ignore_index=True)
     lineframe_main = pd.concat(df.lineframe_main.tolist(), ignore_index=True)
     lineframe_main_cut = pd.concat(df.lineframe_main_cut.tolist(), ignore_index=True)
     areaframe = pd.concat(df.areaframe.tolist(), ignore_index=True)
-    if group is not None:
-        code = group
-    else:
-        code = df.loc[0, 'code']
+
     # rep_circle_area = np.pi * df.rep_circle_r.sum() ** 2
-    unif_ld_main = ta.TargetAreaLines(lineframe_main, areaframe, code)
+    unif_ld_main = ta.TargetAreaLines(lineframe_main, areaframe, group, group=group, using_branches=list_of_lds[0].using_branches)
     unif_ld_main.lineframe_main = lineframe_main
     unif_ld_main.lineframe_main_cut = lineframe_main_cut
     unif_ld_main.cut_off = list_of_lds[0].cut_off
@@ -972,13 +876,13 @@ def unify_lds(list_of_lds, group=None):
     return unif_ld_main
 
 
-def unify_nds(list_of_nds):
-    df = pd.DataFrame(columns=['nodeframe', 'code'])
+def unify_nds(list_of_nds: list, group: str):
+    df = pd.DataFrame(columns=['nodeframe', 'name'])
     for nd in list_of_nds:
-        df = df.append({'nodeframe': nd.nodeframe, 'code': nd.code}, ignore_index=True)
+        df = df.append({'nodeframe': nd.nodeframe, 'name': nd.name}, ignore_index=True)
+
     nodeframe = pd.concat(df.nodeframe.tolist(), ignore_index=True)
-    code = df.loc[0, 'code']
-    unif_nd = ta.TargetAreaNodes(nodeframe, code)
+    unif_nd = ta.TargetAreaNodes(nodeframe, group, group)
     return unif_nd
 
 
@@ -1008,57 +912,57 @@ def calc_curviness_dataframe(lineframe, idx):
     return lineframe, idx
 
 
-def norm_unified(uniframe):
-    """Normalises an unified frame
-
-
-    Parameters
-    ----------
-    uniframe : DataFrame
-         DataFrame with ld objects and attributes used for uniting target areas
-
-
-    Returns
-    -------
-    uniframe
-        uniframe with new normalised DataFrames
-
-
-    """
-    uniframe['area'] = np.nan
-    areas = []
-    for idx, row in uniframe.iterrows():
-        frame = row.uni_ld_area
-        # TODO: Test area sum
-        if isinstance(frame, gpd.GeoDataFrame):
-            area = sum([polygon.area for polygon in frame.geometry])
-        else:
-            try:
-                area = frame['Shape_Area'].sum()
-            except KeyError:
-                area = frame['SHAPE_Area'].sum()
-        # try:
-        #     area = row.uni_ld_area['Shape_Area'].sum()
-        # except KeyError:
-        #     area = row.uni_ld_area['SHAPE_Area'].sum()
-        uniframe['area'].iloc[idx] = area
-        areas.append(area)
-    area_max = max(areas)
-
-    uniframe['norm'] = uniframe.area / area_max
-    # Normalises unified full and cut lineframes. Old normalisation doesn't
-    # respect the combined status.
-    for idx, row in uniframe.iterrows():
-        ld = row['uni_ld']
-        norm = row['norm']
-        cut_off = ld.cut_off
-        uniframe.uni_ld.iloc[idx].norm = norm
-        lineframe_main = calc_y_distribution(ld.lineframe_main, norm)
-        uniframe.uni_ld.iloc[idx].lineframe_main = lineframe_main
-        cut_off_length = calc_cut_off_length(lineframe_main, cut_off)
-        uniframe.uni_ld.iloc[idx].lineframe_main_cut = lineframe_main.loc[lineframe_main['length'] >= cut_off_length]
-
-    return uniframe
+# def norm_unified(uniframe):
+#     """Normalises an unified frame
+#
+#
+#     Parameters
+#     ----------
+#     uniframe : DataFrame
+#          DataFrame with ld objects and attributes used for uniting target areas
+#
+#
+#     Returns
+#     -------
+#     uniframe
+#         uniframe with new normalised DataFrames
+#
+#
+#     """
+#     uniframe['area'] = np.nan
+#     areas = []
+#     for idx, row in uniframe.iterrows():
+#         frame = row.TargetAreaLines_area
+#         # TODO: Test area sum
+#         if isinstance(frame, gpd.GeoDataFrame):
+#             area = sum([polygon.area for polygon in frame.geometry])
+#         else:
+#             try:
+#                 area = frame['Shape_Area'].sum()
+#             except KeyError:
+#                 area = frame['SHAPE_Area'].sum()
+#         # try:
+#         #     area = row.TargetAreaLines_area['Shape_Area'].sum()
+#         # except KeyError:
+#         #     area = row.TargetAreaLines_area['SHAPE_Area'].sum()
+#         uniframe['area'].iloc[idx] = area
+#         areas.append(area)
+#     area_max = max(areas)
+#
+#     uniframe['norm'] = uniframe.area / area_max
+#     # Normalises unified full and cut lineframes. Old normalisation doesn't
+#     # respect the combined status.
+#     for idx, row in uniframe.iterrows():
+#         ld = row['TargetAreaLines']
+#         norm = row['norm']
+#         cut_off = ld.cut_off
+#         uniframe.TargetAreaLines.iloc[idx].norm = norm
+#         lineframe_main = calc_y_distribution(ld.lineframe_main, norm)
+#         uniframe.TargetAreaLines.iloc[idx].lineframe_main = lineframe_main
+#         cut_off_length = calc_cut_off_length(lineframe_main, cut_off)
+#         uniframe.TargetAreaLines.iloc[idx].lineframe_main_cut = lineframe_main.loc[lineframe_main['length'] >= cut_off_length]
+#
+#     return uniframe
 
 
 def unite_areaframes(list_of_areaframes):
@@ -1067,8 +971,9 @@ def unite_areaframes(list_of_areaframes):
     return united
 
 
-def plot_fit_for_uniframe(mult_distrib, ax, cut, use_sets, curr_set=-1, font_multiplier=1, predicting_mode=False,
+def plot_fit_for_uniframe(mult_distrib, ax, cut, use_sets, unified: bool, curr_set=-1, font_multiplier=1, predicting_mode=False,
                           predict_with=None):
+
     def create_text(lineframe_for_text, ax_for_text, font_multiplier=font_multiplier, multi=False):
         msle = sklm.mean_squared_log_error(lineframe_for_text.y.values, lineframe_for_text.y_fit.values)
         r2score = sklm.r2_score(lineframe_for_text.y.values, lineframe_for_text.y_fit.values)
@@ -1095,10 +1000,16 @@ def plot_fit_for_uniframe(mult_distrib, ax, cut, use_sets, curr_set=-1, font_mul
             ax_for_text.text(0.85, 0.16, func_text, transform=ax_for_text.transAxes, ha='center', fontsize='28'
                              , rotation=-50)
 
-    uniframe = mult_distrib.uniframe
-    uniframe_lineframe_main_concat = mult_distrib.uniframe_lineframe_main_concat
+    if unified:
+        frame = mult_distrib.uniframe
+        frame_lineframe_main_concat = mult_distrib.uniframe_lineframe_main_concat
+    else:
+        frame = mult_distrib.df
+        # TODO: mult_distrib.df_lineframe_main_concat
+        frame_lineframe_main_concat = mult_distrib.df_lineframe_main_concat
+
     if cut and use_sets:
-        lineframe = pd.concat([srs.setframes_cut[curr_set] for srs in uniframe.uni_ld])
+        lineframe = pd.concat([srs.setframes_cut[curr_set] for srs in frame.TargetAreaLines])
         lineframe = pd.DataFrame(lineframe)
         lineframe['logLen'] = lineframe.length.apply(np.log)
         lineframe['logY'] = lineframe.y.apply(np.log)
@@ -1118,16 +1029,16 @@ def plot_fit_for_uniframe(mult_distrib, ax, cut, use_sets, curr_set=-1, font_mul
     elif cut and predicting_mode and (predict_with is not None):
         # FIND RIGHT PREDICTION FRAMES
         idx_to_keep = []
-        for idx, row in uniframe.iterrows():
+        for idx, row in frame.iterrows():
             print(predict_with)
-            print(row.code)
-            if row.code in predict_with:
+            print(row.name)
+            if row.name in predict_with:
                 idx_to_keep.append(idx)
-                print(idx, row.code)
-        uniframe_pred = uniframe.iloc[idx_to_keep]
+                print(idx, row.name)
+        frame_pred = frame.iloc[idx_to_keep]
 
-        lineframe = pd.concat([srs.lineframe_main_cut for srs in uniframe_pred.uni_ld], sort=True)
-        codes = [srs.name_code for srs in uniframe_pred.uni_ld]
+        lineframe = pd.concat([srs.lineframe_main_cut for srs in frame_pred.TargetAreaLines], sort=True)
+        names = [srs.name for srs in frame_pred.TargetAreaLines]
 
         lineframe = pd.DataFrame(lineframe)
 
@@ -1153,7 +1064,7 @@ def plot_fit_for_uniframe(mult_distrib, ax, cut, use_sets, curr_set=-1, font_mul
         msle = sklm.mean_squared_log_error(lineframe.y.values, lineframe.y_fit.values)
         r2score = sklm.r2_score(lineframe.y.values, lineframe.y_fit.values)
         # TEXT WITH INFO
-        text_1 = 'Fitted with:\n{}'.format(str(codes).replace('[', '').replace(']', '')).replace(',', '\n')
+        text_1 = 'Fitted with:\n{}'.format(str(names).replace('[', '').replace(']', '')).replace(',', '\n')
         text_2 = 'Exponent: {} \nConstant: {} \nMSLE: {} \nR^2: {}' \
             .format(str(round(m, 2))
                     , str(round(c, 2))
@@ -1172,10 +1083,10 @@ def plot_fit_for_uniframe(mult_distrib, ax, cut, use_sets, curr_set=-1, font_mul
                 , style='italic', ha='center', linespacing=2)
 
     elif cut and predicting_mode:
-        lineframes = [srs.lineframe_main_cut for srs in uniframe.uni_ld]
-        codes = [srs.name_code for srs in uniframe.uni_ld]
+        lineframes = [srs.lineframe_main_cut for srs in frame.TargetAreaLines]
+        names = [srs.name for srs in frame.TargetAreaLines]
         texts = []
-        for lineframe, code in zip(lineframes, codes):
+        for lineframe, name in zip(lineframes, names):
             lineframe = pd.DataFrame(lineframe)
             lineframe['logLen'] = lineframe.length.apply(np.log)
             lineframe['logY'] = lineframe.y.apply(np.log)
@@ -1189,7 +1100,7 @@ def plot_fit_for_uniframe(mult_distrib, ax, cut, use_sets, curr_set=-1, font_mul
             y_fit = np.exp(m * lineframe['logLen'].values + c)  # calculate the fitted values of y
             lineframe['y_fit'] = y_fit
             lineframe.plot(x='length', y='y_fit', c='k', ax=ax, label='FIT')
-            text = '{} E:{} C:{}'.format(code, str(round(m, 2)), str(round(c, 2)))
+            text = '{} E:{} C:{}'.format(name, str(round(m, 2)), str(round(c, 2)))
             texts.append(text)
         props = dict(boxstyle='round', pad=1, facecolor='wheat')
         x_loc = 0.86
@@ -1200,7 +1111,8 @@ def plot_fit_for_uniframe(mult_distrib, ax, cut, use_sets, curr_set=-1, font_mul
             y_loc -= 0.12
 
     elif cut:
-        lineframe = pd.concat([srs.lineframe_main_cut for srs in uniframe.uni_ld])
+
+        lineframe = pd.concat([srs.lineframe_main_cut for srs in frame.TargetAreaLines])
         lineframe = pd.DataFrame(lineframe)
         lineframe['logLen'] = lineframe.length.apply(np.log)
         lineframe['logY'] = lineframe.y.apply(np.log)
@@ -1218,7 +1130,7 @@ def plot_fit_for_uniframe(mult_distrib, ax, cut, use_sets, curr_set=-1, font_mul
         create_text(lineframe, ax)
 
     else:
-        lineframe = uniframe_lineframe_main_concat
+        lineframe = frame_lineframe_main_concat
         lineframe = pd.DataFrame(lineframe)
         lineframe['logLen'] = lineframe.length.apply(np.log)
         lineframe['logY'] = lineframe.y.apply(np.log)
@@ -1581,7 +1493,7 @@ def get_intersect_frame(matching_points_frame, traceframe,
     # setpair=(0,1), pointclass=Y, ==> set 0 trace ends in set 1
 
 
-def plot_ternary_xyi_subplot(nodeframe, ax, code, name):
+def plot_ternary_xyi_subplot(nodeframe, ax, name):
     xcount = len(nodeframe.loc[nodeframe['c'] == 'X'])
     ycount = len(nodeframe.loc[nodeframe['c'] == 'Y'])
     icount = len(nodeframe.loc[nodeframe['c'] == 'I'])
@@ -1672,13 +1584,9 @@ def get_individual_xy_relations(ld, nd, for_ax=False, ax=None):
         nd.determine_XY_relation(length_distribution_for_relation=ld)
 
 
-def setup_ax_for_ld(ax_for_setup, length_distribution, unified, font_multiplier=1,
-                    logarithmic=True, predictions=False):  # Function to setup ax for length distributions
+def setup_ax_for_ld(ax_for_setup, length_distribution, font_multiplier=1, predictions=False):
+    # Function to setup ax for length distributions
     ax = ax_for_setup
-    # MAKE UNIFIED PLOTS HAVE THE SAME WINDOW
-    if unified and logarithmic:
-        ax.set_xlim(length_distribution.uni_left, length_distribution.uni_right)
-        ax.set_ylim(length_distribution.uni_bottom, length_distribution.uni_top)
     # LABELS
     if length_distribution.using_branches:
         ax.set_xlabel('Branch Length (m)', fontsize=36 * font_multiplier, fontfamily='Times New Roman', style='italic')

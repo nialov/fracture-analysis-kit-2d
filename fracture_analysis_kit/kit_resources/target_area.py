@@ -12,6 +12,7 @@ import geopandas as gpd
 import seaborn as sns
 from scipy.interpolate import make_interp_spline
 import ternary
+import logging
 
 # Own code imports
 from . import tools
@@ -23,18 +24,13 @@ from ... import fracture_analysis_2d
 
 class TargetAreaLines:
     # TODO: Add using_branches to ld as well?
-    def __init__(self, lineframe, areaframe, code, cut_off=1.0, norm=1.0, filename=None, using_branches=False):
-
-        self.debug_logger = fracture_analysis_2d.debug_logger
-        self.debug_logger.write_to_log_time(
-            f'lf: {lineframe}\naf: {areaframe}\ncode: {code}\nfilename: {filename}\nusing_branches: {using_branches}')
+    def __init__(self, lineframe, areaframe, name, group, using_branches: bool, cut_off=1.0):
         self.lineframe = lineframe
         self.areaframe = areaframe
-        self.code = code
-        self.name = code
-        self.name_code = code
+        self.group = group
+        self.name = name
         self.cut_off = cut_off
-        self.norm = norm
+
         # Get area using geopandas
         if isinstance(lineframe, gpd.GeoDataFrame):
             self.area = sum([polygon.area for polygon in self.areaframe.geometry])
@@ -43,15 +39,8 @@ class TargetAreaLines:
                 self.area = self.areaframe['Shape_Area'].sum()
             except KeyError:
                 self.area = self.areaframe['SHAPE_Area'].sum()
-        self.filename = filename
+
         self.using_branches = using_branches
-        # if filename is not None:
-        #     full_name = Path(filename).stem.split('_')
-        #     if len(full_name[1]) == 1:
-        #         self.name_code = full_name[0] + '_' + full_name[1]
-        #     else:
-        #         self.name_code = Path(filename).stem.split('_')[0]
-        # else:
 
         # Get line length using geopandas
         if isinstance(lineframe, gpd.GeoDataFrame):
@@ -77,11 +66,8 @@ class TargetAreaLines:
 
     def calc_attributes(self):
         self.lineframe_main = self.lineframe.sort_values(by=['length'], ascending=False)
-        self.lineframe_main = tools.calc_y_distribution(self.lineframe_main, self.norm)
-        with open(r'C:\QGIS_Files\log\log.txt', mode='a') as logfile:
-            logfile.write('\n----------------------------\n')
-            logfile.write('lineframe_main print before azimu \n{}'.format(self.lineframe_main))
-            logfile.write('\n----------------------------\n')
+        self.lineframe_main = tools.calc_y_distribution(self.lineframe_main, self.area)
+
         self.lineframe_main['azimu'] = self.lineframe_main.geometry.apply(tools.calc_azimu)
         # TODO: TEST AND UNDERSTAND WHY THERE ARE nan in AZIMU CALC
         self.lineframe_main = self.lineframe_main.dropna(subset=['azimu'])
@@ -98,6 +84,12 @@ class TargetAreaLines:
         self.lineframe_main_cut = self.lineframe_main.loc[self.lineframe_main['length'] >= self.cut_off_length]
         # Reinforce numeric columns
 
+        logger = logging.getLogger('logging_tool')
+        logger.info('self.lineframe_main\n\n{}'.format(self.lineframe_main))
+        logger.info('self.lineframe_main dtypes\n\n{}'.format(self.lineframe_main.dtypes))
+        logger.info('self.lineframe_main_cut\n\n{}'.format(self.lineframe_main_cut))
+        logger.info('self.lineframe_main_cut dtypes\n\n{}'.format(self.lineframe_main_cut.dtypes))
+
 
     def calc_curviness(self):
         self.lineframe_main['curviness'] = self.lineframe_main.geometry.apply(tools.curviness)
@@ -105,14 +97,14 @@ class TargetAreaLines:
     def plot_length_distribution(self, save=False, savefolder=None):
         fig, ax = plt.subplots()
         self.plot_length_distribution_ax(ax)
-        tools.setup_ax_for_ld(ax, self, unified=False, font_multiplier=0.5)
+        tools.setup_ax_for_ld(ax, self, font_multiplier=0.5)
         if save:
-            name = self.name_code
-            savename = Path(savefolder + '/{}_full.png'.format(name))
+            name = self.name
+            savename = Path(savefolder + '/{}_indiv_full.png'.format(name))
             plt.savefig(savename, dpi=150)
 
-    def plot_length_distribution_ax(self, ax, cut=False, use_sets=False, curr_set=-1, logarithmic=True):
-        log = logarithmic
+    def plot_length_distribution_ax(self, ax, cut=False, use_sets=False, curr_set=-1):
+        logger = logging.getLogger('logging_tool')
         ld = self
         if cut and use_sets:
             setframes_cut = self.setframes_cut
@@ -120,45 +112,43 @@ class TargetAreaLines:
                 s = setframe_cut.set.iloc[0]
                 if s == curr_set:
                     setframe_cut = pd.DataFrame(setframe_cut)
-                    name = self.name_code
-                    setframe_cut.plot.scatter(x='length', y='y', logx=log, logy=log,
+                    name = self.name
+                    setframe_cut.plot.scatter(x='length', y='y', logx=True, logy=True,
                                               label=name + '_cut_set_' + str(s), ax=ax,
                                               color='black')
 
-
         elif cut:
+            logger.info('elif cut')
+            logger.info('self.lineframe_main_cut:\n\n {}'.format(self.lineframe_main_cut))
+
             lineframe_cut = self.lineframe_main_cut
             lineframe_cut = pd.DataFrame(lineframe_cut)
-            name = self.code
-            try:
-                lineframe_cut.plot.scatter(x='length', y='y', s=50, logx=log, logy=log, label=name + '_cut', ax=ax,
-                                           color='black')
-            except KeyError:
-                lineframe_cut.plot.scatter(x='length', y='y', s=50, logx=log, logy=log, label=name + '_cut', ax=ax)
-
+            logger.info('lineframe_cut: {}'.format(lineframe_cut))
+            logger.info(f'nans: {lineframe_cut.isnull().sum().sum()}')
+            lineframe_cut.plot.scatter(x='length', y='y', logx=True, logy=True, label=self.name + '_cut', ax=ax, color='black')
 
         elif use_sets:
-            setframes = self.setframes
-            for setframe in setframes:
-                s = setframe.set.iloc[0]
-                if s == curr_set:
-                    setframe = pd.DataFrame(setframe)
-                    name = self.code
-                    setframe.plot.scatter(x='length', y='y', logx=log, logy=log, label=name + '_full_set_' + str(s),
-                                          ax=ax, color='black')
+            raise Exception('not implemented')
+            # setframes = self.setframes
+            # for setframe in setframes:
+            #     s = setframe.set.iloc[0]
+            #     if s == curr_set:
+            #         setframe = pd.DataFrame(setframe)
+            #
+            #         setframe.plot.scatter(x='length', y='y', logx=True, logy=True, label=self.name + '_full_set_' + str(s),
+            #                               ax=ax, color='black')
 
         else:
             # with open(r'C:\QGIS_Files\log\log.txt', mode='a') as logfile:
             #     logfile.write('lineframe_main print before gdf to df\n{}'.format(self.lineframe_main))
             #     logfile.write('----------------------------')
-            self.debug_logger.write_to_log_time(f'lf_main: {self.lineframe_main}\nname: {self.name_code}')
+
             lineframe_main = self.lineframe_main
             lineframe_main = pd.DataFrame(lineframe_main)
-            name = self.name_code
             # with open(r'C:\QGIS_Files\log\log.txt', mode='a') as logfile:
             #     logfile.write('lineframe_main print after\n{}'.format(lineframe_main))
             #     logfile.write('----------------------------')
-            lineframe_main.plot.scatter(x='length', y='y', s=50, logx=log, logy=log, label=name + '_full', ax=ax,
+            lineframe_main.plot.scatter(x='length', y='y', s=50, logx=True, logy=True, label=self.name + '_full', ax=ax,
                                            color='black')
 
     # list_of_tuples, tuples must be between 0-180
@@ -177,7 +167,7 @@ class TargetAreaLines:
             lineframe = self.lineframe_main
         else:
             lineframe = self.lineframe_main_cut
-        name = self.name_code
+        name = self.name
         lineframe['set'] = lineframe.set.astype('category')
         sns.boxplot(data=lineframe, x='curviness', y='set', notch=True, ax=ax)
         ax.set_title(name, fontsize=14, fontweight='heavy', fontfamily='Times New Roman')
@@ -193,7 +183,7 @@ class TargetAreaLines:
             lineframe = self.lineframe_main
         else:
             lineframe = self.lineframe_main_cut
-        name = self.code
+        name = self.name
         lineframe['set'] = lineframe.set.astype('category')
         sns.violinplot(data=lineframe, x='curviness', y='set', ax=ax)
         ax.set_title(name, fontsize=14, fontweight='heavy', fontfamily='Times New Roman')
@@ -206,14 +196,14 @@ class TargetAreaLines:
     def create_setframes(self):
         sets = self.lineframe_main.set.unique()
         sets.sort()
-        norm = self.norm
+
         setframes = []
         setframes_cut = []
         for s in sets:
             setframe = self.lineframe_main.loc[self.lineframe_main.set == s]
             setframe_cut = self.lineframe_main_cut.loc[self.lineframe_main_cut.set == s]
-            setframe = tools.calc_y_distribution(setframe, norm)
-            setframe_cut = tools.calc_y_distribution(setframe_cut, norm)
+            setframe = tools.calc_y_distribution(setframe, self.area)
+            setframe_cut = tools.calc_y_distribution(setframe_cut, self.area)
             setframes.append(setframe)
             setframes_cut.append(setframe_cut)
         self.setframes = setframes
@@ -223,42 +213,42 @@ class TargetAreaLines:
                      , ax=None, ax_w=None, ax_ew=None, small_text=False):
         if big_plots:
             if ellipse_weights:
-                tools.plot_azimuths_sub_plot(self.lineframe_main, ax=ax_ew, filename=self.name_code, weights=False,
+                tools.plot_azimuths_sub_plot(self.lineframe_main, ax=ax_ew, filename=self.name, weights=False,
                                              small_text=small_text)
             else:
-                tools.plot_azimuths_sub_plot(self.lineframe_main, ax=ax, filename=self.name_code, weights=False,
+                tools.plot_azimuths_sub_plot(self.lineframe_main, ax=ax, filename=self.name, weights=False,
                                              small_text=small_text)
-                tools.plot_azimuths_sub_plot(self.lineframe_main, ax=ax_w, filename=self.name_code, weights=True,
+                tools.plot_azimuths_sub_plot(self.lineframe_main, ax=ax_w, filename=self.name, weights=True,
                                              small_text=small_text)
 
         else:
             fig, ax = plt.subplots(subplot_kw=dict(polar=True), constrained_layout=True, figsize=(6.5, 5.1))
-            tools.plot_azimuths_sub_plot(self.lineframe_main, ax=ax, filename=self.name_code, weights=False,
+            tools.plot_azimuths_sub_plot(self.lineframe_main, ax=ax, filename=self.name, weights=False,
                                          small_text=small_text)
             if save:
                 if branches:
-                    savename = Path(savefolder + '/{}_azimuth_branches.png'.format(self.name_code))
+                    savename = Path(savefolder + '/{}_azimuth_branches.png'.format(self.name))
                 else:
-                    savename = Path(savefolder + '/{}_azimuth_traces.png'.format(self.name_code))
+                    savename = Path(savefolder + '/{}_azimuth_traces.png'.format(self.name))
                 plt.savefig(savename, dpi=150)
             fig, ax = plt.subplots(subplot_kw=dict(polar=True), constrained_layout=True, figsize=(6.5, 5.1))
-            tools.plot_azimuths_sub_plot(self.lineframe_main, ax=ax, filename=self.name_code, weights=True,
+            tools.plot_azimuths_sub_plot(self.lineframe_main, ax=ax, filename=self.name, weights=True,
                                          small_text=small_text)
             if save:
                 if branches:
-                    savename = Path(savefolder + '/{}_azimuth_branches_WEIGHTED.png'.format(self.name_code))
+                    savename = Path(savefolder + '/{}_azimuth_branches_WEIGHTED.png'.format(self.name))
                 else:
-                    savename = Path(savefolder + '/{}_azimuth_traces_WEIGHTED.png'.format(self.name_code))
+                    savename = Path(savefolder + '/{}_azimuth_traces_WEIGHTED.png'.format(self.name))
                 plt.savefig(savename, dpi=150)
             if ellipse_weights:
                 fig, ax = plt.subplots(subplot_kw=dict(polar=True), constrained_layout=True, figsize=(6.5, 5.1))
-                tools.plot_azimuths_sub_plot(self.lineframe_main, ax=ax, filename=self.name_code, weights=False,
+                tools.plot_azimuths_sub_plot(self.lineframe_main, ax=ax, filename=self.name, weights=False,
                                              small_text=small_text)
                 if save:
                     if branches:
-                        savename = Path(savefolder + '/{}_azimuth_branches_ELLIPSE_WEIGHTED.png'.format(self.name_code))
+                        savename = Path(savefolder + '/{}_azimuth_branches_ELLIPSE_WEIGHTED.png'.format(self.name))
                     else:
-                        savename = Path(savefolder + '/{}_azimuth_traces_ELLIPSE_WEIGHTED.png'.format(self.name_code))
+                        savename = Path(savefolder + '/{}_azimuth_traces_ELLIPSE_WEIGHTED.png'.format(self.name))
                     plt.savefig(savename, dpi=150)
 
     def topology_parameters_2d_branches(self, branches=False):
@@ -285,7 +275,7 @@ class TargetAreaLines:
 
     def plot_branch_ternary_point(self, tax):
         connection_dict = self.lineframe_main.Connection.value_counts().to_dict()
-        name = self.code
+        name = self.name
         cc = connection_dict['C - C']
         ci = connection_dict['C - I']
         ii = connection_dict['I - I']
@@ -306,17 +296,12 @@ class TargetAreaLines:
     #     self.rep_circle_area = np.pi * b ** 2
     #     self.rep_circle_r = b
 
-    def calc_anisotropy(self, ellipse_weights=False):
+    def calc_anisotropy(self):
         branchframe = self.lineframe_main
 
-        if ellipse_weights:
-            branchframe['anisotropy'] = branchframe.apply(
-                lambda row: tools.aniso_calc_anisotropy(row['halved'], row['Connection'], row['ellipse_weight']),
-                axis=1)
-        else:
-            branchframe['anisotropy'] = branchframe.apply(
-                lambda row: tools.aniso_calc_anisotropy(row['halved'], row['Connection'], row['length']),
-                axis=1)
+        branchframe['anisotropy'] = branchframe.apply(
+            lambda row: tools.aniso_calc_anisotropy(row['halved'], row['Connection'], row['length']),
+            axis=1)
         arr_sum = branchframe.anisotropy.sum()
 
         self.anisotropy = arr_sum
@@ -336,7 +321,7 @@ class TargetAreaLines:
         ax.set_theta_zero_location('N')
         ax.set_theta_direction(-1)
         max_aniso = max(self.anisotropy)
-        # norm_anisotropy = [a / max_aniso for a in double_anisotropy]
+
         for theta, r in zip(angles, double_anisotropy):
             theta = np.deg2rad(theta)
             ax.annotate('', xy=(theta, r), xytext=(theta, 0)
@@ -360,55 +345,32 @@ class TargetAreaLines:
         ax.add_artist(circle)
         if not for_ax:
             if save:
-                name = self.name_code
+                name = self.name
                 savename = Path(save_folder + '/{}_anisotropy_indiv.png'.format(name))
                 plt.savefig(savename, dpi=150)
 
 
 class TargetAreaNodes:
-    def __init__(self, nodeframe, code, filename=None):
+    def __init__(self, nodeframe, name, group):
         self.nodeframe = nodeframe
-        self.code = code
-        self.filename = filename
-        # if filename is not None:
-        #     full_name = Path(filename).stem.split('_')
-        #     if len(full_name[1]) == 1:
-        #         self.name_code = full_name[0] + '_' + full_name[1]
-        #     else:
-        #         self.name_code = Path(filename).stem.split('_')[0]
-        # else:
-        self.name_code = code
+        self.name = name
+        self.group = group
 
-    # def determine_XY_relation(self, length_distribution_for_relation, for_ax=False, ax=None):
-    #     length_distribution = length_distribution_for_relation
-    #     if ~(self.code in length_distribution.code):
-    #         raise Exception('TargetAreaNodes code and length_distribution code do not match.')
-    #     if ~('set' in length_distribution.lineframe_main.columns):
-    #         raise Exception('No set data in lineframe_main DataFrame')
-    #     bf = length_distribution.lineframe_main
-    #     nf = self.nodeframe
-    #     intersectframe = tools.run_xy_relations(bf, nf)
-    #     intersectframe = intersectframe.groupby(['pointclass', 'setpair']).size()
-    #     intersectframe = intersectframe.unstack()
-    #     #        intersectframe.iloc[0,1] = intersectframe.iloc[0,2]
-    #     if for_ax:
-    #         intersectframe.plot(kind='bar', ax=ax)
-    #     else:
-    #         intersectframe.plot(kind='bar')
+
 
     def plot_xyi(self, save=False, savefolder=None, for_ax=False, ax=None):
         if for_ax:
             pass
         else:
             fig, ax = plt.subplots(figsize=(7, 7))
-        tools.plot_ternary_xyi_subplot(self.nodeframe, ax=ax, code=self.code, name=self.name_code)
+        tools.plot_ternary_xyi_subplot(self.nodeframe, ax=ax, name=self.name)
         if save:
-            name = self.name_code
+            name = self.name
             savename = Path(savefolder + '/{}_xyi.png'.format(name))
             plt.savefig(savename, dpi=150)
 
     def plot_xyi_point(self, tax):
-        tools.plot_ternary_xyi_point(self.nodeframe, tax, name=self.code)
+        tools.plot_ternary_xyi_point(self.nodeframe, tax, name=self.name)
 
     def topology_parameters_2d_nodes(self):
         nodeframe = self.nodeframe
