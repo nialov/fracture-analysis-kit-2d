@@ -3,21 +3,33 @@
   <component name="ChangeListManager">
     <list default="true" id="c31abe43-014e-4ee7-b756-2d5f1f62f453" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/fracture_analysis_2d.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/fracture_analysis_2d.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/compile.bat" beforeDir="false" afterPath="$PROJECT_DIR$/dev/compile.bat" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.html" beforeDir="false" afterPath="$PROJECT_DIR$/README.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fracture_analysis_2d.py" beforeDir="false" afterPath="$PROJECT_DIR$/fracture_analysis_2d.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fracture_analysis_2d_dialog.py" beforeDir="false" afterPath="$PROJECT_DIR$/fracture_analysis_2d_dialog.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fracture_analysis_2d_dialog_base.ui" beforeDir="false" afterPath="$PROJECT_DIR$/fracture_analysis_2d_dialog_base.ui" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fracture_analysis_kit/kit_resources/analysis_main.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/fracture_analysis_kit/analysis_and_plotting.py" beforeDir="false" afterPath="$PROJECT_DIR$/fracture_analysis_kit/analysis_and_plotting.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fracture_analysis_kit/fracture_analysis_kit_qgis_tools.py" beforeDir="false" afterPath="$PROJECT_DIR$/fracture_analysis_kit/fracture_analysis_kit_qgis_tools.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fracture_analysis_kit/kit_resources/multiple_target_areas.py" beforeDir="false" afterPath="$PROJECT_DIR$/fracture_analysis_kit/kit_resources/multiple_target_areas.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fracture_analysis_kit/kit_resources/plot_data.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/fracture_analysis_kit/kit_resources/target_area.py" beforeDir="false" afterPath="$PROJECT_DIR$/fracture_analysis_kit/kit_resources/target_area.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fracture_analysis_kit/kit_resources/test.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/fracture_analysis_kit/kit_resources/tools.py" beforeDir="false" afterPath="$PROJECT_DIR$/fracture_analysis_kit/kit_resources/tools.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fracture_analysis_kit/logging_tool.py" beforeDir="false" afterPath="$PROJECT_DIR$/fracture_analysis_kit/logging_tool.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fracture_analysis_kit/main_target_analysis.py" beforeDir="false" afterPath="$PROJECT_DIR$/fracture_analysis_kit/main_target_analysis.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fracture_analysis_kit/target_area_analysis_qgis.py" beforeDir="false" afterPath="$PROJECT_DIR$/fracture_analysis_kit/target_area_analysis_qgis.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/icon.png" beforeDir="false" afterPath="$PROJECT_DIR$/icon.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources.py" beforeDir="false" afterPath="$PROJECT_DIR$/resources.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/help/source/conf.py" beforeDir="false" afterPath="$PROJECT_DIR$/help/source/conf.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/help/source/index.rst" beforeDir="false" afterPath="$PROJECT_DIR$/help/source/index.rst" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/plugin_upload.py" beforeDir="false" afterPath="$PROJECT_DIR$/plugin_upload.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/qgis_interface.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/qgis_interface.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/tenbytenraster.asc.aux.xml" beforeDir="false" afterPath="$PROJECT_DIR$/test/tenbytenraster.asc.aux.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/test_fracture_analysis_2d_dialog.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_fracture_analysis_2d_dialog.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/test_init.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_init.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/test_qgis_environment.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_qgis_environment.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/test_resources.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_resources.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/utilities.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/utilities.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -45,9 +57,9 @@
   <component name="ProjectId" id="1WINdTzZ2LTv0PjGrA1WqR7vq3J" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="PropertiesComponent">
-    <property name="last_opened_file_path" value="F:/Program Files/Git/bin/git.exe" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../minkowskiDimCalculator" />
     <property name="run.code.analysis.last.selected.profile" value="aDefault" />
-    <property name="settings.editor.selected.configurable" value="preferences.keymap" />
+    <property name="settings.editor.selected.configurable" value="preferences.editor" />
   </component>
   <component name="PyFindUsagesOptions">
     <option name="isSearchForTextOccurrences" value="true" />
@@ -69,6 +81,80 @@
       </list>
     </option>
   </component>
+  <component name="RunManager" selected="Python.target_area">
+    <configuration name="target_area" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="fracture_analysis_2d" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/fracture_analysis_kit/kit_resources" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/fracture_analysis_kit/kit_resources/target_area.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="test" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="fracture_analysis_2d" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/fracture_analysis_kit/kit_resources" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/fracture_analysis_kit/kit_resources/test.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="tools" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="fracture_analysis_2d" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/fracture_analysis_kit/kit_resources" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/fracture_analysis_kit/kit_resources/tools.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Python.target_area" />
+        <item itemvalue="Python.test" />
+        <item itemvalue="Python.test" />
+        <item itemvalue="Python.tools" />
+        <item itemvalue="Python.tools" />
+      </list>
+    </recent_temporary>
+  </component>
   <component name="SvnConfiguration">
     <configuration />
   </component>
@@ -86,7 +172,13 @@
       <option name="presentableId" value="LOCAL−00001" />
       <updated>1579814712440</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL−00002" summary="Working version.">
+      <created>1580573222461</created>
+      <option name="number" value="LOCAL−00002" />
+      <option name="presentableId" value="LOCAL−00002" />
+      <updated>1580573222461</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -104,6 +196,7 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="First time setup. Added defunct files to .gitignore/deleted" />
-    <option name="LAST_COMMIT_MESSAGE" value="First time setup. Added defunct files to .gitignore/deleted" />
+    <MESSAGE value="Working version." />
+    <option name="LAST_COMMIT_MESSAGE" value="Working version." />
   </component>
 </project>

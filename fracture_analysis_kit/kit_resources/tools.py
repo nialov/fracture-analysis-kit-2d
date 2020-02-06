@@ -1,8 +1,4 @@
-import glob
 import math
-import os
-from pathlib import Path
-import logging
 
 import geopandas as gpd
 import matplotlib.patheffects as path_effects
@@ -26,32 +22,34 @@ color_keys = [key for key in color_dict_code.keys()]
 detailed_list = templates.detailed
 style = templates.styled_text_dict
 prop = templates.styled_prop
+
+# Values used in spatial estimates of superposition
 buffer_value = 0.001
 snap_value = 0.001
 
 
-def initialize_branch_frame(filename):
-    branchframe = gpd.read_file(filename)
-    branchframe['azimu'] = branchframe.geometry.apply(calc_azimu)
-    branchframe['c'] = branchframe.Class.apply(str)
-    branchframe['connection'] = branchframe.Connection.apply(str)
-    branchframe['halved'] = branchframe.azimu.apply(azimu_half)
-    # branchframe = branchframe.dropna()
-    return branchframe
+# def initialize_branch_frame(filename):
+#     branchframe = gpd.read_file(filename)
+#     branchframe['azimu'] = branchframe.geometry.apply(calc_azimu)
+#     branchframe['c'] = branchframe.Class.apply(str)
+#     branchframe['connection'] = branchframe.Connection.apply(str)
+#     branchframe['halved'] = branchframe.azimu.apply(azimu_half)
+#     # branchframe = branchframe.dropna()
+#     return branchframe
 
 
-def initialize_trace_frame(filename):
-    branchframe = gpd.read_file(filename)
-    branchframe['azimu'] = branchframe.geometry.apply(calc_azimu)
-    branchframe['halved'] = branchframe.azimu.apply(azimu_half)
-    # branchframe = branchframe.dropna()
-    return branchframe
+# def initialize_trace_frame(filename):
+#     branchframe = gpd.read_file(filename)
+#     branchframe['azimu'] = branchframe.geometry.apply(calc_azimu)
+#     branchframe['halved'] = branchframe.azimu.apply(azimu_half)
+#     # branchframe = branchframe.dropna()
+#     return branchframe
 
 
-def initialize_node_frame(filename):
-    nodeframe = gpd.read_file(filename)
-    nodeframe['c'] = nodeframe.Class.apply(str)
-    return nodeframe
+# def initialize_node_frame(filename):
+#     nodeframe = gpd.read_file(filename)
+#     nodeframe['c'] = nodeframe.Class.apply(str)
+#     return nodeframe
 
 
 # def initialize_normalisation(filelist):
@@ -64,56 +62,93 @@ def initialize_node_frame(filename):
 #     return norm_list
 
 
-def initialize_area_frame(filename):
-    areaframe = gpd.read_file(filename)
-    return areaframe
+# def initialize_area_frame(filename):
+#     areaframe = gpd.read_file(filename)
+#     return areaframe
 
 
-def calc_strike(azimuth):
-    strike = azimuth - 90
+def calc_strike(dip_direction):
+    """
+    Calculates strike from dip direction. Right-handed rule.
+    Examples:
+
+    >>> calc_strike(50)
+    320
+
+    >>> calc_strike(180)
+    90
+
+    :param dip_direction: Dip direction of plane
+    :type dip_direction: float
+    :return: Strike of plane
+    :rtype: float
+    """
+    strike = dip_direction - 90
     if strike < 0:
         strike = 360 + strike
     return strike
 
 
-def initialize_plane_file(filename, declination_fix=9):
-    planeframe = gpd.read_file(filename)
-    planeframe['DIRECTION_OF_DIP_DEC_FIX'] = planeframe.DIRECTION_ - declination_fix
-    planeframe['STRIKE'] = planeframe.DIRECTION_OF_DIP_DEC_FIX.apply(calc_strike)
-    return planeframe
+# def initialize_plane_file(filename, declination_fix=9):
+#     planeframe = gpd.read_file(filename)
+#     planeframe['DIRECTION_OF_DIP_DEC_FIX'] = planeframe.DIRECTION_ - declination_fix
+#     planeframe['STRIKE'] = planeframe.DIRECTION_OF_DIP_DEC_FIX.apply(calc_strike)
+#     return planeframe
 
 
-def get_filenames_planefiles(directory):
-    faultfiles = list(glob.glob(os.path.join(directory, '*_faults_*.shp')))
-    dykefiles = list(glob.glob(os.path.join(directory, '*_layerings_*.shp')))
-    lineationfiles = list(glob.glob(os.path.join(directory, '*_lineations_*.shp')))
-    if len(faultfiles + dykefiles + lineationfiles) == 0:
-        raise Exception('No fault, dyke or lineation files found. Check spelling and directory.')
-    return faultfiles, dykefiles, lineationfiles
+# def get_filenames_planefiles(directory):
+#     faultfiles = list(glob.glob(os.path.join(directory, '*_faults_*.shp')))
+#     dykefiles = list(glob.glob(os.path.join(directory, '*_layerings_*.shp')))
+#     lineationfiles = list(glob.glob(os.path.join(directory, '*_lineations_*.shp')))
+#     if len(faultfiles + dykefiles + lineationfiles) == 0:
+#         raise Exception('No fault, dyke or lineation files found. Check spelling and directory.')
+#     return faultfiles, dykefiles, lineationfiles
 
 
-def get_filenames_branches_nodes(directory):
-    branchfiles = list(glob.glob(os.path.join(directory, '*branches.shp')))
-    branchfiles = sorted(branchfiles)
-    nodefiles = list(glob.glob(os.path.join(directory, '*nodes.shp')))
-    nodefiles = sorted(nodefiles)
-    if len(branchfiles) + len(nodefiles) == 0:
-        raise Exception('No branch or nodefiles found. Check spelling and directory.')
-    if len(branchfiles) != len(nodefiles):
-        raise Exception('Unequal amount of nodefiles and branchfiles')
-    return branchfiles, nodefiles
+# def get_filenames_branches_nodes(directory):
+#     branchfiles = list(glob.glob(os.path.join(directory, '*branches.shp')))
+#     branchfiles = sorted(branchfiles)
+#     nodefiles = list(glob.glob(os.path.join(directory, '*nodes.shp')))
+#     nodefiles = sorted(nodefiles)
+#     if len(branchfiles) + len(nodefiles) == 0:
+#         raise Exception('No branch or nodefiles found. Check spelling and directory.')
+#     if len(branchfiles) != len(nodefiles):
+#         raise Exception('Unequal amount of nodefiles and branchfiles')
+#     return branchfiles, nodefiles
 
 
-def get_filenames_branches_or_traces(directory):
-    branchfiles = list(glob.glob(os.path.join(directory, '*branches.shp')))
-    tracefiles = list(glob.glob(os.path.join(directory, '*tulkinta.shp')))
-    files = branchfiles + tracefiles
-    if len(files) == 0:
-        raise Exception('No branch or tracefiles found. Check spelling and directory.')
-    return files
+# def get_filenames_branches_or_traces(directory):
+#     branchfiles = list(glob.glob(os.path.join(directory, '*branches.shp')))
+#     tracefiles = list(glob.glob(os.path.join(directory, '*tulkinta.shp')))
+#     files = branchfiles + tracefiles
+#     if len(files) == 0:
+#         raise Exception('No branch or tracefiles found. Check spelling and directory.')
+#     return files
 
 
 def calc_azimu(line):
+    """
+    Calculates azimuth of given line.
+
+    e.g.:
+
+    Accepts LineString
+    >>> calc_azimu(shapely.geometry.LineString([(0, 0), (1, 1)]))
+    45.0
+
+    Accepts MultiLineString
+    >>> calc_azimu(shapely.geometry.MultiLineString([((0, 0), (1, 1)), ((1, 1), (2, 2))]))
+    45.0
+
+    Returns np.nan when the line cannot be merged into one continuous line.
+    >>> calc_azimu(shapely.geometry.MultiLineString([((0, 0), (1, 1)), ((1.5, 1), (2, 2))]))
+    nan
+
+    :param line: (Continous) line feature (trace, branch, etc.)
+    :type line: shapely.geometry.LineString | shapely.geometry.MultiLineString
+    :return: Azimuth of line.
+    :rtype: float | np.nan
+    """
     try:
         coord_list = list(line.coords)
     except NotImplementedError:
@@ -122,7 +157,6 @@ def calc_azimu(line):
         try:
             coord_list = list(line.coords)
         except NotImplementedError:
-            # logging.exception('error in calc_azimu')
             return np.NaN
     start_x = coord_list[0][0]
     start_y = coord_list[0][1]
@@ -135,25 +169,32 @@ def calc_azimu(line):
 
 
 def azimu_half(degrees):
+    """
+    Transforms azimuths from 180-360 range to range 0-180
+    :param degrees: Degrees in range 0 - 360
+    :type degrees: float
+    :return: Degrees in range 0 - 180
+    :rtype: float
+    """
     if degrees >= 180:
         degrees = degrees - 180
     return degrees
 
 
-def get_filenames_branches_traces_and_areas(branchdirectory,
-                                            areadirectory):  # Gets both branches and traces + their areas
-    branchfiles = list(glob.glob(os.path.join(branchdirectory, '*branches.shp')))
-    tracefiles = list(glob.glob(os.path.join(branchdirectory, '*tulkinta.shp')))
-    branchfiles = branchfiles + tracefiles
-    branchfiles = sorted(branchfiles)
-
-    areafiles = list(glob.glob(os.path.join(areadirectory, '*tulkinta_alue.shp')))
-    areafiles = sorted(areafiles)
-    if len(branchfiles) + len(areafiles) == 0:
-        raise Exception('No branch or areafiles found. Check spelling and directories.')
-    if len(branchfiles) != len(areafiles):
-        raise Exception('Unequal amount of areafiles and branchfiles')
-    return branchfiles, areafiles
+# def get_filenames_branches_traces_and_areas(branchdirectory,
+#                                             areadirectory):  # Gets both branches and traces + their areas
+#     branchfiles = list(glob.glob(os.path.join(branchdirectory, '*branches.shp')))
+#     tracefiles = list(glob.glob(os.path.join(branchdirectory, '*tulkinta.shp')))
+#     branchfiles = branchfiles + tracefiles
+#     branchfiles = sorted(branchfiles)
+#
+#     areafiles = list(glob.glob(os.path.join(areadirectory, '*tulkinta_alue.shp')))
+#     areafiles = sorted(areafiles)
+#     if len(branchfiles) + len(areafiles) == 0:
+#         raise Exception('No branch or areafiles found. Check spelling and directories.')
+#     if len(branchfiles) != len(areafiles):
+#         raise Exception('Unequal amount of areafiles and branchfiles')
+#     return branchfiles, areafiles
 
 
 # def get_filenames_branches_traces_and_areas_coded_old(linedirectory, areadirectory, code):
@@ -284,11 +325,11 @@ def get_filenames_branches_traces_and_areas(branchdirectory,
 #     return norm_list
 
 
-def unify_frames(frames):  # Appends multiple dataframes together
-    unifiedframe = frames[0]
-    for frame in frames:
-        unifiedframe = unifiedframe.append(frame)
-    return unifiedframe
+# def unify_frames(frames):  # Appends multiple dataframes together
+#     unifiedframe = frames[0]
+#     for frame in frames:
+#         unifiedframe = unifiedframe.append(frame)
+#     return unifiedframe
 
 
 # def unify(linedirectory, areadirectory, code):
@@ -310,33 +351,71 @@ def unify_frames(frames):  # Appends multiple dataframes together
 #     return lineframe, areaframe
 
 
-def flatten_list(l):
-    flat_list = []
-    for sublist in l:
-        for item in sublist:
-            flat_list.append(item)
-    return flat_list
+# def flatten_list(l):
+#     flat_list = []
+#     for sublist in l:
+#         for item in sublist:
+#             flat_list.append(item)
+#     return flat_list
 
 
-def define_marker_sizes(shp_len):
-    def dist(length, median):
-        if (length - median) == 0:
-            return 0.01
-        distance = np.abs((1 / (median - length)))
-        return distance
-
-    lineframe = pd.DataFrame({'length': shp_len}, columns=['length'])
-    median = lineframe.length.median()
-
-    lineframe['marker_size'] = lineframe.apply(lambda x: dist(x['length'], median), axis=1)
-    sizes = lineframe['marker_size'].values
-    sizes = sizes / np.linalg.norm(sizes)
-    sizes = np.log10(sizes + 1)
-    sizes = sizes * 10000
-    return sizes
+# def define_marker_sizes(shp_len):
+#     """
+#     Custom marker sizes based on length. Size is determined based on distance from median.
+#     :param shp_len: Array of lengths
+#     :type shp_len: np.ndarray
+#     :return: Array of sizes
+#     :rtype: np.ndarray
+#     """
+#     def dist(length, median):
+#         if (length - median) == 0:
+#             return 0.01
+#         distance = np.abs((1 / (median - length)))
+#         return distance
+#
+#     lineframe = pd.DataFrame({'length': shp_len}, columns=['length'])
+#     median = lineframe.length.median()
+#
+#     lineframe['marker_size'] = lineframe.apply(lambda x: dist(x['length'], median), axis=1)
+#     sizes = lineframe['marker_size'].values
+#     sizes = sizes / np.linalg.norm(sizes)
+#     sizes = np.log10(sizes + 1)
+#     sizes = sizes * 10000
+#     return sizes
 
 
 def azimuth_plot_attributes(lineframe, weights=False):
+    """
+    Calculates azimuth bins for plotting azimuth rose plots.
+
+    Example:
+
+    Non-weighted
+    >>> azimuth_plot_attributes(pd.DataFrame({'azimu': np.array([0, 45, 90]), 'length': np.array([1, 2, 1])}))
+    array([33.33333333,  0.        ,  0.        ,  0.        ,  0.        ,
+           33.33333333,  0.        ,  0.        ,  0.        , 33.33333333,
+            0.        ,  0.        ,  0.        ,  0.        ,  0.        ,
+            0.        ,  0.        ,  0.        , 33.33333333,  0.        ,
+            0.        ,  0.        ,  0.        , 33.33333333,  0.        ,
+            0.        ,  0.        , 33.33333333,  0.        ,  0.        ,
+            0.        ,  0.        ,  0.        ,  0.        ,  0.        ,
+            0.        ])
+
+    Weighted
+    >>> azimuth_plot_attributes(pd.DataFrame({'azimu': np.array([0, 45, 90]), 'length': np.array([1, 2, 1])}), weights=True)
+    array([25.,  0.,  0.,  0.,  0., 50.,  0.,  0.,  0., 25.,  0.,  0.,  0.,
+            0.,  0.,  0.,  0.,  0., 25.,  0.,  0.,  0.,  0., 50.,  0.,  0.,
+            0., 25.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.])
+
+
+    :param lineframe: DataFrame containing lines with azimu (and length columns)
+    :type lineframe: pd.DataFrame
+    :param weights: Whether to use weights for bins.
+    :type weights: bool
+    :return: bin_locs: Locations for each bin, number_of_azimuths: Frequency (length-weighted) of each bin
+    :rtype: tuple
+    """
+
     def get_statistics(lineframe):
         df = lineframe
         df['halved'] = df.azimu.apply(azimu_half)
@@ -355,7 +434,6 @@ def azimuth_plot_attributes(lineframe, weights=False):
     azimuths = lineframe.loc[:, 'azimu'].values
     bin_edges = np.arange(-5, 366, 10)
     if weights:
-        lineframe['length'] = lineframe.geometry.length
         lengths = lineframe.loc[:, 'length'].values
         number_of_azimuths, bin_edges = np.histogram(azimuths, bin_edges, weights=lengths)
     else:
@@ -371,7 +449,137 @@ def azimuth_plot_attributes(lineframe, weights=False):
     return two_halves
 
 
+def azimuth_plot_attributes_experimental(lineframe, weights=False):
+    """
+    Calculates azimuth bins for plotting azimuth rose plots. Uses HALVED azimuths (i.e. column 'halved' in lineframe)
+
+    :param lineframe: DataFrame containing lines with halved azimuth (and length) columns
+    :type lineframe: pd.DataFrame
+    :param weights: Whether to use weights for bins.
+    :type weights: bool
+    :return: bin_width: Azimuth bin array, bin_locs: Bin locs, number_of_azimuths: Azimuth bin frequency (length-weighted)
+    :rtype: tuple
+    """
+
+    def get_statistics(lineframe):
+        df = lineframe
+        df['halved'] = df.azimu.apply(azimu_half)
+        df = df.loc[:, 'halved']
+        stats = df.describe()
+        count = round(stats[0], 2)
+        mean = round(stats[1], 2)
+        std = round(stats[2], 2)
+        min_len = round(stats[3], 5)
+        max_len = round(stats[7], 2)
+        median = round(df.median(), 2)
+        return {'count': count, 'mean': mean, 'std': std, 'minLen': min_len, 'maxLen': max_len, 'median': median}
+
+    def calc_ideal_bin_width(n, axial=True):
+        """
+        Calculates ideal bin width. axial or vector data
+        Reference:
+            Sanderson, D.J., Peacock, D.C.P., 2020.
+            Making rose diagrams fit-for-purpose. Earth-Science Reviews. doi:10.1016/j.earscirev.2019.103055
+
+        e.g.
+        >>> calc_ideal_bin_width(30)
+        28.964681538168897
+        >>>calc_ideal_bin_width(90)
+        20.08298850246509
+
+        :param n: Sample size
+        :type n: int
+        :param axial: Whether data is axial or vector
+        :type axial: bool
+        :return: Bin width in degrees
+        :rtype: float
+        :raises: ValueError
+        """
+        if n <= 0:
+            raise ValueError('Sample size cannot be 0 or lower')
+        if axial:
+            range = 180
+        else:
+            range = 360
+        return range / (2 * n ** (1 / 3))
+
+    def calc_bins(ideal_bin_width):
+        """
+        Calculates bin edges and real bin width
+
+        E.g.
+
+        >>> calc_bins(25.554235)
+        (array([  0. ,  22.5,  45. ,  67.5,  90. , 112.5, 135. , 157.5, 180. ]), 22.5)
+
+        :param ideal_bin_width: Ideal bin width
+        :type ideal_bin_width: float
+        :return: bin_edges: bin edges, bin_width: real bin width (rounded up)
+        :rtype: np.ndarray, float
+        """
+
+        div = 180 / ideal_bin_width
+        rounded_div = math.ceil(div)
+        bin_width = 180 / rounded_div
+
+        start = 0
+        end = 180 + bin_width * 0.01
+        bin_edges = np.arange(start, end, bin_width)
+        return bin_edges, bin_width
+
+    def calc_locs(bin_width):
+        """
+        Calculates bar plot bar locations.
+        :param bin_width: Real bin width
+        :type bin_width: float
+        :return: Array of locations
+        :rtype: np.ndarray
+        """
+        start = bin_width / 2
+        end = 180 + bin_width / 2
+        locs = np.arange(start, end, bin_width)
+        return locs
+
+    lineframe = lineframe.dropna(subset=['halved'])
+    # stats = get_statistics(lineframe)
+    azimuths = lineframe.loc[:, 'halved'].values
+    ideal_bin_width = calc_ideal_bin_width(lineframe.shape[0])
+    bin_edges, bin_width = calc_bins(ideal_bin_width)
+    bin_locs = calc_locs(bin_width)
+
+    if weights:
+        lengths = lineframe.loc[:, 'length'].values
+        number_of_azimuths, _ = np.histogram(azimuths, bin_edges, weights=lengths)
+    else:
+        number_of_azimuths, _ = np.histogram(azimuths, bin_edges)
+
+    # bin_edges = np.arange(-5, 366, 10)
+    # if weights:
+    #     lengths = lineframe.loc[:, 'length'].values
+    #     number_of_azimuths, bin_edges = np.histogram(azimuths, bin_edges, weights=lengths)
+    # else:
+    #     number_of_azimuths, bin_edges = np.histogram(azimuths, bin_edges)
+
+    # number_of_azimuths[0] += number_of_azimuths[-1]
+    # half = np.sum(np.split(number_of_azimuths[:-1], 2), 0)
+    # two_halves = np.concatenate([half, half])
+    # if weights:
+    #     azi_count = lengths.sum()
+    # else:
+    #     azi_count = len(azimuths)
+    # two_halves = (two_halves / azi_count) * 100
+    return bin_width, bin_locs, number_of_azimuths
+
+
 def plot_azimuth_plot(two_halves, weights=False):
+    """
+    Plots an azimuth plot using a bin array. Weighted or non-weighted
+    :param two_halves: Azimuth bin array
+    :type two_halves: np.ndarray
+    :param weights: Whether to use weights for bins.
+    :type weights: bool
+
+    """
     fig = plt.figure(polar=True)
     fig.patch.set_facecolor('#CDFFE6')
     ax = plt.gca()
@@ -401,6 +609,11 @@ def plot_azimuth_plot(two_halves, weights=False):
 #    return lineframe
 
 def length_distribution_plot(length_distribution):
+    """
+    Plots a length distribution plot
+    :param length_distribution: TargetAreaLines Class
+    :type length_distribution: TargetAreaLines
+    """
     ld = length_distribution
     name = ld.name
     lineframe = ld.lineframe_main
@@ -417,6 +630,11 @@ def length_distribution_plot(length_distribution):
 
 
 def length_distribution_plot_with_fit(length_distribution):
+    """
+    Plots a length distribution plot with fit.
+    :param length_distribution: TargetAreaLines Class
+    :type length_distribution: TargetAreaLines
+    """
     fig, ax = plt.subplots()
 
     ld = length_distribution
@@ -442,6 +660,11 @@ def length_distribution_plot_with_fit(length_distribution):
 
 
 def length_distribution_plot_sets(length_distribution):
+    """
+    Plots a length distribution plot using sets
+    :param length_distribution: TargetAreaLines Class
+    :type length_distribution: TargetAreaLines
+    """
     ld = length_distribution
     name = ld.name
     setframes = ld.setframes
@@ -459,13 +682,26 @@ def length_distribution_plot_sets(length_distribution):
 
 
 def sd_calc(data):
-    n = len(data)
+    """
+    TODO: Wrong results?
+    Calculates standard deviation for radial data (degrees)
 
+    E.g.
+
+    >>> sd_calc(np.array([2, 5, 8]))
+    3.0
+
+
+    :param data: Array of degrees
+    :type data: np.ndarray
+    :return: Standard deviation
+    :rtype: float
+    """
+
+    n = len(data)
     if n <= 1:
         return 0.0
-
     mean, sd = avg_calc(data), 0.0
-
     # calculate stan. dev.
     for el in data:
         diff = abs(mean - float(el))
@@ -475,7 +711,7 @@ def sd_calc(data):
         sd += diff ** 2
     sd = math.sqrt(sd / float(n - 1))
 
-    return sd
+    return sd, mean
 
 
 def avg_calc(data):
@@ -529,50 +765,36 @@ def find_color_topology_plot(name):
     # return color
 
 
-def find_order_topology_plot(name):
-    # NOT FOR GENERAL USE TODO: Plot according to list nro
-    order = 10
-
-    return order
-
-
-def find_detailed_topology_plot(name):
-    result = False
-    if ('det' in name) or ('Det' in name):
-        result = True
-    return result
-
-
-def transform_to_ellipse(halved, phi):
-    rotation_of_ellipse = 90 - phi
-    transformed = rotation_of_ellipse - halved
-    return transformed
+# def transform_to_ellipse(halved, phi):
+#     rotation_of_ellipse = 90 - phi
+#     transformed = rotation_of_ellipse - halved
+#     return transformed
+#
+#
+# def radius_of_ellipse(a, b, transformed):
+#     angle = np.deg2rad(transformed)
+#     m = max([a, b])
+#     a = a / m
+#     b = b / m
+#     ab = a * b
+#     u_sqrt = (a ** 2) * np.sin(angle) * np.sin(angle) + (b ** 2) * np.cos(angle) * np.cos(angle)
+#     radius = ab / np.sqrt(u_sqrt)
+#     return radius
 
 
-def radius_of_ellipse(a, b, transformed):
-    angle = np.deg2rad(transformed)
-    m = max([a, b])
-    a = a / m
-    b = b / m
-    ab = a * b
-    u_sqrt = (a ** 2) * np.sin(angle) * np.sin(angle) + (b ** 2) * np.cos(angle) * np.cos(angle)
-    radius = ab / np.sqrt(u_sqrt)
-    return radius
+# def calc_ellipse_weight_for_row(halved, length, a, b, phi):
+#     transformed = transform_to_ellipse(halved, phi)
+#     radius = radius_of_ellipse(a, b, transformed)
+#     weight = length / radius
+#     # print('old length:', length, 'new length:', weight)  # DEBUGGING
+#     # print('phi:', phi, 'halved:', halved)  # DEBUGGING
+#     return weight
 
 
-def calc_ellipse_weight_for_row(halved, length, a, b, phi):
-    transformed = transform_to_ellipse(halved, phi)
-    radius = radius_of_ellipse(a, b, transformed)
-    weight = length / radius
-    # print('old length:', length, 'new length:', weight)  # DEBUGGING
-    # print('phi:', phi, 'halved:', halved)  # DEBUGGING
-    return weight
-
-
-def calc_ellipse_weight(lineframe, a, b, phi):
-    lineframe['ellipse_weight'] = lineframe.apply(
-        lambda row: calc_ellipse_weight_for_row(row['halved'], row['length'], a, b, phi), axis=1)
-    return lineframe
+# def calc_ellipse_weight(lineframe, a, b, phi):
+#     lineframe['ellipse_weight'] = lineframe.apply(
+#         lambda row: calc_ellipse_weight_for_row(row['halved'], row['length'], a, b, phi), axis=1)
+#     return lineframe
 
 
 def tern_yi_func(c, x):
@@ -602,6 +824,13 @@ def tern_find_last_x(c, x_start=0):
 
 
 def tern_plot_the_fing_lines(tax, cs_locs=(1.3, 1.5, 1.7, 1.9)):
+    """
+    Plots connections per branch paramter to XYI-plot
+    :param tax: Ternary axis to plot to
+    :type tax: ternary.TernaryAxesSubplot
+    :param cs_locs: Pre-determined locations for lines
+    :type cs_locs: tuple
+    """
     for c in cs_locs:
         last_x = tern_find_last_x(c)
         x1 = 0
@@ -619,6 +848,12 @@ def tern_plot_the_fing_lines(tax, cs_locs=(1.3, 1.5, 1.7, 1.9)):
 
 
 def tern_plot_branch_lines(tax):
+    """
+    Plot line of random assignenment of nodes to branches. Line positions from NetworkGT code.
+    https://github.com/BjornNyberg/NetworkGT
+    :param tax: Ternary axis to plot to
+    :type tax: ternary.TernaryAxesSubplot
+    """
     ax = tax.get_axes()
     tax.boundary()
     points = [(0, 1, 0), (0.01, 0.81, 0.18), (0.04, 0.64, 0.32), (0.09, 0.49, 0.42), (0.16, 0.36, 0.48),
@@ -670,6 +905,23 @@ def tern_plot_branch_lines(tax):
 
 
 def aniso_get_class_as_value(c):
+    """
+    Return value based on branch classification. Only C-C branches have a value, but this can be changed here.
+    Classification can differ from ('C - C', 'C - I', 'I - I') (e.g. 'C - E') in which case a value is still returned.
+
+    E.g.
+
+    >>> aniso_get_class_as_value('C - C')
+    1
+
+    >>> aniso_get_class_as_value('C - E')
+    0
+
+    :param c: Branch classification
+    :type c: str
+    :return: Value for classification
+    :rtype: float
+    """
     if c == 'C - C':
         return 1
     elif c == 'C - I':
@@ -681,7 +933,32 @@ def aniso_get_class_as_value(c):
 
 
 def aniso_calc_anisotropy(halved, c, length):
-    angles_of_study = templates.angles_for_examination
+    """
+    Calculates anisotropy of connectivity for a branch based on azimuth, classification and length.
+    Value is calculated for preset angles (angles_of_study = np.arange(0, 179, 30))
+
+    E.g.
+
+    Anisotropy for a C-C classified branch:
+    >>> aniso_calc_anisotropy(90, 'C - C', 10)
+    array([6.12323400e-16, 5.00000000e+00, 8.66025404e+00, 1.00000000e+01,
+           8.66025404e+00, 5.00000000e+00])
+
+    Other classification for branch:
+    >>> aniso_calc_anisotropy(90, 'C - I', 10)
+    array([0, 0, 0, 0, 0, 0])
+
+
+    :param halved: Azimuth of branch in range 0 - 180
+    :type halved: float
+    :param c: Branch classification
+    :type c: str
+    :param length: Branch length
+    :type length: float
+    :return: Result is given for every angle of study (angles_of_study array)
+    :rtype: np.ndarray
+    """
+    angles_of_study = np.arange(0, 179, 30)
     # print(angles_of_study)
     c_value = aniso_get_class_as_value(c)
     # CALCULATION
@@ -700,22 +977,33 @@ def aniso_calc_anisotropy(halved, c, length):
     return np.array(results)
 
 
-def calc_sum_isotropy(branchframe):
-    sums = []
-    for _, row in branchframe.iterrows():
-        sum_list = []
-        for a in row.anisotropy:
-            sum_list.append(a)
-        sums.append(np.array(sum_list))
-    for idx, sum_arr in enumerate(sums):
-        if idx == 0:
-            arr_sum = sum_arr
-        else:
-            arr_sum += sum_arr
-    return arr_sum
+# def calc_sum_isotropy(branchframe):
+#     sums = []
+#     for _, row in branchframe.iterrows():
+#         sum_list = []
+#         for a in row.anisotropy:
+#             sum_list.append(a)
+#         sums.append(np.array(sum_list))
+#     for idx, sum_arr in enumerate(sums):
+#         if idx == 0:
+#             arr_sum = sum_arr
+#         else:
+#             arr_sum += sum_arr
+#     return arr_sum
 
 
 def calc_y_distribution(lineframe_main, area):
+    """
+    Calculates Complementary Cumulative Number (= y) for a length distribution
+    and normalises the values based on target area size.
+
+    :param lineframe_main: DataFrame with lengths
+    :type lineframe_main: pd.DataFrame
+    :param area: Area value
+    :type area: float
+    :return: DataFrame with y values calculated
+    :rtype: pd.DataFrame
+    """
 
     lineframe_main = lineframe_main.sort_values(by=['length'], ascending=False)
     nrows = len(lineframe_main.index)
@@ -725,22 +1013,23 @@ def calc_y_distribution(lineframe_main, area):
 
 
 def calc_cut_off_length(lineframe_main, cut_off: float):
-    """Calculates minimum length for distribution
+    """
+    Calculates minimum length for distribution with a proportional cut-off value. Exact cut-off length is calculated
+    using cut-off value and the maximum line length in distribution.
 
-    Parameters
-    ----------
-    lineframe_main : initialized dataframe
-         initialized lineframe with proper columns
+    E.g.
 
-    cut_off : float
-        float used to cut lengths
+    >>> calc_cut_off_length(pd.DataFrame({'length': np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])}), 0.55)
+    4.5
+    >>> calc_cut_off_length(pd.DataFrame({'length': np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])}), 0.5)
+    5.0
 
-    Returns
-    -------
-    lineframe_main
-        linefram with cut lengths
-
-
+    :param lineframe_main: DataFrame with lengths
+    :type lineframe_main: pd.DataFrame
+    :param cut_off: Proportional cut-off value in range [0, 1]
+    :type cut_off: float
+    :return: Cut-off length
+    :rtype: float
     """
 
     if cut_off == 1.0:
@@ -824,9 +1113,9 @@ def define_set(azimuth, list_of_tuples):  # Uses HALVED azimuth: 0-180
     return set_num
 
 
-def construct_length_distribution_base(lineframe: pd.DataFrame, areaframe: pd.DataFrame, name: str, group:str, cut_off=1, norm=1,
+def construct_length_distribution_base(lineframe: gpd.GeoDataFrame, areaframe: gpd.GeoDataFrame, name: str, group: str,
+                                       cut_off=1, norm=1,
                                        using_branches=False):
-
     ld = ta.TargetAreaLines(lineframe, areaframe, name, group, using_branches, cut_off)
     return ld
 
@@ -836,21 +1125,8 @@ def construct_node_data_base(nodeframe, name, group):
     return node_data_base
 
 
-def unify_lds(list_of_lds: list, group: str):
+def unify_lds(list_of_lds: list, group: str, cut_off: float):
     """Unifies/adds multiple length distribution objects together
-
-
-    Parameters
-    ----------
-    list_of_lds : list
-         list of length distribution objects
-
-
-    Returns
-    -------
-    unif_ld_main
-        length distribution object with unified attributes from multiple lds
-
 
     """
     df = pd.DataFrame(columns=['lineframe_main', 'lineframe_main_cut', 'areaframe', 'name'])
@@ -862,12 +1138,12 @@ def unify_lds(list_of_lds: list, group: str):
     lineframe_main_cut = pd.concat(df.lineframe_main_cut.tolist(), ignore_index=True)
     areaframe = pd.concat(df.areaframe.tolist(), ignore_index=True)
 
-    # rep_circle_area = np.pi * df.rep_circle_r.sum() ** 2
-    unif_ld_main = ta.TargetAreaLines(lineframe_main, areaframe, group, group=group, using_branches=list_of_lds[0].using_branches)
+    unif_ld_main = ta.TargetAreaLines(lineframe_main, areaframe, group, group=group,
+                                      using_branches=list_of_lds[0].using_branches, cut_off=cut_off)
     unif_ld_main.lineframe_main = lineframe_main
     unif_ld_main.lineframe_main_cut = lineframe_main_cut
     unif_ld_main.cut_off = list_of_lds[0].cut_off
-    # unif_ld_main.rep_circle_area = rep_circle_area
+
     try:  # Only succeeds if sets have been defined, otherwise passed
         unif_ld_main.set_list = list_of_lds[0].set_list
     except AttributeError:
@@ -971,9 +1247,9 @@ def unite_areaframes(list_of_areaframes):
     return united
 
 
-def plot_fit_for_uniframe(mult_distrib, ax, cut, use_sets, unified: bool, curr_set=-1, font_multiplier=1, predicting_mode=False,
+def plot_fit_for_uniframe(mult_distrib, ax, cut, use_sets, unified: bool, curr_set=-1, font_multiplier=1,
+                          predicting_mode=False,
                           predict_with=None):
-
     def create_text(lineframe_for_text, ax_for_text, font_multiplier=font_multiplier, multi=False):
         msle = sklm.mean_squared_log_error(lineframe_for_text.y.values, lineframe_for_text.y_fit.values)
         r2score = sklm.r2_score(lineframe_for_text.y.values, lineframe_for_text.y_fit.values)
@@ -1195,24 +1471,24 @@ def plot_curv_plot(lineframe, ax=plt.gca(), name=''):
     # sns.violinplot(data=df, x='curviness', y='group')
 
 
-def plot_all_curv_plots(branchdirectory, traces=False):
-    sns.set(style='ticks')
-    branchfiles = get_filenames_branches_or_traces(branchdirectory)
-    filecount = len(branchfiles)
-    fig, axes, nrows, ncols = curviness_initialize_sub_plotting(filecount)
-    row = -1
-    for idx, file in enumerate(branchfiles):
-        name = Path(file).stem
-        if traces:
-            lineframe = initialize_trace_frame(file)
-        else:
-            lineframe = initialize_branch_frame(file)
-        col = idx % ncols
-
-        if col == 0:
-            row = row + 1
-        ax = axes[row][col]
-        plot_curv_plot(lineframe, ax, name)
+# def plot_all_curv_plots(branchdirectory, traces=False):
+#     sns.set(style='ticks')
+#     branchfiles = get_filenames_branches_or_traces(branchdirectory)
+#     filecount = len(branchfiles)
+#     fig, axes, nrows, ncols = curviness_initialize_sub_plotting(filecount)
+#     row = -1
+#     for idx, file in enumerate(branchfiles):
+#         name = Path(file).stem
+#         if traces:
+#             lineframe = initialize_trace_frame(file)
+#         else:
+#             lineframe = initialize_branch_frame(file)
+#         col = idx % ncols
+#
+#         if col == 0:
+#             row = row + 1
+#         ax = axes[row][col]
+#         plot_curv_plot(lineframe, ax, name)
 
 
 def plot_azimuths_sub_plot(lineframe, ax, filename, weights, striations=False, small_text=False,

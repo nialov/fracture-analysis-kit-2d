@@ -14,6 +14,9 @@
    <string>2D Fracture Analysis Kit</string>
   </property>
   <widget class="QTabWidget" name="tabWidget">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
    <property name="geometry">
     <rect>
      <x>30</x>
@@ -236,6 +239,9 @@
        <pointsize>10</pointsize>
       </font>
      </property>
+     <property name="toolTip">
+      <string>Layer table</string>
+     </property>
      <attribute name="horizontalHeaderDefaultSectionSize">
       <number>90</number>
      </attribute>
@@ -279,6 +285,15 @@
        <height>23</height>
       </rect>
      </property>
+     <property name="toolTip">
+      <string>Clear Group and Cut Off table</string>
+     </property>
+     <property name="statusTip">
+      <string/>
+     </property>
+     <property name="whatsThis">
+      <string/>
+     </property>
      <property name="text">
       <string>Clear Table</string>
      </property>
@@ -291,6 +306,9 @@
        <width>75</width>
        <height>23</height>
       </rect>
+     </property>
+     <property name="toolTip">
+      <string>Clear Layer table</string>
      </property>
      <property name="text">
       <string>Clear Table</string>
@@ -312,15 +330,21 @@
     <widget class="QTableWidget" name="tableWidget_tab2_gnames">
      <property name="geometry">
       <rect>
-       <x>601</x>
-       <y>21</y>
+       <x>730</x>
+       <y>60</y>
        <width>211</width>
        <height>192</height>
       </rect>
      </property>
+     <property name="toolTip">
+      <string>Group and Cut Off table</string>
+     </property>
+     <property name="whatsThis">
+      <string/>
+     </property>
      <column>
       <property name="text">
-       <string>Name</string>
+       <string>Group</string>
       </property>
       <property name="font">
        <font>
@@ -356,6 +380,9 @@
           <pointsize>12</pointsize>
          </font>
         </property>
+        <property name="toolTip">
+         <string>Give name to analysis</string>
+        </property>
         <property name="text">
          <string>Analysis Name</string>
         </property>
@@ -363,6 +390,9 @@
       </item>
       <item row="0" column="1">
        <widget class="QLineEdit" name="lineEdit_tab2_analysis_name">
+        <property name="toolTip">
+         <string>E.g. Loviisa_analysis</string>
+        </property>
         <property name="text">
          <string>test_</string>
         </property>
@@ -374,6 +404,9 @@
          <font>
           <pointsize>12</pointsize>
          </font>
+        </property>
+        <property name="toolTip">
+         <string>Use button (...) to point to a folder where a new folder for results will be created.</string>
         </property>
         <property name="text">
          <string>Output folder</string>
@@ -396,6 +429,9 @@
           <underline>false</underline>
          </font>
         </property>
+        <property name="toolTip">
+         <string>Choose folder</string>
+        </property>
         <property name="text">
          <string>...</string>
         </property>
@@ -406,8 +442,8 @@
     <widget class="QWidget" name="layoutWidget">
      <property name="geometry">
       <rect>
-       <x>390</x>
-       <y>20</y>
+       <x>530</x>
+       <y>60</y>
        <width>185</width>
        <height>85</height>
       </rect>
@@ -420,6 +456,12 @@
           <pointsize>12</pointsize>
          </font>
         </property>
+        <property name="toolTip">
+         <string>Input name for group</string>
+        </property>
+        <property name="whatsThis">
+         <string/>
+        </property>
         <property name="text">
          <string>Group Name</string>
         </property>
@@ -427,8 +469,14 @@
       </item>
       <item row="0" column="1">
        <widget class="QLineEdit" name="lineEdit_gname">
+        <property name="toolTip">
+         <string>E.g. KB_20m</string>
+        </property>
+        <property name="whatsThis">
+         <string/>
+        </property>
         <property name="text">
-         <string>kb</string>
+         <string>KB</string>
         </property>
        </widget>
       </item>
@@ -439,15 +487,27 @@
           <pointsize>12</pointsize>
          </font>
         </property>
+        <property name="toolTip">
+         <string>Input cut off in range 0 - 1 for group</string>
+        </property>
+        <property name="whatsThis">
+         <string/>
+        </property>
         <property name="text">
-         <string>Cut Off %</string>
+         <string>Cut Off 0 - 1</string>
         </property>
        </widget>
       </item>
       <item row="1" column="1">
        <widget class="QLineEdit" name="lineEdit_tab2_cutoff">
+        <property name="toolTip">
+         <string>E.g. 0.95</string>
+        </property>
+        <property name="whatsThis">
+         <string/>
+        </property>
         <property name="text">
-         <string>50</string>
+         <string>0.95</string>
         </property>
        </widget>
       </item>
@@ -457,6 +517,12 @@
          <font>
           <pointsize>14</pointsize>
          </font>
+        </property>
+        <property name="toolTip">
+         <string>Add row to Group and Cut Off table</string>
+        </property>
+        <property name="whatsThis">
+         <string>Add row to Name and Cut Off table</string>
         </property>
         <property name="text">
          <string>Add row</string>
@@ -468,8 +534,8 @@
     <widget class="QWidget" name="layoutWidget">
      <property name="geometry">
       <rect>
-       <x>10</x>
-       <y>290</y>
+       <x>20</x>
+       <y>280</y>
        <width>361</width>
        <height>281</height>
       </rect>
@@ -481,6 +547,9 @@
          <font>
           <pointsize>12</pointsize>
          </font>
+        </property>
+        <property name="toolTip">
+         <string>Select layer with digitized traces</string>
         </property>
         <property name="text">
          <string>Select trace layer</string>
@@ -504,6 +573,9 @@
           <pointsize>12</pointsize>
          </font>
         </property>
+        <property name="toolTip">
+         <string>Select layer with branches (from NetworkGT)</string>
+        </property>
         <property name="text">
          <string>Select branch layer</string>
         </property>
@@ -522,6 +594,9 @@
          <font>
           <pointsize>12</pointsize>
          </font>
+        </property>
+        <property name="toolTip">
+         <string>Select layer with nodes (from NetworkGT)</string>
         </property>
         <property name="text">
          <string>Select node layer</string>
@@ -542,6 +617,9 @@
           <pointsize>12</pointsize>
          </font>
         </property>
+        <property name="toolTip">
+         <string>Select layer with interpretation boundary polygon</string>
+        </property>
         <property name="text">
          <string>Select area layer</string>
         </property>
@@ -561,6 +639,9 @@
           <pointsize>12</pointsize>
          </font>
         </property>
+        <property name="toolTip">
+         <string>Name the target area</string>
+        </property>
         <property name="text">
          <string>Name target area</string>
         </property>
@@ -568,8 +649,11 @@
       </item>
       <item row="4" column="1">
        <widget class="QLineEdit" name="lineEdit_tab2_tan">
+        <property name="toolTip">
+         <string>E.g. KB11</string>
+        </property>
         <property name="text">
-         <string>kb10</string>
+         <string>KB10</string>
         </property>
        </widget>
       </item>
@@ -579,6 +663,9 @@
          <font>
           <pointsize>12</pointsize>
          </font>
+        </property>
+        <property name="toolTip">
+         <string>Select Group based on rows in Name and Cut Off table</string>
         </property>
         <property name="text">
          <string>Select group</string>
@@ -595,9 +682,166 @@
           <pointsize>15</pointsize>
          </font>
         </property>
+        <property name="toolTip">
+         <string>Add row to Layer table</string>
+        </property>
         <property name="text">
          <string>Add row</string>
         </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+    <widget class="QPushButton" name="pushButton_tab2_set_clear">
+     <property name="geometry">
+      <rect>
+       <x>340</x>
+       <y>70</y>
+       <width>75</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>Clear Set and Set limits table</string>
+     </property>
+     <property name="text">
+      <string>Clear Table</string>
+     </property>
+    </widget>
+    <widget class="QWidget" name="layoutWidget">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>100</y>
+       <width>401</width>
+       <height>171</height>
+      </rect>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
+         <widget class="QLabel" name="label_tab2_set_start_2">
+          <property name="font">
+           <font>
+            <pointsize>12</pointsize>
+           </font>
+          </property>
+          <property name="toolTip">
+           <string>Ranges extending from below 180 to over 0 are allowed. E.g. Set start = 170, Set end = 15</string>
+          </property>
+          <property name="layoutDirection">
+           <enum>Qt::LeftToRight</enum>
+          </property>
+          <property name="text">
+           <string>Input set limits
+in range
+[0, 180]</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <layout class="QGridLayout" name="gridLayout_3">
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_tab2_set_start">
+            <property name="font">
+             <font>
+              <pointsize>12</pointsize>
+             </font>
+            </property>
+            <property name="toolTip">
+             <string>Start of set</string>
+            </property>
+            <property name="text">
+             <string>Set start</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_tab2_set_end">
+            <property name="font">
+             <font>
+              <pointsize>12</pointsize>
+             </font>
+            </property>
+            <property name="toolTip">
+             <string>End of set</string>
+            </property>
+            <property name="text">
+             <string>Set end</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="lineEdit_tab2_set_end">
+            <property name="toolTip">
+             <string>E.g. 45</string>
+            </property>
+            <property name="text">
+             <string>50</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="lineEdit_tab2_set_start">
+            <property name="toolTip">
+             <string>E.g. 15</string>
+            </property>
+            <property name="text">
+             <string>0</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushButton_tab2_set_add">
+          <property name="font">
+           <font>
+            <pointsize>14</pointsize>
+           </font>
+          </property>
+          <property name="toolTip">
+           <string>Add set to Set and Set limits table</string>
+          </property>
+          <property name="text">
+           <string>Add set</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QTableWidget" name="tableWidget_tab2_sets">
+        <property name="toolTip">
+         <string>Set and Set limits table</string>
+        </property>
+        <property name="lineWidth">
+         <number>1</number>
+        </property>
+        <column>
+         <property name="text">
+          <string>Set</string>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Set limits</string>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+        </column>
        </widget>
       </item>
      </layout>

@@ -15,10 +15,10 @@ __copyright__ = 'Copyright 2020, Nikolas Ovaskainen'
 import unittest
 
 from qgis.PyQt.QtGui import QDialogButtonBox, QDialog
+from utilities import get_qgis_app
 
 from fracture_analysis_2d_dialog import FractureAnalysis2DDialog
 
-from utilities import get_qgis_app
 QGIS_APP = get_qgis_app()
 
 
@@ -48,8 +48,8 @@ class FractureAnalysis2DDialogTest(unittest.TestCase):
         result = self.dialog.result()
         self.assertEqual(result, QDialog.Rejected)
 
+
 if __name__ == "__main__":
     suite = unittest.makeSuite(FractureAnalysis2DDialogTest)
     runner = unittest.TextTestRunner(verbosity=2)
     runner.run(suite)
-

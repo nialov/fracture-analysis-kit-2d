@@ -1,16 +1,10 @@
-from pathlib import Path
-import os
-import shutil
 import logging
 
-
 from . import fracture_analysis_kit_qgis_tools as qgis_tools
+from .kit_resources import multiple_target_areas as mta
 # from .kit_resources import layers_to_pandas as lap
 from .kit_resources import target_area as ta
-from .kit_resources import multiple_target_areas as mta
 from .kit_resources import templates
-
-from . import logging_tool
 
 
 # TODO: implement sets, more plotting
@@ -43,13 +37,13 @@ class TargetAreaAnalysis:
 
     def geopandafy(self):
         self.trace_frame = qgis_tools.df_to_gdf(df=qgis_tools.layer_to_df(self.trace_layer)[0],
-                                         coord_system=qgis_tools.layer_to_df(self.trace_layer)[1])
+                                                coord_system=qgis_tools.layer_to_df(self.trace_layer)[1])
         self.branch_frame = qgis_tools.df_to_gdf(df=qgis_tools.layer_to_df(self.branch_layer)[0],
-                                          coord_system=qgis_tools.layer_to_df(self.branch_layer)[1])
+                                                 coord_system=qgis_tools.layer_to_df(self.branch_layer)[1])
         self.node_frame = qgis_tools.df_to_gdf(df=qgis_tools.layer_to_df(self.node_layer)[0],
-                                        coord_system=qgis_tools.layer_to_df(self.node_layer)[1])
+                                               coord_system=qgis_tools.layer_to_df(self.node_layer)[1])
         self.area_frame = qgis_tools.df_to_gdf(df=qgis_tools.layer_to_df(self.area_layer)[0],
-                                        coord_system=qgis_tools.layer_to_df(self.area_layer)[1])
+                                               coord_system=qgis_tools.layer_to_df(self.area_layer)[1])
 
     def initialize_tas(self):
         self.trace_ta = ta.TargetAreaLines(
@@ -94,15 +88,15 @@ class TargetAreaAnalysis:
 class MultiTargetAreaAnalysis:
 
     def __init__(
-            self, table_df, plotting_directory, analysis_name, gname_list, set_list
+            self, table_df, plotting_directory, analysis_name, gnames_cutoffs_df, set_df
     ):
         self.logger = logging.getLogger('logging_tool')
-        self.set_list = set_list
-        self.gname_list = gname_list
+        # TODO: both dfs!!!
+        self.set_df = set_df
+        self.gnames_cutoffs_df = gnames_cutoffs_df
         self.table_df = table_df
         self.plotting_directory = plotting_directory
         self.analysis_name = analysis_name
-
         self.analysis_traces = None
         self.analysis_branches = None
 
@@ -112,55 +106,53 @@ class MultiTargetAreaAnalysis:
         self.table_df['Area_frame'] = self.table_df['Area'].apply(qgis_tools.layer_to_gdf)
         self.table_df['Node_frame'] = self.table_df['Node'].apply(qgis_tools.layer_to_gdf)
 
-
-
     def analysis(self):
-
         # DEBUG
         # self.table_df = self.table_df.drop(columns=['Trace', 'Branch', 'Area', 'Node'])
         self.logger.info('CREATING MultiTargetAreaQGIS FOR TRACES AND BRANCHES')
-        self.analysis_traces = mta.MultiTargetAreaQGIS(self.table_df, self.gname_list, branches=False)
-        self.analysis_branches = mta.MultiTargetAreaQGIS(self.table_df, self.gname_list, branches=True)
-        self.logger.info('CALC ATTRIBUTES TRACES')
+
+        self.analysis_traces = mta.MultiTargetAreaQGIS(self.table_df, self.gnames_cutoffs_df, branches=False)
+        # Bar at 25
+
+        self.analysis_branches = mta.MultiTargetAreaQGIS(self.table_df, self.gnames_cutoffs_df, branches=True)
+        # Bar at 45
+
         # TRACE DATA SETUP
+        self.logger.info('CALC ATTRIBUTES TRACES')
         self.analysis_traces.calc_attributes_for_all()
-        self.analysis_traces.define_sets_for_all(self.set_list)
+
+        self.analysis_traces.define_sets_for_all(self.set_df.SetLimits.tolist())
+
         # self.analysis_traces.calc_curviness_for_all()
         self.logger.info('UNIFIED TRACES')
         self.analysis_traces.unified()
+
         # self.logger.info('UNIFIED SETFRAMES')
         # TODO: Check setframes
         # self.analysis_traces.create_setframes_for_all_unified()
 
-
-
-        # self.debug_logger.write_to_log_time(f'\nBefore xy_relations_all:{self.analysis_traces.uniframe.head()}')
-        # self.debug_logger.write_to_log_time(f'\nuniframe.iloc0:{self.analysis_traces.uniframe.iloc[0]}')
-        # self.debug_logger.write_to_log_time(f'\nuni_ld:{self.analysis_traces.uniframe.iloc[0].uni_ld}')
-        # self.debug_logger.write_to_log_time(f'\nuni_ld linef geom:{self.analysis_traces.uniframe.iloc[0].uni_ld.lineframe_main.geometry}')
-        # self.debug_logger.write_to_log_time(f'\nuni_ld linef geom0:{self.analysis_traces.uniframe.iloc[0].uni_ld.lineframe_main.geometry.iloc[0]}')
-        self.logger.info('DETERMINE XY RELATIONS ALL')
-        self.analysis_traces.determine_xy_relations_all()
-        self.logger.info('DETERMINE XY RELATIONS UNIF ALL')
-        self.analysis_traces.determine_xy_relations_unified()
-        self.logger.info('gather_topology_parameters(unified=False)')
+        # self.logger.info('DETERMINE XY RELATIONS ALL')
+        # self.analysis_traces.determine_xy_relations_all()
+        # self.logger.info('DETERMINE XY RELATIONS UNIF ALL')
+        # self.analysis_traces.determine_xy_relations_unified()
+        # self.logger.info('gather_topology_parameters(unified=False)')
 
         self.analysis_traces.gather_topology_parameters(unified=False)
         self.logger.info('gather_topology_parameters(unified=True)')
         self.analysis_traces.gather_topology_parameters(unified=True)
 
-
         # BRANCH DATA SETUP
         self.analysis_branches.calc_attributes_for_all()
-        self.analysis_branches.define_sets_for_all(self.set_list)
+
+        self.analysis_branches.define_sets_for_all(self.set_df.SetLimits.tolist())
 
         self.analysis_branches.unified()
 
         self.analysis_branches.gather_topology_parameters(unified=False)
         self.analysis_branches.gather_topology_parameters(unified=True)
+
         self.logger.info('END ANALYSIS in analysis()')
-
-
+        # Bar at 85
 
     def plot_results(self):
         self.logger.info('START OF PLOTTING RESULTS')
@@ -168,112 +160,97 @@ class MultiTargetAreaAnalysis:
 
         # ___________________BRANCH DATA_______________________
         templates.styling_plots("branches")
-
-        self.analysis_branches.plot_lengths(unified=False, save=True, savefolder=self.plotting_directory + '/length_distributions/indiv/branches')
-        self.analysis_branches.plot_lengths(unified=True, save=True,
+        # Length distributions
+        self.analysis_branches.plot_lengths(unified=False, save=True,
                                             savefolder=self.plotting_directory + '/length_distributions/indiv/branches')
+        self.analysis_branches.plot_lengths(unified=True, save=True,
+                                            savefolder=self.plotting_directory + '/length_distributions/branches')
 
-
-        # self.analysis_branches.plot_lengths_unified_combined(save=True, savefolder=self.plotting_directory + '/length_distributions/branches')
-
-        # Length distribution predictions
+        # TODO: Length distribution predictions
         # for p in predict_with:
         #     self.analysis_branches.plot_lengths_unified_combined_predictions(
         #         save=True, savefolder=self.plotting_directory + '/length_distributions/branches/predictions', predict_with=p)
-        # TODO: Fix azimuths plotting (redundant ellipse weighting)
 
-        self.analysis_branches.plot_azimuths(unified=False, save=True
-                                                 , savefolder=self.plotting_directory + '/azimuths/branches')
-        self.analysis_branches.plot_azimuths(unified=True, save=True
-                                             , savefolder=self.plotting_directory + '/azimuths/branches')
+        # Azimuths
+        self.analysis_branches.plot_azimuths(unified=False, rose_type='equal-radius', save=True
+                                             ,
+                                             savefolder=self.plotting_directory + '/azimuths/equal_radius/indiv/branches')
+        self.analysis_branches.plot_azimuths(unified=True, rose_type='equal-radius', save=True
+                                             , savefolder=self.plotting_directory + '/azimuths/equal_radius/branches')
+        self.analysis_branches.plot_azimuths(unified=False, rose_type='equal-area', save=True
+                                             ,
+                                             savefolder=self.plotting_directory + '/azimuths/equal_area/indiv/branches')
+        self.analysis_branches.plot_azimuths(unified=True, rose_type='equal-area', save=True
+                                             , savefolder=self.plotting_directory + '/azimuths/equal_area/branches')
 
-
-        # self.analysis_branches.plot_all_azimuths(big_plots=True, save=True
-        #                               , savefolder=self.plotting_directory + '/azimuths/branches')
-        # self.analysis_branches.plot_unified_azimuths(big_plots=True, save=True
-        #                                   , savefolder=self.plotting_directory + '/azimuths/branches')
-
-        self.analysis_branches.plot_xyi(unified=False, save=True, savefolder=self.plotting_directory + "/xyi/individual")
+        # Experimental azimuth
+        self.analysis_branches.plot_azimuths_exp(unified=True, rose_type='equal-area', save=True
+                                                 , savefolder=self.plotting_directory + '/azimuths/equal_area/branches')
+        # XYI
+        self.analysis_branches.plot_xyi(unified=False, save=True,
+                                        savefolder=self.plotting_directory + "/xyi/individual")
         self.analysis_branches.plot_xyi(unified=True, save=True,
                                         savefolder=self.plotting_directory + "/xyi")
-
-        # self.analysis_branches.plot_all_xyi(save=True, savefolder=self.plotting_directory + "/xyi/individual")
-        # self.analysis_branches.plot_all_xyi_unified(save=True, savefolder=self.plotting_directory + '/xyi')
-
+        # Topo parameters
         self.analysis_branches.plot_topology(unified=False, save=True,
-                                                     savefolder=self.plotting_directory + '/topology/branches')
+                                             savefolder=self.plotting_directory + '/topology/branches')
         self.analysis_branches.plot_topology(unified=True, save=True,
                                              savefolder=self.plotting_directory + '/topology/branches')
-
-        # self.analysis_branches.plot_topology_unified(save=True, savefolder=self.plotting_directory + '/topology/branches')
-
-        self.analysis_branches.plot_hexbin_plot(unified=False, save=True, savefolder=self.plotting_directory + '/hexbinplots')
+        # Hexbinplots
+        self.analysis_branches.plot_hexbin_plot(unified=False, save=True,
+                                                savefolder=self.plotting_directory + '/hexbinplots')
         self.analysis_branches.plot_hexbin_plot(unified=True, save=True,
                                                 savefolder=self.plotting_directory + '/hexbinplots')
 
         # ----------------unique for branches-------------------
+        # Branch Classification ternary plot
         self.analysis_branches.plot_branch_ternary(unified=False,
-            save=True, savefolder=self.plotting_directory + "/branch_class"
-        )
+                                                   save=True, savefolder=self.plotting_directory + "/branch_class"
+                                                   )
         self.analysis_branches.plot_branch_ternary(unified=True,
                                                    save=True, savefolder=self.plotting_directory + "/branch_class"
                                                    )
 
-
-        # self.analysis_branches.plot_all_branch_ternary(
-        #     save=True, savefolder=self.plotting_directory + "/branch_class"
-        # )
-        # self.analysis_branches.plot_all_branch_ternary_unified(
-        #     save=True, savefolder=self.plotting_directory + "/branch_class"
-        # )
-
-        self.analysis_branches.plot_anisotropy(unified=False, save=True, savefolder=self.plotting_directory + '/anisotropy')
-        self.analysis_branches.plot_anisotropy(unified=True, save=True, savefolder=self.plotting_directory + '/anisotropy')
-
-        # self.analysis_branches.plot_anisotropy_all(save=True, savefolder=self.plotting_directory + '/anisotropy')
-        # self.analysis_branches.plot_anisotropy_unified(save=True, savefolder=self.plotting_directory + '/anisotropy')
-
-
+        # Anisotropy
+        self.analysis_branches.plot_anisotropy(unified=False, save=True,
+                                               savefolder=self.plotting_directory + '/anisotropy/indiv')
+        self.analysis_branches.plot_anisotropy(unified=True, save=True,
+                                               savefolder=self.plotting_directory + '/anisotropy')
 
         self.logger.info('__________________TRACE DATA PLOTTING START______________________')
+
         # __________________TRACE DATA______________________
         templates.styling_plots('traces')
 
         self.analysis_traces.plot_lengths(unified=False, save=True,
-                                              savefolder=self.plotting_directory + '/length_distributions/indiv/traces')
+                                          savefolder=self.plotting_directory + '/length_distributions/indiv/traces')
         self.analysis_traces.plot_lengths(unified=True, save=True,
-                                              savefolder=self.plotting_directory + '/length_distributions/traces')
-
-
-        # self.analysis_traces.plot_lengths_all(save=True, savefolder=self.plotting_directory + '/length_distributions/indiv/traces')
-        # self.analysis_traces.plot_lengths_unified(save=True, savefolder=self.plotting_directory + '/length_distributions/traces')
-        # self.analysis_traces.plot_lengths_unified_combined(save=True, savefolder=self.plotting_directory + '/length_distributions/traces')
+                                          savefolder=self.plotting_directory + '/length_distributions/traces')
 
         # Length distribution predictions
         # for p in predict_with:
         #     self.analysis_traces.plot_lengths_unified_combined_predictions(
         #         save=True, savefolder=self.plotting_directory + '/length_distributions/traces/predictions', predict_with=p)
 
-        self.analysis_traces.plot_azimuths(unified=False, save=True
-                                               , savefolder=self.plotting_directory + '/azimuths/traces')
-        self.analysis_traces.plot_azimuths(unified=True, save=True
-                                               , savefolder=self.plotting_directory + '/azimuths/traces')
-
-        # self.analysis_traces.plot_all_azimuths(big_plots=True, save=True
-        #                              , savefolder=self.plotting_directory + '/azimuths/traces')
-        # self.analysis_traces.plot_unified_azimuths(big_plots=True, save=True
-        #                                  , savefolder=self.plotting_directory + '/azimuths/traces')
-
-        self.analysis_traces.plot_topology(unified=False, save=True, savefolder=self.plotting_directory + '/topology/traces')
+        # Azimuths
+        self.analysis_traces.plot_azimuths(unified=False, rose_type='equal-radius', save=True
+                                           , savefolder=self.plotting_directory + '/azimuths/equal_radius/traces')
+        self.analysis_traces.plot_azimuths(unified=True, rose_type='equal-radius', save=True
+                                           , savefolder=self.plotting_directory + '/azimuths/equal_radius/traces')
+        self.analysis_traces.plot_azimuths(unified=False, rose_type='equal-area', save=True
+                                           , savefolder=self.plotting_directory + '/azimuths/equal_area/traces')
+        self.analysis_traces.plot_azimuths(unified=True, rose_type='equal-area', save=True
+                                           , savefolder=self.plotting_directory + '/azimuths/equal_area/traces')
+        # Topo parameters
+        self.analysis_traces.plot_topology(unified=False, save=True,
+                                           savefolder=self.plotting_directory + '/topology/traces')
         self.analysis_traces.plot_topology(unified=True, save=True,
                                            savefolder=self.plotting_directory + '/topology/traces')
-
-        # self.analysis_traces.plot_topology_unified(save=True, savefolder=self.plotting_directory + '/topology/traces')
-        self.analysis_traces.plot_hexbin_plot(unified=False, save=True, savefolder=self.plotting_directory + '/hexbinplots')
+        # Hexbinplots
+        self.analysis_traces.plot_hexbin_plot(unified=False, save=True,
+                                              savefolder=self.plotting_directory + '/hexbinplots')
         self.analysis_traces.plot_hexbin_plot(unified=True, save=True,
                                               savefolder=self.plotting_directory + '/hexbinplots')
-
-        # self.analysis_traces.plot_hexbin_plot(save=True, savefolder=self.plotting_directory + '/hexbinplots')
 
         # ---------------unique for traces-------------------
         # TODO: Fix for age relations single ax, put data into multiple images?
@@ -292,10 +269,3 @@ class MultiTargetAreaAnalysis:
         # self.analysis_traces.plot_curviness_for_unified(violins=True, save=True, savefolder=self.plotting_directory + '/curviness/traces')
 
         self.logger.info('Plotting end!')
-
-        
-        
-        
-
-
-

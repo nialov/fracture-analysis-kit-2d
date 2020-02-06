@@ -1,6 +1,7 @@
+import logging
 import time
 from pathlib import Path
-import logging
+
 
 class DebugLogger:
 
@@ -75,7 +76,6 @@ class DebugLogger:
             logger.addHandler(fh)
             logger.addHandler(fh2)
             logger.info('-----------------Python logging tool initialized.-----------------')
-
 
     def write_to_log_mem(self, text: str):
         if self.log_file is None:

@@ -21,24 +21,24 @@
  *                                                                         *
  ***************************************************************************/
 """
+
+import os.path
+
+import pandas as pd
 from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication
 from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtWidgets import QAction, QFileDialog, QTableWidgetItem
-from qgis.core import QgsProject, Qgis
+from qgis.PyQt.QtWidgets import QAction, QFileDialog, QTableWidgetItem, QMessageBox, QProgressBar, QProgressDialog
+from qgis.core import QgsProject, Qgis, QgsVectorLayer
 
 # Initialize Qt resources from file resources.py
 from .resources import *
 
 # Import the code for the dialog
 from .fracture_analysis_2d_dialog import FractureAnalysis2DDialog
-import os.path
-
-from .fracture_analysis_kit import target_area_analysis_qgis
-from .fracture_analysis_kit import main_target_analysis
 from .fracture_analysis_kit import logging_tool
-import time
-import pandas as pd
-import logging
+from .fracture_analysis_kit import main_target_analysis
+
+# Initialize Qt resources from file resources.py
 
 debug_logger = logging_tool.DebugLogger()
 
@@ -82,11 +82,10 @@ class FractureAnalysis2D:
         self.polygon_layers = None
         self.point_layers = None
         self.table_df = pd.DataFrame(columns=['Trace', 'Branch', 'Node', 'Area', 'Name', 'Group'])
-        self.gname_df = pd.DataFrame(columns=['Group', 'Cut Off'])
+        self.gnames_cutoffs_df = pd.DataFrame(columns=['Group', 'CutOff'])
+        self.set_df = pd.DataFrame(columns=['Set', 'SetLimits'])
         # Debug logger
         self.debug_logger = debug_logger
-        # TODO: Implement sets
-        self.set_list = None
 
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
@@ -104,16 +103,16 @@ class FractureAnalysis2D:
         return QCoreApplication.translate("FractureAnalysis2D", message)
 
     def add_action(
-        self,
-        icon_path,
-        text,
-        callback,
-        enabled_flag=True,
-        add_to_menu=True,
-        add_to_toolbar=True,
-        status_tip=None,
-        whats_this=None,
-        parent=None,
+            self,
+            icon_path,
+            text,
+            callback,
+            enabled_flag=True,
+            add_to_menu=True,
+            add_to_toolbar=True,
+            status_tip=None,
+            whats_this=None,
+            parent=None,
     ):
         """Add a toolbar icon to the toolbar.
 
@@ -182,7 +181,7 @@ class FractureAnalysis2D:
         icon_path = ":/plugins/fracture_analysis_2d/icon.png"
         self.add_action(
             icon_path,
-            text=self.tr("2D Fracture Analysis"),
+            text=self.tr(u"𝟮𝗗 𝗙𝗿𝗮𝗰𝘁𝘂𝗿𝗲 𝗔𝗻𝗮𝗹𝘆𝘀𝗶𝘀"),
             callback=self.run,
             parent=self.iface.mainWindow(),
         )
@@ -199,7 +198,7 @@ class FractureAnalysis2D:
             self.iface.removeToolBarIcon(action)
 
     def select_output_folder(self, tab: int):
-        outp = QFileDialog.getExistingDirectory(self.dlg, "Select   output directory ")
+        outp = QFileDialog.getExistingDirectory(self.dlg, "Select output directory ")
         if type(outp) is (tuple or list):
             raise Exception("Multiple outputs from QFileDialog.getExistingDirectory")
         else:
@@ -211,19 +210,34 @@ class FractureAnalysis2D:
         else:
             raise Exception('how is tab not 1 or 2')
 
-
     def clear_group_name_cut_off_table(self):
         self.dlg.tableWidget_tab2_gnames.clearContents()
-        self.gname_df = self.gname_df.iloc[0:0]
+        self.gnames_cutoffs_df = self.gnames_cutoffs_df.iloc[0:0]
 
     def populate_groups(self):
         # Get group name list
-        gname_list = self.gname_df.Group.tolist()
+        gname_list = self.gnames_cutoffs_df.Group.tolist()
         # Clear contents
         self.dlg.comboBox_tab2_gnames.clear()
         self.dlg.comboBox_tab2_gnames.addItems(gname_list)
 
-    def add_row(self):
+    def add_row_layer(self):
+        """
+        Adds row to layer table and switches dummy layers to combo-boxes.
+        """
+
+        class DummyLayer(object):
+            """
+            Dummy layer for combo-box.
+            """
+            is_dummy = True
+
+            def __init__(self):
+                pass
+
+            def name(self):
+                return "---"
+
         # Additions
         name = self.dlg.lineEdit_tab2_tan.text()
         trace_layer = self.line_layers[self.dlg.comboBox_trace_2.currentIndex()]
@@ -234,11 +248,23 @@ class FractureAnalysis2D:
         # Substitute for blank names
         if name == "":
             name = trace_layer.name()
+        # Verify addition
+
+        for layer in [trace_layer, branch_layer, node_layer, area_layer]:
+            if not isinstance(layer, QgsVectorLayer):
+                QMessageBox.critical(None, "Error"
+                                     , f'Dummy (= "---"-layer) or Non-vector layer chosen for addition\
+                                      \nDo not choose {layer.name()} layer')
+                return
+        if len(target_area_group) == 0:
+            QMessageBox.critical(None, "Error"
+                                 , f'No Group chosen')
+            return
         # Current row count
         curr_row = self.dlg.tableWidget_tab2.rowCount()
         # Add new row
         self.dlg.tableWidget_tab2.insertRow(curr_row)
-        # Add data
+        # Add data to table
         self.dlg.tableWidget_tab2.setItem(curr_row, 4, QTableWidgetItem(name))
         self.dlg.tableWidget_tab2.setItem(curr_row, 0, QTableWidgetItem(trace_layer.name()))
         self.dlg.tableWidget_tab2.setItem(curr_row, 1, QTableWidgetItem(branch_layer.name()))
@@ -248,31 +274,80 @@ class FractureAnalysis2D:
         self.table_df = self.table_df.append({'Trace': trace_layer, 'Branch': branch_layer, 'Node': node_layer
                                                  , 'Area': area_layer, 'Name': name, 'Group': target_area_group}
                                              , ignore_index=True)
+        # Switch list item with a dummy
+        # TODO: Further testing required
+        self.line_layers[self.dlg.comboBox_trace_2.currentIndex()] = DummyLayer()
+        self.line_layers[self.dlg.comboBox_branch_2.currentIndex()] = DummyLayer()
+        self.point_layers[self.dlg.comboBox_node_2.currentIndex()] = DummyLayer()
+        self.polygon_layers[self.dlg.comboBox_area_2.currentIndex()] = DummyLayer()
+        self.update_layers_tab2()
 
-    def clear_table(self):
+    def clear_layer_table(self):
+        """
+        Clears layer table and restores all layers to choices.
+        """
+        for i in range(self.dlg.tableWidget_tab2.rowCount(), -1, -1):
+            self.dlg.tableWidget_tab2.removeRow(i)
         self.dlg.tableWidget_tab2.clearContents()
-        self.table_df = self.table_df.iloc[0:0]
 
-    def run_multi_target_analysis(self):
-        # Get group name list
-        gname_list = self.gname_df.Group.tolist()
-        # Output folder
-        results_folder = self.dlg.lineEdit_tab2_folder.text()
-        # Analysis name
-        analysis_name = self.dlg.lineEdit_tab2_analysis_name.text()
-        # Run analysis
-        main_target_analysis.main_multi_target_area(self.table_df, results_folder, analysis_name, gname_list, self.set_list, self.debug_logger)
-        # Push finish message
-        self.iface.messageBar().pushMessage(
-            "Success",
-            f"Plots were of {analysis_name} made into {results_folder}",
-            level=Qgis.Success,
-            duration=10,
-        )
+        self.table_df = self.table_df.iloc[0:0]
+        self.fetch_correct_vector_layers()
+        self.update_layers_tab2()
+
+    def update_layers_tab2(self):
+        """
+        Updates layers to combo-boxes for tab2.
+        """
+        # Clear the contents of the comboBox from previous runs tab 2
+        self.dlg.comboBox_trace_2.clear()
+        self.dlg.comboBox_branch_2.clear()
+        self.dlg.comboBox_node_2.clear()
+        self.dlg.comboBox_area_2.clear()
+        # Populate the comboBox with names of all the updated layers tab 2
+        self.dlg.comboBox_trace_2.addItems([layer.name() for layer in self.line_layers])
+        self.dlg.comboBox_branch_2.addItems([layer.name() for layer in self.line_layers])
+        self.dlg.comboBox_node_2.addItems([layer.name() for layer in self.point_layers])
+        self.dlg.comboBox_area_2.addItems([layer.name() for layer in self.polygon_layers])
+
+    def update_layers_tab1(self):
+        """
+        Updates layers to combo-boxes for tab1.
+        """
+        # Clear the contents of the comboBox from previous runs tab 2
+        self.dlg.comboBox_trace_2.clear()
+        self.dlg.comboBox_branch_2.clear()
+        self.dlg.comboBox_node_2.clear()
+        self.dlg.comboBox_area_2.clear()
+        # Populate the comboBox with names of all the updated layers tab 2
+        self.dlg.comboBox_trace_2.addItems([layer.name() for layer in self.line_layers])
+        self.dlg.comboBox_branch_2.addItems([layer.name() for layer in self.line_layers])
+        self.dlg.comboBox_node_2.addItems([layer.name() for layer in self.point_layers])
+        self.dlg.comboBox_area_2.addItems([layer.name() for layer in self.polygon_layers])
 
     def add_row_group_name_cutoff(self):
         group_name = self.dlg.lineEdit_gname.text()
         cut_off = self.dlg.lineEdit_tab2_cutoff.text()
+        # Validate inputs
+        try:
+            cut_off_float = float(cut_off)
+        except ValueError:
+            QMessageBox.critical(None, "Error"
+                                 , f'Invalid Cut-off given: {cut_off}\n'
+                                   f'Give as a decimal between 0 and 1 (e.g. 0.95)')
+            return
+        if len(group_name) == 0:
+            QMessageBox.critical(None, "Error"
+                                 , f'No Group name given')
+            return
+        if cut_off == '':
+            QMessageBox.critical(None, "Error"
+                                 , f'No Cut-off value given')
+            return
+        if not 1 >= cut_off_float > 0:
+            QMessageBox.critical(None, "Error"
+                                 , f'Invalid Cut-off value given: {cut_off}\n'
+                                   f'Give as a decimal between 0 and 1 (e.g. 0.95)')
+            return
         # Current row count
         curr_row = self.dlg.tableWidget_tab2_gnames.rowCount()
         # Add new row
@@ -280,38 +355,57 @@ class FractureAnalysis2D:
         # Add data
         self.dlg.tableWidget_tab2_gnames.setItem(curr_row, 0, QTableWidgetItem(group_name))
         self.dlg.tableWidget_tab2_gnames.setItem(curr_row, 1, QTableWidgetItem(cut_off))
-        # Append to DataFrame
-        self.gname_df = self.gname_df.append({'Group': group_name, 'Cut Off': cut_off}, ignore_index=True)
+        # Append to DataFrame as float
+        self.gnames_cutoffs_df = self.gnames_cutoffs_df.append({'Group': group_name, 'CutOff': cut_off_float},
+                                                               ignore_index=True)
         # Populate names to target area group button
         self.populate_groups()
         # Clear name and cut_off text boxes
         self.dlg.lineEdit_gname.clear()
         self.dlg.lineEdit_tab2_cutoff.clear()
 
-    def run(self):
-        """Run method that performs all the real work"""
+    def add_row_set(self):
+        set_start = self.dlg.lineEdit_tab2_set_start.text()
+        set_end = self.dlg.lineEdit_tab2_set_end.text()
+        # Verify addition
+        try:
+            set_start_float = float(set_start)
+            set_end_float = float(set_end)
+        except ValueError:
+            QMessageBox.critical(None, "Error"
+                                 , f'Invalid input: "{set_start, set_end}". Could not convert to float.\n'
+                                   f'Give inputs as numerical values with dot as the decimal-separator.')
+            return
+        if (set_start == '') or (set_end == ''):
+            QMessageBox.critical(None, "Error"
+                                 , f'Input both set values.')
+            return
+        if (not 180 >= set_start_float >= 0) or (not 180 >= set_end_float >= 0):
+            QMessageBox.critical(None, "Error"
+                                 , f'Invalid set range given (Input must be degrees between 0 and 180)')
+            return
+        # Set name and limits
+        set_name = str(self.set_df.shape[0] + 1)
+        set_limits = f'[{set_start}, {set_end}]'
+        # Current row count
+        curr_row = self.dlg.tableWidget_tab2_sets.rowCount()
+        # Add new row
+        self.dlg.tableWidget_tab2_sets.insertRow(curr_row)
+        # Add data
+        self.dlg.tableWidget_tab2_sets.setItem(curr_row, 0, QTableWidgetItem(set_name))
+        self.dlg.tableWidget_tab2_sets.setItem(curr_row, 1, QTableWidgetItem(set_limits))
+        # Append to DataFrame as floats
+        self.set_df = self.set_df.append({'Set': set_name, 'SetLimits': (set_start_float, set_end_float)},
+                                         ignore_index=True)
+        # Clear name and limits text boxes
+        self.dlg.lineEdit_tab2_set_start.clear()
+        self.dlg.lineEdit_tab2_set_end.clear()
 
-        # Create the dialog with elements (after translation) and keep reference
-        # Only create GUI ONCE in callback, so that it will only load when the plugin is started
-        if self.first_start == True:
-            self.first_start = False
-            self.dlg = FractureAnalysis2DDialog()
-            self.dlg.pushButton.clicked.connect(lambda: self.select_output_folder(1))
-            self.dlg.pushButton_tab2_folder.clicked.connect(lambda: self.select_output_folder(2))
-            # Clear group name table from prev runs
-            self.dlg.tableWidget_tab2_gnames.clearContents()
-            # Clear group name list
-            self.dlg.pushButton_gname_clear.clicked.connect(self.clear_group_name_cut_off_table)
-            # Add row to table for layers and info
-            self.dlg.pushButton_tab2_add_row.clicked.connect(self.add_row)
-            # Clear table
-            self.dlg.pushButton_tab2_table_clear.clicked.connect(self.clear_table)
-            # Run multi-target analysis
-            self.dlg.pushButton_tab2_run.clicked.connect(self.run_multi_target_analysis)
-            # Add row to table for group names and cut offs
-            self.dlg.pushButton_gname_add.clicked.connect(self.add_row_group_name_cutoff)
+    def clear_set_table(self):
+        self.dlg.tableWidget_tab2_sets.clearContents()
+        self.set_df = self.set_df.iloc[0:0]
 
-
+    def fetch_correct_vector_layers(self):
         # Fetch the currently loaded layers
         layers = QgsProject.instance().mapLayers().values()
 
@@ -336,31 +430,52 @@ class FractureAnalysis2D:
                         polygon_layers.append(layer)
                         break
         # Save as class attributes
-        # TODO: Pop used layers from list, ease-of-use
-        self.line_layers, self.point_layers, self.polygon_layers,  = line_layers, point_layers, polygon_layers
+        self.line_layers, self.point_layers, self.polygon_layers, = line_layers, point_layers, polygon_layers
 
-        # Clear the contents of the comboBox from previous runs tab 1
-        self.dlg.comboBox_trace.clear()
-        self.dlg.comboBox_branch.clear()
-        self.dlg.comboBox_node.clear()
-        self.dlg.comboBox_area.clear()
-        # Populate the comboBox with names of all the loaded layers tab 1
-        self.dlg.comboBox_trace.addItems([layer.name() for layer in line_layers])
-        self.dlg.comboBox_branch.addItems([layer.name() for layer in line_layers])
-        self.dlg.comboBox_node.addItems([layer.name() for layer in point_layers])
-        self.dlg.comboBox_area.addItems([layer.name() for layer in polygon_layers])
+    def create_progress_dialog(self):
+        dialog = QProgressDialog()
+        dialog.setWindowTitle("Analysis Progress")
+        dialog.setLabelText("Note: Only a rough indicator")
+        bar = QProgressBar(dialog)
+        bar.setTextVisible(True)
+        bar.setValue(0)
+        dialog.setBar(bar)
+        dialog.setMinimumWidth(300)
+        dialog.show()
+        return dialog, bar
 
-        # Clear the contents of the comboBox from previous runs tab 2
-        self.dlg.comboBox_trace_2.clear()
-        self.dlg.comboBox_branch_2.clear()
-        self.dlg.comboBox_node_2.clear()
-        self.dlg.comboBox_area_2.clear()
-        # Populate the comboBox with names of all the loaded layers tab 2
-        self.dlg.comboBox_trace_2.addItems([layer.name() for layer in line_layers])
-        self.dlg.comboBox_branch_2.addItems([layer.name() for layer in line_layers])
-        self.dlg.comboBox_node_2.addItems([layer.name() for layer in point_layers])
-        self.dlg.comboBox_area_2.addItems([layer.name() for layer in polygon_layers])
+    def run(self):
+        """Run method that performs all the real work"""
 
+        # Create the dialog with elements (after translation) and keep reference
+        # Only create GUI ONCE in callback, so that it will only load when the plugin is started
+        if self.first_start == True:
+            self.first_start = False
+            self.dlg = FractureAnalysis2DDialog()
+            self.dlg.pushButton.clicked.connect(lambda: self.select_output_folder(1))
+            '''-------------Multi Target Area----------------'''
+            # Select ouput folder for Multi Target Area
+            self.dlg.pushButton_tab2_folder.clicked.connect(lambda: self.select_output_folder(2))
+            # Clear group name table from prev runs
+            self.dlg.tableWidget_tab2_gnames.clearContents()
+            # Clear group name list
+            self.dlg.pushButton_gname_clear.clicked.connect(self.clear_group_name_cut_off_table)
+            # Add row to table for layers and info
+            self.dlg.pushButton_tab2_add_row.clicked.connect(self.add_row_layer)
+            # Clear table
+            self.dlg.pushButton_tab2_table_clear.clicked.connect(self.clear_layer_table)
+            # Run multi-target analysis
+            self.dlg.pushButton_tab2_run.clicked.connect(self.run_multi_target_analysis)
+            # Add row to table for group names and cut offs
+            self.dlg.pushButton_gname_add.clicked.connect(self.add_row_group_name_cutoff)
+            # Add azimuth set
+            self.dlg.pushButton_tab2_set_add.clicked.connect(self.add_row_set)
+            # Clear set table
+            self.dlg.pushButton_tab2_set_clear.clicked.connect(self.clear_set_table)
+
+        self.fetch_correct_vector_layers()
+        self.update_layers_tab2()
+        self.update_layers_tab1()
 
         # show the dialog
         self.dlg.show()
@@ -372,10 +487,11 @@ class FractureAnalysis2D:
             # substitute with your code.
             results_folder = self.dlg.lineEdit_folder.text()
             name = self.dlg.lineEdit_name.text()
-            trace_layer = line_layers[self.dlg.comboBox_trace.currentIndex()]
-            branch_layer = line_layers[self.dlg.comboBox_branch.currentIndex()]
-            node_layer = point_layers[self.dlg.comboBox_node.currentIndex()]
-            area_layer = polygon_layers[self.dlg.comboBox_area.currentIndex()]
+            # TODO: Uses same layers as multi target: errors with list popping feature possible
+            trace_layer = self.line_layers[self.dlg.comboBox_trace.currentIndex()]
+            branch_layer = self.line_layers[self.dlg.comboBox_branch.currentIndex()]
+            node_layer = self.point_layers[self.dlg.comboBox_node.currentIndex()]
+            area_layer = self.polygon_layers[self.dlg.comboBox_area.currentIndex()]
 
             # Start analysis
 
@@ -384,7 +500,6 @@ class FractureAnalysis2D:
 
             # self.debug_logger.write_to_log_time('table_df:' + str(self.table_df))
 
-
             # Push finish message
             self.iface.messageBar().pushMessage(
                 "Success",
@@ -392,3 +507,50 @@ class FractureAnalysis2D:
                 level=Qgis.Success,
                 duration=10,
             )
+
+    def run_multi_target_analysis(self):
+        # TODO: Add user input verification
+        # Output folder
+        results_folder = self.dlg.lineEdit_tab2_folder.text()
+        # Analysis name
+        analysis_name = self.dlg.lineEdit_tab2_analysis_name.text()
+        # Validate inputs
+        if len(results_folder) == 0 or len(analysis_name) == 0:
+            QMessageBox.critical(None, "Error"
+                                 , f'Empty results folder or analysis name inputs: {results_folder, analysis_name}\n'
+                                   f'Try again with fixed inputs.')
+            return
+        if len(self.table_df) == 0:
+            QMessageBox.critical(None, "Error"
+                                 , f'Empty trace, branch and area layer table.')
+            return
+        if len(self.gnames_cutoffs_df) == 0:
+            QMessageBox.critical(None, "Error"
+                                 , f'Empty Group name and Cut-off table.')
+            return
+        if len(self.set_df) == 0:
+            qb = QMessageBox
+            reply = qb.question(None, 'Alert!', 'No set ranges given. Continue with default sets?', qb.No, qb.Yes)
+            if reply == qb.No:
+                return
+            elif reply == qb.Yes:
+                self.set_df = self.set_df.append({'Set': [1, 2, 3], 'SetLimits': [(0, 60), (60, 120), (120, 180)]},
+                                                 ignore_index=True)
+            else:
+                return
+
+        # Initialize progress bar
+        # self.dialog, self.bar = self.create_progress_dialog()
+
+        # Run analysis
+        main_target_analysis.main_multi_target_area(self.table_df, results_folder, analysis_name,
+                                                    self.gnames_cutoffs_df,
+                                                    self.set_df, self.debug_logger)
+
+        # Push finish message
+        self.iface.messageBar().pushMessage(
+            "Success",
+            f"Plots were of {analysis_name} made into {results_folder}",
+            level=Qgis.Success,
+            duration=10,
+        )

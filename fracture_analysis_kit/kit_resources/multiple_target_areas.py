@@ -1,4 +1,6 @@
 # Python Windows co-operation imports
+import logging
+import math
 from pathlib import Path
 
 # Math and analysis imports
@@ -9,10 +11,9 @@ import matplotlib.patheffects as path_effects
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import shapely
 import ternary
 from matplotlib.ticker import FormatStrFormatter
-import shapely
-import logging
 
 # Own code imports
 from . import templates
@@ -25,22 +26,29 @@ from . import tools
 # Old class
 
 
-
 class MultiTargetAreaQGIS:
     # TODO: Implement cut-offs into input: list => table
     # TODO: Implement sets
-    def __init__(self, table_df, group_names, branches, cut_offs=False):
+    def __init__(self, table_df, gnames_cutoffs_df, branches):
+        """
 
-        self.cut_offs = cut_offs
-        # TODO: Switch from codes to groups. Test.
-        self.groups = group_names
-        # self.codes = group_names
+        :param table_df: DataFrame with user inputs
+        :type table_df: pd.DataFrame
+        :param gnames_cutoffs_df: Group names and cut-offs from user input
+        :type gnames_cutoffs_df: pd.DataFrame
+        :param branches: Branches or traces
+        :type branches: bool
+        """
+        logger = logging.getLogger('logging_tool')
+        self.gnames_cutoffs_df = gnames_cutoffs_df
+        self.groups = gnames_cutoffs_df.Group.tolist()
+        # self.codes = gnames_cutoffs_df
         self.table_df = table_df
 
         self.using_branches = branches
+
         # TODO: Remove filename when isn't used
         self.df = pd.DataFrame(columns=['name', 'lineframe', 'areaframe', 'nodeframe', 'group', 'cut_off'])
-
         # Assign None to later initialized attributes
         # TODO: TEST PROPERLY
         self.set_list = None
@@ -55,7 +63,9 @@ class MultiTargetAreaQGIS:
         self.df_topology_concat = None
         self.uniframe_topology_concat = None
         self.relations_set_counts_indiv = None
+        # 20 % of progress happens here for both traces and branches
 
+        # Iterate over all target areas
         for idx, row in table_df.iterrows():
             name = row.Name
             if self.using_branches:
@@ -65,11 +75,16 @@ class MultiTargetAreaQGIS:
             areaframe = row.Area_frame
             nodeframe = row.Node_frame
             group = row.Group
-            if not self.cut_offs:
-                cut_off = 1
-            else:
-                # TODO: Implement cut-offs
-                cut_off = 1
+
+            # Cut-off for group
+            cut_off = self.gnames_cutoffs_df.loc[self.gnames_cutoffs_df.Group == group].CutOff.iloc[0]
+            try:
+                cut_off = float(cut_off)
+            except TypeError as te:
+                logger.exception(
+                    f'Cut-off value was an iterable or not convertible to float. -- CutOff value: {cut_off}')
+                raise
+
             # Initialize DataFrames with additional columns
             lineframe['azimu'] = lineframe.geometry.apply(tools.calc_azimu)
             lineframe['halved'] = lineframe.azimu.apply(tools.azimu_half)
@@ -77,34 +92,29 @@ class MultiTargetAreaQGIS:
 
             # Change MultiLineStrings to LineStrings. Delete unmergeable MultiLineStrings. A trace should be mergeable.
             if isinstance(lineframe.geometry.iloc[0], shapely.geometry.MultiLineString):
-
                 non_mergeable_idx = []
                 for idx, row in lineframe.iterrows():
                     try:
                         lineframe.geometry.iloc[idx] = shapely.ops.linemerge(row.geometry)
                     except ValueError:
-
                         non_mergeable_idx.append(idx)
                     # Should be LineString if mergeable. If not:
                     if isinstance(lineframe.geometry.iloc[idx], shapely.geometry.MultiLineString):
-
                         non_mergeable_idx.append(idx)
                 # Drop non-mergeable
                 lineframe = lineframe.drop(index=non_mergeable_idx)
-
-
 
             if self.using_branches:
                 lineframe['c'] = lineframe.Class.apply(str)
                 lineframe['connection'] = lineframe.Connection.apply(str)
 
             # Append to DataFrame
-            self.df = self.df.append({'name': name, 'lineframe':lineframe, 'areaframe':areaframe
-                                         , 'nodeframe':nodeframe, 'group':group, 'cut_off':cut_off}, ignore_index=True)
+            self.df = self.df.append({'name': name, 'lineframe': lineframe, 'areaframe': areaframe
+                                         , 'nodeframe': nodeframe, 'group': group, 'cut_off': cut_off},
+                                     ignore_index=True)
 
-        # self.norm_list = tools.get_area_normalisations_frames(self.df.areaframe.tolist())
-        # norm_array = np.asarray(self.norm_list)
-        # self.df['norm'] = norm_array
+
+
         self.df['TargetAreaLines'] = self.df.apply(
             lambda x: tools.construct_length_distribution_base(x['lineframe'], x['areaframe'], x['name'], x['group'],
                                                                x['cut_off'], self.using_branches),
@@ -113,13 +123,20 @@ class MultiTargetAreaQGIS:
             lambda x: tools.construct_node_data_base(x['nodeframe'], x['name'], x['group']), axis=1)
 
     def calc_attributes_for_all(self):
+        """
+        Calculates attributes for all target areas.
+        """
         for idx, row in self.df.iterrows():
             row['TargetAreaLines'].calc_attributes()
         self.df_lineframe_main_concat = pd.concat([srs.lineframe_main for srs in self.df.TargetAreaLines],
-                                                        sort=True)
+                                                  sort=True)
 
     def define_sets_for_all(self, list_of_tuples):
-        # TODO: Implement sets
+        """
+        Categorizes data based on azimuth to sets.
+        :param list_of_tuples: List of tuples of set limits e.g. [(0, 60), (60, 120), (120, 180)]
+        :type list_of_tuples: list
+        """
         if list_of_tuples is None:
             list_of_tuples = [(0, 60), (60, 120), (120, 180)]
         self.set_list = list_of_tuples
@@ -135,13 +152,22 @@ class MultiTargetAreaQGIS:
             row['TargetAreaLines'].calc_curviness()
 
     def unified(self):
+        """
+        Creates new datasets (TargetAreaLines + TargetAreaNodes for each group) based on groupings by user.
+        """
         logger = logging.getLogger('logging_tool')
-        uniframe = pd.DataFrame(columns=['TargetAreaLines', 'TargetAreaNodes', 'group', 'uni_ld_area'])
+        uniframe = pd.DataFrame(columns=['TargetAreaLines', 'TargetAreaNodes', 'group', 'uni_ld_area', 'cut_off'])
         for idx, group in enumerate(self.groups):
             frame = self.df.loc[self.df['group'] == group]
 
             if len(frame) > 0:
-                unif_ld_main = tools.unify_lds(frame.TargetAreaLines.tolist(), group)
+                # Cut-off is same for all group target areas
+                cut_off = frame.cut_off.iloc[0]
+                # Hunting possible bugs:
+                if frame.shape[0] > 1:
+                    assert frame.cut_off.iloc[0] == frame.cut_off.iloc[1]
+
+                unif_ld_main = tools.unify_lds(frame.TargetAreaLines.tolist(), group, cut_off)
                 logger.info('Calcing attributes for unified')
                 unif_ld_main.calc_attributes()
                 logger.info('Creating geodataframe from areas')
@@ -150,16 +176,17 @@ class MultiTargetAreaQGIS:
                 unif_nd_main = tools.unify_nds(frame.TargetAreaNodes.tolist(), group)
                 logger.info('Appending uniframe')
                 uniframe = uniframe.append(
-                    {'TargetAreaLines': unif_ld_main, 'TargetAreaNodes': unif_nd_main, 'group': group, 'uni_ld_area': uni_ld_area},
+                    {'TargetAreaLines': unif_ld_main, 'TargetAreaNodes': unif_nd_main, 'group': group,
+                     'uni_ld_area': uni_ld_area, 'cut_off': cut_off},
                     ignore_index=True)
             else:
-
                 raise Exception('len(frame) == 0')
 
         # uniframe = tools.norm_unified(uniframe)
         self.uniframe = uniframe
         # AIDS FOR PLOTTING:
-        self.uniframe_lineframe_main_concat = pd.concat([srs.lineframe_main for srs in self.uniframe.TargetAreaLines], sort=True)
+        self.uniframe_lineframe_main_concat = pd.concat([srs.lineframe_main for srs in self.uniframe.TargetAreaLines],
+                                                        sort=True)
         self.uni_left, self.uni_right = tools.calc_xlims(self.uniframe_lineframe_main_concat)
         self.uni_top, self.uni_bottom = tools.calc_ylims(self.uniframe_lineframe_main_concat)
 
@@ -182,6 +209,19 @@ class MultiTargetAreaQGIS:
             row['TargetAreaLines'].create_setframes()
 
     def plot_lengths(self, unified: bool, save=False, savefolder=None, use_sets=False):
+        """
+        Plots length distributions
+        :param unified: Plot unified datasets or individual target areas
+        :type unified: bool
+        :param save: Whether to save
+        :type save: bool
+        :param savefolder: Folder to save to
+        :type savefolder: str
+        :param use_sets: Whether to use sets
+        :type use_sets: bool
+        :return:
+        :rtype:
+        """
         logger = logging.getLogger('logging_tool')
         logger.info('Starting plot_lengths_unified')
 
@@ -593,7 +633,20 @@ class MultiTargetAreaQGIS:
     #                 savename = Path(savefolder + '/CUT_LD_SET_{}_predictions.png'.format(curr_set))
     #                 plt.savefig(savename, dpi=150)
 
-    def plot_azimuths(self, unified: bool, save=False, savefolder=None):
+    def plot_azimuths(self, unified: bool, rose_type: str, save=False, savefolder=None):
+        """
+        Plots azimuths.
+        :param unified: Plot unified datasets or individual target areas
+        :type unified: bool
+        :param rose_type: Whether to plot equal-radius or equal-area rose plot e.g. 'equal-radius' or 'equal-area'
+        :type rose_type: str
+        :param save: Whether to save
+        :type save: bool
+        :param savefolder: Folder to save to
+        :type savefolder: str
+        :return:
+        :rtype:
+        """
         branches = self.using_branches
 
         if unified:
@@ -603,7 +656,8 @@ class MultiTargetAreaQGIS:
 
         # Individual plots
         for idx, row in frame.iterrows():
-            row['TargetAreaLines'].plot_azimuth(save=save, savefolder=savefolder, branches=branches)
+            row['TargetAreaLines'].plot_azimuth(rose_type=rose_type, save=save, savefolder=savefolder,
+                                                branches=branches)
 
         # Experimental, one big plot
         plot_count = len(frame)
@@ -619,11 +673,74 @@ class MultiTargetAreaQGIS:
                                    , figsize=(width, height))
 
         for idx, row in frame.iterrows():
-            row['TargetAreaLines'].plot_azimuth(save=False, savefolder=savefolder, branches=branches
+            row['TargetAreaLines'].plot_azimuth(rose_type=rose_type, save=False, savefolder=savefolder,
+                                                branches=branches
                                                 , ax=ax[idx // cols][idx % cols]
                                                 , big_plots=True
                                                 , ax_w=ax_w[idx // cols][idx % cols])
 
+        top, bottom, left, right, hspace, wspace = 0.90, 0.07, 0.05, 0.95, 0.3, 0.3
+        fig.tight_layout()
+        fig.subplots_adjust(top=top, bottom=bottom, left=left, right=right, hspace=hspace, wspace=wspace)
+        fig_w.tight_layout()
+        fig_w.subplots_adjust(top=top, bottom=bottom, left=left, right=right, hspace=hspace, wspace=wspace)
+
+        if save:
+            if unified:
+                savename = Path(savefolder + '/azimuths_unified_all.png')
+                savename_w = Path(savefolder + '/azimuths_unified_WEIGHTED_all.png')
+            else:
+                savename = Path(savefolder + '/azimuths_all.png')
+                savename_w = Path(savefolder + '/azimuths_WEIGHTED_all.png')
+
+            fig.savefig(savename, dpi=150)
+            fig_w.savefig(savename_w, dpi=150)
+
+    def plot_azimuths_exp(self, unified: bool, rose_type: str, save=False, savefolder=None):
+        """
+        Plots azimuths.
+        :param unified: Plot unified datasets or individual target areas
+        :type unified: bool
+        :param rose_type: Whether to plot equal-radius or equal-area rose plot e.g. 'equal-radius' or 'equal-area'
+        :type rose_type: str
+        :param save: Whether to save
+        :type save: bool
+        :param savefolder: Folder to save to
+        :type savefolder: str
+        :return:
+        :rtype:
+        """
+        branches = self.using_branches
+
+        if unified:
+            frame = self.uniframe
+        else:
+            frame = self.df
+
+        # Individual plots
+        for idx, row in frame.iterrows():
+            row['TargetAreaLines'].plot_azimuth_exp(rose_type=rose_type, save=save, savefolder=savefolder,
+                                                    branches=branches)
+
+        # Experimental, one big plot
+        plot_count = len(frame)
+        if plot_count < 5:
+            plot_count = 5
+        cols = 4
+        rows = plot_count // cols + 1
+        width = 26
+        height = (width / cols) * (rows * 1.3)
+        fig, ax = plt.subplots(ncols=cols, nrows=rows, subplot_kw=dict(polar=True)
+                               , figsize=(width, height))
+        fig_w, ax_w = plt.subplots(ncols=cols, nrows=rows, subplot_kw=dict(polar=True)
+                                   , figsize=(width, height))
+
+        for idx, row in frame.iterrows():
+            row['TargetAreaLines'].plot_azimuth_exp(rose_type=rose_type, save=False, savefolder=savefolder,
+                                                    branches=branches
+                                                    , ax=ax[idx // cols][idx % cols]
+                                                    , big_plots=True
+                                                    , ax_w=ax_w[idx // cols][idx % cols])
 
         top, bottom, left, right, hspace, wspace = 0.90, 0.07, 0.05, 0.95, 0.3, 0.3
         fig.tight_layout()
@@ -663,13 +780,13 @@ class MultiTargetAreaQGIS:
     #         #                                  , figsize=(width, height))
     #         for idx, row in self.df.iterrows():
     #
-    #             row['TargetAreaLines'].plot_azimuth(save=False, savefolder=savefolder, branches=self.using_branches
+    #             row['TargetAreaLines'].plot_azimuth(rose_type=rose_typesave=False, savefolder=savefolder, branches=self.using_branches
     #                                                 , big_plots=big_plots
     #                                                 , ax=ax[idx // cols][idx % cols]
     #                                                 , ax_w=ax_w[idx // cols][idx % cols]
     #                                                 , small_text=small_text)
     #         #         if ellipse_weights:
-    #         #             row['TargetAreaLines'].plot_azimuth(save=False, savefolder=savefolder, branches=branches
+    #         #             row['TargetAreaLines'].plot_azimuth(rose_type=rose_typesave=False, savefolder=savefolder, branches=branches
     #         #                                                    , big_plots=big_plots
     #         #                                                    , ellipse_weights=ellipse_weights
     #         #                                                    , ax_ew=ax_ew[idx // cols][idx % cols]
@@ -692,11 +809,11 @@ class MultiTargetAreaQGIS:
     #             #     fig_ew.savefig(savename_ew, dpi=150)
     #     # elif ellipse_weights:
     #     #     for idx, row in self.df.iterrows():
-    #     #         row['TargetAreaLines'].plot_azimuth(save=save, savefolder=savefolder, branches=branches
+    #     #         row['TargetAreaLines'].plot_azimuth(rose_type=rose_typesave=save, savefolder=savefolder, branches=branches
     #     #                                    , ellipse_weights=ellipse_weights, small_text = small_text)
     #     else:
     #         for idx, row in self.df.iterrows():
-    #             row['TargetAreaLines'].plot_azimuth(save=save, savefolder=savefolder, branches=self.using_branches
+    #             row['TargetAreaLines'].plot_azimuth(rose_type=rose_typesave=save, savefolder=savefolder, branches=self.using_branches
     #                                                 , small_text=small_text)
 
     # def plot_unified_azimuths(self, save=False, savefolder=None, big_plots=False):
@@ -717,12 +834,12 @@ class MultiTargetAreaQGIS:
     #         #     fig_ew, ax_ew = plt.subplots(ncols=cols, nrows=rows, subplot_kw=dict(polar=True)
     #         #                                  , figsize=(width, height))
     #         for idx, row in self.uniframe.iterrows():
-    #             row['TargetAreaLines'].plot_azimuth(save=False, savefolder=savefolder, branches=branches
+    #             row['TargetAreaLines'].plot_azimuth(rose_type=rose_typesave=False, savefolder=savefolder, branches=branches
     #                                        , big_plots=big_plots
     #                                        , ax=ax[idx // cols][idx % cols]
     #                                        , ax_w=ax_w[idx // cols][idx % cols])
     #             # if ellipse_weights:
-    #             #     row['TargetAreaLines'].plot_azimuth(save=False, savefolder=savefolder, branches=branches
+    #             #     row['TargetAreaLines'].plot_azimuth(rose_type=rose_typesave=False, savefolder=savefolder, branches=branches
     #             #                                , big_plots=big_plots
     #             #                                , ellipse_weights=ellipse_weights
     #             #                                , ax_ew=ax_ew[idx // cols][idx % cols])
@@ -745,11 +862,11 @@ class MultiTargetAreaQGIS:
     #             #     fig_ew.savefig(savename_ew, dpi=150)
     #     # elif ellipse_weights:
     #     #     for idx, row in self.uniframe.iterrows():
-    #     #         row['TargetAreaLines'].plot_azimuth(save=save, savefolder=savefolder, branches=branches
+    #     #         row['TargetAreaLines'].plot_azimuth(rose_type=rose_typesave=save, savefolder=savefolder, branches=branches
     #     #                                    , ellipse_weights=ellipse_weights)
     #     else:
     #         for idx, row in self.uniframe.iterrows():
-    #             row['TargetAreaLines'].plot_azimuth(save=save, savefolder=savefolder, branches=branches)
+    #             row['TargetAreaLines'].plot_azimuth(rose_type=rose_typesave=save, savefolder=savefolder, branches=branches)
 
     def determine_xy_relations_unified(self, big_plot=True):
         # Determines xy relations and dynamically creates a dataframe as an aid for plotting the relations
@@ -1101,6 +1218,17 @@ class MultiTargetAreaQGIS:
             plt.savefig(savename, dpi=200)
 
     def plot_xyi(self, unified: bool, save=False, savefolder=None):
+        """
+        Plots XYI-ternary plots
+        :param unified: Plot unified datasets or individual target areas
+        :type unified: bool
+        :param save: Whether to save
+        :type save: bool
+        :param savefolder: Folder to save to
+        :type savefolder: str
+        :return:
+        :rtype:
+        """
         if unified:
             frame = self.uniframe
         else:
@@ -1163,6 +1291,17 @@ class MultiTargetAreaQGIS:
     #         plt.savefig(savename, dpi=150)
 
     def plot_branch_ternary(self, unified: bool, save=False, savefolder=None):
+        """
+        Plots Branch classification-ternary plots
+        :param unified: Plot unified datasets or individual target areas
+        :type unified: bool
+        :param save: Whether to save
+        :type save: bool
+        :param savefolder: Folder to save to
+        :type savefolder: str
+        :return:
+        :rtype:
+        """
         if not self.using_branches:
             raise Exception('Branch classifications cannot be determined from traces.')
         fig, ax = plt.subplots(figsize=(8, 8))
@@ -1233,6 +1372,13 @@ class MultiTargetAreaQGIS:
     #             plt.savefig(savename, dpi=150)
 
     def gather_topology_parameters(self, unified: bool):
+        """
+        Gathers topological parameters of both traces and branches
+        :param unified: Use unified datasets or individual target areas
+        :type unified: bool
+        :return:
+        :rtype:
+        """
         branches = self.using_branches
         if unified:
             self.uniframe['topology'] = None
@@ -1406,6 +1552,17 @@ class MultiTargetAreaQGIS:
     #     self.uniframe_topology_concat = pd.concat(self.uniframe.topology.tolist(), ignore_index=True)
 
     def plot_topology(self, unified: bool, save=False, savefolder=None):
+        """
+        Plot topological parameters
+        :param unified: Plot unified datasets or individual target areas
+        :type unified: bool
+        :param save: Whether to save
+        :type save: bool
+        :param savefolder: Folder to save to
+        :type savefolder: str
+        :return:
+        :rtype:
+        """
         branches = self.using_branches
         log_scale_columns = ['Mean Length', 'Areal Frequency B20',
                              'Fracture Intensity B21', 'Fracture Intensity P21', 'Areal Frequency P20']
@@ -1607,8 +1764,18 @@ class MultiTargetAreaQGIS:
     #             savename = Path(savefolder + '/{}_all.png'.format(str(column)))
     #             plt.savefig(savename, dpi=150)
 
-
     def plot_hexbin_plot(self, unified: bool, save=False, savefolder=None):
+        """
+        Plot a hexbinplot to estimate sample size differences.
+       :param unified: Plot unified datasets or individual target areas
+        :type unified: bool
+        :param save: Whether to save
+        :type save: bool
+        :param savefolder: Folder to save to
+        :type savefolder: str
+        :return:
+        :rtype:
+        """
         branches = self.using_branches
         if unified:
             lf = self.uniframe_lineframe_main_concat
@@ -1664,6 +1831,17 @@ class MultiTargetAreaQGIS:
             plt.savefig(savename, dpi=200)
 
     def plot_anisotropy(self, unified: bool, save=False, savefolder=None):
+        """
+        Plot anisotropy of connectivity
+        :param unified: Plot unified datasets or individual target areas
+        :type unified: bool
+        :param save: Whether to save
+        :type save: bool
+        :param savefolder: Folder to save to
+        :type savefolder: str
+        :return:
+        :rtype:
+        """
         if not self.using_branches:
             raise Exception('Anisotropy cannot be determined from traces.')
 
@@ -1707,8 +1885,6 @@ class MultiTargetAreaQGIS:
     #         if save:
     #             savename = Path(savefolder + '/{}_anisotropy.png'.format(row.TargetAreaLines.name))
     #             plt.savefig(savename, dpi=200)
-
-
 
 # class MultiTargetArea:
 #

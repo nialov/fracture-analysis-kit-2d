@@ -24,12 +24,13 @@
 
 import os
 
-from qgis.PyQt import uic
 from qgis.PyQt import QtWidgets
+from qgis.PyQt import uic
 
 # This loads your .ui file so that PyQt can populate your plugin with the elements from Qt Designer
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'fracture_analysis_2d_dialog_base.ui'))
+
 
 # test
 class FractureAnalysis2DDialog(QtWidgets.QDialog, FORM_CLASS):

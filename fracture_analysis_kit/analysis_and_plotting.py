@@ -35,7 +35,8 @@ cut_offs_traces = [[0.99, 0.95], [0.99, 0.97], [0.95], [0.97]]
 # Assign sets
 set_list = [(45, 90), (125, 170), (171, 15)]
 
-analysis_main.analyze_data(analysis_name, branchdirs, tracedirs, nodedirs, areadirs, codes, cut_offs_branches, cut_offs_traces, set_list)
+analysis_main.analyze_data(analysis_name, branchdirs, tracedirs, nodedirs, areadirs, codes, cut_offs_branches,
+                           cut_offs_traces, set_list)
 
 # Assign length distributions for predictions
 predict_with = [

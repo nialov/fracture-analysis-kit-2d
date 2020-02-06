@@ -5,12 +5,9 @@ from pathlib import Path
 import geopandas as gpd
 import pandas as pd
 
-from . import target_area_analysis_qgis as taaq
-
-
 
 # TODO: 1. single target area workflow : create alt inits, reduce/change filename usage
-#  2. multi target area workflow : alt inits, reduce filename usage
+
 
 # Convert QGIS vectorlayer to pandas DataFrame
 def layer_to_df(layer):
@@ -62,16 +59,29 @@ def plotting_directories(results_folder, name):
         os.mkdir(Path(f"{plotting_directory}/age_relations"))
         os.mkdir(Path(f"{plotting_directory}/age_relations/indiv"))
         os.mkdir(Path(f"{plotting_directory}/anisotropy"))
+        os.mkdir(Path(f"{plotting_directory}/anisotropy/indiv"))
         os.mkdir(Path(f"{plotting_directory}/azimuths"))
-        os.mkdir(Path(f"{plotting_directory}/azimuths/traces"))
-        os.mkdir(Path(f"{plotting_directory}/azimuths/branches"))
+        os.mkdir(Path(f"{plotting_directory}/azimuths/equal_radius"))
+        os.mkdir(Path(f"{plotting_directory}/azimuths/equal_radius/traces"))
+        os.mkdir(Path(f"{plotting_directory}/azimuths/equal_radius/branches"))
+        os.mkdir(Path(f"{plotting_directory}/azimuths/equal_radius/indiv"))
+        os.mkdir(Path(f"{plotting_directory}/azimuths/equal_radius/indiv/traces"))
+        os.mkdir(Path(f"{plotting_directory}/azimuths/equal_radius/indiv/branches"))
+
+        os.mkdir(Path(f"{plotting_directory}/azimuths/equal_area"))
+        os.mkdir(Path(f"{plotting_directory}/azimuths/equal_area/traces"))
+        os.mkdir(Path(f"{plotting_directory}/azimuths/equal_area/branches"))
+        os.mkdir(Path(f"{plotting_directory}/azimuths/equal_area/indiv"))
+        os.mkdir(Path(f"{plotting_directory}/azimuths/equal_area/indiv/traces"))
+        os.mkdir(Path(f"{plotting_directory}/azimuths/equal_area/indiv/branches"))
+
         os.mkdir(Path(f"{plotting_directory}/branch_class"))
         os.mkdir(Path(f"{plotting_directory}/length_distributions"))
         os.mkdir(Path(f"{plotting_directory}/length_distributions/branches"
-            )
-        )
+                      )
+                 )
         os.mkdir(Path(f"{plotting_directory}/length_distributions/branches/predictions")
-        )
+                 )
         os.mkdir(Path(f"{plotting_directory}/length_distributions/traces"))
         os.mkdir(Path(f"{plotting_directory}/length_distributions/traces/predictions"))
         os.mkdir(Path(f"{plotting_directory}/length_distributions/indiv"))
