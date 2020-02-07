@@ -2,16 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="c31abe43-014e-4ee7-b756-2d5f1f62f453" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/config.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fracture_analysis_2d.py" beforeDir="false" afterPath="$PROJECT_DIR$/fracture_analysis_2d.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fracture_analysis_2d_dialog_base.ui" beforeDir="false" afterPath="$PROJECT_DIR$/fracture_analysis_2d_dialog_base.ui" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fracture_analysis_kit/fracture_analysis_kit_qgis_tools.py" beforeDir="false" afterPath="$PROJECT_DIR$/fracture_analysis_kit/fracture_analysis_kit_qgis_tools.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fracture_analysis_kit/kit_resources/multiple_target_areas.py" beforeDir="false" afterPath="$PROJECT_DIR$/fracture_analysis_kit/kit_resources/multiple_target_areas.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fracture_analysis_kit/kit_resources/target_area.py" beforeDir="false" afterPath="$PROJECT_DIR$/fracture_analysis_kit/kit_resources/target_area.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fracture_analysis_kit/kit_resources/tools.py" beforeDir="false" afterPath="$PROJECT_DIR$/fracture_analysis_kit/kit_resources/tools.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fracture_analysis_kit/main_target_analysis.py" beforeDir="false" afterPath="$PROJECT_DIR$/fracture_analysis_kit/main_target_analysis.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fracture_analysis_kit/target_area_analysis_qgis.py" beforeDir="false" afterPath="$PROJECT_DIR$/fracture_analysis_kit/target_area_analysis_qgis.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -32,6 +26,11 @@
       <list>
         <option value="nialov" />
       </list>
+    </option>
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="master" />
+      </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
     <option name="ROOT_SYNC" value="DONT_SYNC" />
@@ -165,6 +164,7 @@
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
       <changelist id="c31abe43-014e-4ee7-b756-2d5f1f62f453" name="Default Changelist" comment="" />
+      <changelist id="" name="Working version v0.1.1 - Revised cross-cutting and abutting relationships analysis" comment="" />
       <created>1578833235022</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
@@ -188,7 +188,19 @@
       <option name="presentableId" value="LOCAL−00003" />
       <updated>1581006783166</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL−00004" summary="Working version v0.1.1&#10;- Revised cross-cutting and abutting relationships analysis">
+      <created>1581115606708</created>
+      <option name="number" value="LOCAL−00004" />
+      <option name="presentableId" value="LOCAL−00004" />
+      <updated>1581115606708</updated>
+    </task>
+    <task id="LOCAL−00005" summary="Working version v0.1.1&#10;- Revised cross-cutting and abutting relationships analysis">
+      <created>1581115671193</created>
+      <option name="number" value="LOCAL−00005" />
+      <option name="presentableId" value="LOCAL−00005" />
+      <updated>1581115671193</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -205,9 +217,11 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
+    <option name="CHECK_NEW_TODO" value="false" />
     <MESSAGE value="First time setup. Added defunct files to .gitignore/deleted" />
     <MESSAGE value="Working version." />
     <MESSAGE value="Working version v0.1." />
-    <option name="LAST_COMMIT_MESSAGE" value="Working version v0.1." />
+    <MESSAGE value="Working version v0.1.1&#10;- Revised cross-cutting and abutting relationships analysis" />
+    <option name="LAST_COMMIT_MESSAGE" value="Working version v0.1.1&#10;- Revised cross-cutting and abutting relationships analysis" />
   </component>
 </project>

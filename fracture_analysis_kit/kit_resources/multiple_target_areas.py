@@ -929,7 +929,7 @@ class MultiTargetAreaQGIS:
 
                     intersectframe = tools.get_intersect_frame(intersecting_nodes_frame, traceframe_two_sets, (s, c_s))
 
-                    if len(intersectframe.error) > 0:
+                    if len(intersectframe.loc[intersectframe.error == True]) > 0:
                         QgsMessageLog.logMessage(message='There were errors in creating intersectframe.\n'
                                                          f'Error count: {len(intersectframe.loc[intersectframe.error == True])}'
                                                  , tag=__name__, level=Qgis.Warning)
