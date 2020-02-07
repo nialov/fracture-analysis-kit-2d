@@ -28,7 +28,7 @@ import pandas as pd
 from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction, QFileDialog, QTableWidgetItem, QMessageBox, QProgressBar, QProgressDialog
-from qgis.core import QgsProject, Qgis, QgsVectorLayer
+from qgis.core import QgsProject, Qgis, QgsVectorLayer, QgsMessageLog
 
 # Initialize Qt resources from file resources.py
 from .resources import *
@@ -38,9 +38,8 @@ from .fracture_analysis_2d_dialog import FractureAnalysis2DDialog
 from .fracture_analysis_kit import logging_tool
 from .fracture_analysis_kit import main_target_analysis
 
-# Initialize Qt resources from file resources.py
-
 debug_logger = logging_tool.DebugLogger()
+
 
 
 class FractureAnalysis2D:
@@ -400,6 +399,8 @@ class FractureAnalysis2D:
         # Clear name and limits text boxes
         self.dlg.lineEdit_tab2_set_start.clear()
         self.dlg.lineEdit_tab2_set_end.clear()
+        self.dlg.lineEdit_tab2_set_start.setText('125')
+        self.dlg.lineEdit_tab2_set_end.setText('170')
 
     def clear_set_table(self):
         self.dlg.tableWidget_tab2_sets.clearContents()
@@ -417,7 +418,6 @@ class FractureAnalysis2D:
             if "VectorLayer" in str(layer.type()):
                 vector_layers.append(layer)
                 layer_features_iter = layer.getFeatures()
-                # TODO: Use yield?
                 # Find feature type by checking the geometry of the first item in the geometry column of the layer
                 for feature in layer_features_iter:
                     if 'String' in str(feature.geometry()):
@@ -473,6 +473,8 @@ class FractureAnalysis2D:
             # Clear set table
             self.dlg.pushButton_tab2_set_clear.clicked.connect(self.clear_set_table)
 
+            QgsMessageLog.logMessage(message="Plugin initialized", tag=f'{__name__}', level=Qgis.Info)
+
         self.fetch_correct_vector_layers()
         self.update_layers_tab2()
         self.update_layers_tab1()
@@ -483,6 +485,10 @@ class FractureAnalysis2D:
         result = self.dlg.exec_()
         # See if OK was pressed
         if result:
+
+            QMessageBox.critical(None, "Error"
+                                 , f'Single Target Area Analysis Not Implemented')
+            return
             # Do something useful here - delete the line containing pass and
             # substitute with your code.
             results_folder = self.dlg.lineEdit_folder.text()
@@ -509,7 +515,8 @@ class FractureAnalysis2D:
             )
 
     def run_multi_target_analysis(self):
-        # TODO: Add user input verification
+        # Log start
+        QgsMessageLog.logMessage(message="Multi Target Analysis started.", tag=f'{__name__}', level=Qgis.Info)
         # Output folder
         results_folder = self.dlg.lineEdit_tab2_folder.text()
         # Analysis name
@@ -534,13 +541,16 @@ class FractureAnalysis2D:
             if reply == qb.No:
                 return
             elif reply == qb.Yes:
-                self.set_df = self.set_df.append({'Set': [1, 2, 3], 'SetLimits': [(0, 60), (60, 120), (120, 180)]},
+                # Default set ranges
+                self.set_df = self.set_df.append({'Set': str(1), 'SetLimits': (45, 90)},
                                                  ignore_index=True)
+                self.set_df = self.set_df.append({'Set': str(2), 'SetLimits': (125, 170)},
+                                                 ignore_index=True)
+                self.set_df = self.set_df.append({'Set': str(3), 'SetLimits': (171, 15)},
+                                                 ignore_index=True)
+
             else:
                 return
-
-        # Initialize progress bar
-        # self.dialog, self.bar = self.create_progress_dialog()
 
         # Run analysis
         main_target_analysis.main_multi_target_area(self.table_df, results_folder, analysis_name,

@@ -84,6 +84,7 @@ class TargetAreaLines:
         self.bin_locs = None
         self.number_of_azimuths = None
         self.bin_width = None
+        self.set_df = None
 
     def calc_attributes(self):
         """
@@ -121,18 +122,20 @@ class TargetAreaLines:
         # logger.info('self.lineframe_main_cut dtypes\n\n{}'.format(self.lineframe_main_cut.dtypes))
 
     # list_of_tuples, tuples must be between 0-180
-    def define_sets(self, list_of_tuples=((0, 60), (60, 120), (120, 180))):
+    def define_sets(self, set_df):
         """
         Categorizes both non-cut and cut DataFrames with set limits
-        :param list_of_tuples: List/tuple of tuples of set limits e.g. [(0, 60), (60, 120), (120, 180)]
-        :type list_of_tuples: list or tuple
+        :param set_df: DataFrame with set limits and set names
+        :type set_df: DataFrame
         """
-        self.lineframe_main['set'] = self.lineframe_main.apply(lambda x: tools.define_set(x['halved'], list_of_tuples)
+        self.lineframe_main['set'] = self.lineframe_main.apply(lambda x: tools.define_set(x['halved'], set_df)
                                                                , axis=1)
         self.lineframe_main_cut['set'] = self.lineframe_main_cut.apply(
-            lambda x: tools.define_set(x['halved'], list_of_tuples)
+            lambda x: tools.define_set(x['halved'], set_df)
             , axis=1)
-        self.set_list = list_of_tuples
+        set_list = set_df.Set.tolist()
+        self.set_df = set_df
+        self.set_list = set_list
 
     def calc_curviness(self):
         self.lineframe_main['curviness'] = self.lineframe_main.geometry.apply(tools.curviness)

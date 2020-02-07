@@ -6,9 +6,6 @@ import geopandas as gpd
 import pandas as pd
 
 
-# TODO: 1. single target area workflow : create alt inits, reduce/change filename usage
-
-
 # Convert QGIS vectorlayer to pandas DataFrame
 def layer_to_df(layer):
     fieldnames = [field.name() for field in layer.fields()]

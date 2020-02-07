@@ -7,7 +7,7 @@ from .kit_resources import target_area as ta
 from .kit_resources import templates
 
 
-# TODO: implement sets, more plotting
+
 class TargetAreaAnalysis:
     def __init__(
             self, plotting_directory, name, trace_layer, branch_layer, node_layer, area_layer, debug_logger
@@ -121,7 +121,7 @@ class MultiTargetAreaAnalysis:
         self.logger.info('CALC ATTRIBUTES TRACES')
         self.analysis_traces.calc_attributes_for_all()
 
-        self.analysis_traces.define_sets_for_all(self.set_df.SetLimits.tolist())
+        self.analysis_traces.define_sets_for_all(self.set_df)
 
         # self.analysis_traces.calc_curviness_for_all()
         self.logger.info('UNIFIED TRACES')
@@ -141,10 +141,14 @@ class MultiTargetAreaAnalysis:
         self.logger.info('gather_topology_parameters(unified=True)')
         self.analysis_traces.gather_topology_parameters(unified=True)
 
+        # Cross-cutting and abutting relationships
+        self.analysis_traces.determine_crosscut_abutting_relations(unified=False)
+        self.analysis_traces.determine_crosscut_abutting_relations(unified=True)
+
         # BRANCH DATA SETUP
         self.analysis_branches.calc_attributes_for_all()
 
-        self.analysis_branches.define_sets_for_all(self.set_df.SetLimits.tolist())
+        self.analysis_branches.define_sets_for_all(self.set_df)
 
         self.analysis_branches.unified()
 

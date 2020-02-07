@@ -1,4 +1,6 @@
+import logging
 import math
+import os
 
 import geopandas as gpd
 import matplotlib.patheffects as path_effects
@@ -12,20 +14,22 @@ import ternary
 from shapely.geometry import LineString
 from shapely.geometry import Point
 from shapely.ops import linemerge
+from shapely import strtree
 
 # import multiple_target_areas as mta
-from . import target_area as ta
-from . import templates
 
-color_dict_code = templates.color_dict_code
-color_keys = [key for key in color_dict_code.keys()]
-detailed_list = templates.detailed
-style = templates.styled_text_dict
-prop = templates.styled_prop
+from . import templates
+from . import target_area as ta
+from ... import config
+
+
+
+style = config.styled_text_dict
+prop = config.styled_prop
 
 # Values used in spatial estimates of superposition
-buffer_value = 0.001
-snap_value = 0.001
+buffer_value = config.buffer_value
+snap_value = config.snap_value
 
 
 # def initialize_branch_frame(filename):
@@ -1082,35 +1086,44 @@ def calc_ylims(lineframe):
     return top, bottom
 
 
-def define_set(azimuth, list_of_tuples):  # Uses HALVED azimuth: 0-180
-    """Defines set based on azimuth value
-
-    Uses halved azimuth values 0 < azimuth < 180
-
-    Parameters
-    ----------
-    azimuth : azimuth float
-         azimuth as float (degrees)
-
-    list_of_tuples : list
-        list with set limits e.g.(20,50)
-
-    Returns
-    -------
-    set_num
-        set number based on set list
-
-
+def define_set(azimuth, set_df):  # Uses HALVED azimuth: 0-180
     """
-    set_num = -1
-    for idx, s in enumerate(list_of_tuples):
-        if s[0] > s[1]:
-            if (azimuth >= s[0]) | (azimuth <= s[1]):
-                set_num = idx
+    Defines set based on azimuth value in degrees. Uses halved azimuth values i.e. azimuth must be: 0 < azimuth < 180.
+
+    E.g. when azimuth is in set 1
+    >>> define_set(50, pd.DataFrame({'Set': [1, 2], 'SetLimits': [(10, 90), (100, 170)]}))
+    '1'
+
+    E.g. when azimuth isn't within ranges
+    >>> define_set(99, pd.DataFrame({'Set': [1, 2], 'SetLimits': [(10, 90), (100, 170)]}))
+    '-1'
+
+    :param azimuth: azimuth as float (degrees)
+    :type azimuth: float
+    :param set_df: DataFrame with set ranges and set names
+    :type set_df: DataFrame
+    :return: Set name based on azimuth
+    :rtype: str
+    """
+    # Quick assertation
+    if azimuth < 0 or azimuth > 180:
+        raise ValueError('Azimuth value wasnt in range 0 - 180.\n'
+                         f'Value: {azimuth}')
+
+    # Set_num is -1 when azimuth is in no set range
+    set_label = -1
+    for _, row in set_df.iterrows():
+        set_range = row.SetLimits
+        # Checks if azimuth degree value is within the set range and
+        # checks whether set range is normal (e.g. 20, 50) or if it extends over 0 (e.g. 171, 15)
+        if set_range[0] > set_range[1]:
+            if (azimuth >= set_range[0]) | (azimuth <= set_range[1]):
+                set_label = row.Set
         else:
-            if (azimuth >= s[0]) & (azimuth <= s[1]):
-                set_num = idx
-    return set_num
+            if (azimuth >= set_range[0]) & (azimuth <= set_range[1]):
+                set_label = row.Set
+
+    return str(set_label)
 
 
 def construct_length_distribution_base(lineframe: gpd.GeoDataFrame, areaframe: gpd.GeoDataFrame, name: str, group: str,
@@ -1254,25 +1267,25 @@ def plot_fit_for_uniframe(mult_distrib, ax, cut, use_sets, unified: bool, curr_s
         msle = sklm.mean_squared_log_error(lineframe_for_text.y.values, lineframe_for_text.y_fit.values)
         r2score = sklm.r2_score(lineframe_for_text.y.values, lineframe_for_text.y_fit.values)
 
-        text = 'Exponent: ' + str(round(m, 2)) \
-               + '\nConstant: ' + str(round(c, 2)) \
-               + '\nMSLE: ' + str(round(msle, 2)) \
-               + '\nR^2: ' + str(round(r2score, 5))
+        text = 'Exponent: ' + str(np.round(m, 2)) \
+               + '\nConstant: ' + str(np.round(c, 2)) \
+               + '\nMSLE: ' + str(np.round(msle, 2)) \
+               + '\nR^2: ' + str(np.round(r2score, 5))
 
         props = dict(boxstyle='round', pad=1, facecolor='wheat',
                      path_effects=[path_effects.SimplePatchShadow(), path_effects.Normal()])
         if multi:
             x_loc = lineframe_for_text.length.mean()
             y_loc = lineframe_for_text.y.mean()
-            text = 'E: ' + str(round(m, 2)) \
-                   + '\nC: ' + str(round(c, 2))
+            text = 'E: ' + str(np.round(m, 2)) \
+                   + '\nC: ' + str(np.round(c, 2))
             ax_for_text.text(x_loc, y_loc, text, bbox=props
                              , fontsize='10', fontfamily='Times New Roman', ha='center', alpha=0.5)
         else:
             ax_for_text.text(0.86, 0.48, text, transform=ax_for_text.transAxes
                              , bbox=props, style='italic'
                              , fontsize='28', fontfamily='Times New Roman', ha='center', linespacing=2)
-            func_text = '$n (L) = {{{}}} * L^{{{}}}$'.format(round(c, 2), round(m, 2))
+            func_text = '$n (L) = {{{}}} * L^{{{}}}$'.format(np.round(c, 2), np.round(m, 2))
             ax_for_text.text(0.85, 0.16, func_text, transform=ax_for_text.transAxes, ha='center', fontsize='28'
                              , rotation=-50)
 
@@ -1342,10 +1355,10 @@ def plot_fit_for_uniframe(mult_distrib, ax, cut, use_sets, unified: bool, curr_s
         # TEXT WITH INFO
         text_1 = 'Fitted with:\n{}'.format(str(names).replace('[', '').replace(']', '')).replace(',', '\n')
         text_2 = 'Exponent: {} \nConstant: {} \nMSLE: {} \nR^2: {}' \
-            .format(str(round(m, 2))
-                    , str(round(c, 2))
-                    , str(round(msle, 2))
-                    , str(round(r2score, 2)))
+            .format(str(np.round(m, 2))
+                    , str(np.round(c, 2))
+                    , str(np.round(msle, 2))
+                    , str(np.round(r2score, 2)))
 
         props = dict(boxstyle='round', pad=1, facecolor='wheat')
         x_loc = 0.22
@@ -1376,7 +1389,7 @@ def plot_fit_for_uniframe(mult_distrib, ax, cut, use_sets, unified: bool, curr_s
             y_fit = np.exp(m * lineframe['logLen'].values + c)  # calculate the fitted values of y
             lineframe['y_fit'] = y_fit
             lineframe.plot(x='length', y='y_fit', c='k', ax=ax, label='FIT')
-            text = '{} E:{} C:{}'.format(name, str(round(m, 2)), str(round(c, 2)))
+            text = '{} E:{} C:{}'.format(name, str(np.round(m, 2)), str(np.round(c, 2)))
             texts.append(text)
         props = dict(boxstyle='round', pad=1, facecolor='wheat')
         x_loc = 0.86
@@ -1596,6 +1609,7 @@ def plot_azimuths_sub_plot(lineframe, ax, filename, weights, striations=False, s
         ax.scatter(np.deg2rad(mean_striation), arrow_len, marker=(3, 0, arrow_dir), s=500, zorder=6, c='blue')
 
 
+# Methods for cross.cutting and abutting relationship spatial calculations
 def line_end_point(line):
     try:
         coord_list = list(line.coords)
@@ -1605,7 +1619,6 @@ def line_end_point(line):
     end_y = coord_list[-1][1]
     return shapely.geometry.Point(end_x, end_y)
 
-
 def line_start_point(line):
     try:
         coord_list = list(line.coords)
@@ -1614,14 +1627,6 @@ def line_start_point(line):
     start_x = coord_list[0][0]
     start_y = coord_list[0][1]
     return shapely.geometry.Point(start_x, start_y)
-
-
-def get_xy_points_frame_from_frame(nodeframe):
-    pointsframe = nodeframe
-    xypointsframe = pointsframe.loc[(pointsframe.c == 'X') | (pointsframe.c == 'Y')]
-    xypointsframe = xypointsframe.reset_index(drop=True)
-    return xypointsframe
-
 
 def prepare_geometry_traces(traceframe):
     traces = traceframe.geometry.values
@@ -1646,7 +1651,7 @@ def prepare_geometry_traces(traceframe):
 
 
 def make_point_tree(traceframe):
-    from shapely import strtree
+
     points = []
     for idx, row in traceframe.iterrows():
         sp = row.startpoint
@@ -1656,117 +1661,159 @@ def make_point_tree(traceframe):
     return tree
 
 
-def get_matching_points(xypointsframe, traceframe):
-    # xypointsframe = nodeframe that only contains x- and y-nodes. traceframe only contains two compared sets.
+def get_nodes_intersecting_sets(xypointsframe, traceframe):
+    """
+    Does a spatial intersect between node GeoDataFrame with only X- and Y-nodes and
+    the trace GeoDataFrame with only two sets. Returns only nodes that intersect traces from BOTH sets.
+
+    E.g.
+    >>> p = gpd.GeoDataFrame(data={'geometry': [Point(0, 0), Point(1, 1), Point(3, 3)]})
+    >>> l = gpd.GeoDataFrame(data={'geometry': [LineString([(0, 0), (2, 2)]), LineString([(0, 0), (0.5, 0.5)])], 'set': [1, 2]})
+    >>> get_nodes_intersecting_sets(p, l)
+                    geometry
+    0  POINT (0.00000 0.00000)
+
+    :param xypointsframe: GeoDataFrame with only X- and Y-nodes
+    :type xypointsframe: GeoDataFrame
+    :param traceframe: Trace GeoDataFrame with only two sets
+    :type traceframe: GeoDataFrame
+    :return: GeoDataFrame with nodes that intersect traces from BOTH sets
+    :rtype: GeoDataFrame
+    """
 
     sets = traceframe.set.unique().tolist()
     if len(sets) != 2:
-        raise Exception('get_matching_points function received traceframe without exactly two sets.')
+        raise Exception('get_nodes_intersecting_sets function received traceframe without exactly two sets.')
     set_1_frame = traceframe.loc[traceframe.set == sets[0]]
     set_2_frame = traceframe.loc[traceframe.set == sets[1]]
 
     prep_traces_1, _ = prepare_geometry_traces(set_1_frame)
     prep_traces_2, _ = prepare_geometry_traces(set_2_frame)
 
-    rows_for_keeping = []
+    rows_to_keep = []
     for idx, row in xypointsframe.iterrows():
 
         point = row.geometry
-
         if (prep_traces_1.intersects(point.buffer(buffer_value))) and (
                 prep_traces_2.intersects(point.buffer(buffer_value))):
-            rows_for_keeping.append(idx)
-    resultframe = xypointsframe.iloc[rows_for_keeping].reset_index(drop=True)
-    return resultframe
+            rows_to_keep.append(idx)
+    intersecting_nodes_frame = xypointsframe.iloc[rows_to_keep].reset_index(drop=True)
+    return intersecting_nodes_frame
 
 
-def get_intersect_frame(matching_points_frame, traceframe,
-                        set_tuple):  # pointframe == XYpoints that intersect BOTH sets, lineframe == branches with sets added (sets 0 and 1)
-    pointframe = matching_points_frame
-    #    print(len(pointframe))                 # DEBUGGING
-    intersectframe = pd.DataFrame(columns=['point', 'pointclass', 'setpair', 'error'])
+def get_intersect_frame(intersecting_nodes_frame, traceframe, set_tuple):
+
+    """
+    Does spatial intersects to determine how abutments and crosscuts occur between two sets
+
+    E.g. where Set 2 ends in set 1 and Set 2 crosscuts set 1
+
+    >>> nodes = gpd.GeoDataFrame({'geometry': [Point(0, 0), Point(1, 1)], 'c': ['Y', 'X']})
+    >>> traces = gpd.GeoDataFrame(data={'geometry': [
+    ... LineString([(-1, -1), (2, 2)]), LineString([(0, 0), (-0.5, 0.5)]), LineString([(2, 0), (0, 2)])]
+    ... , 'set': [1, 2, 2]})
+    >>> traces['startpoint'] = traces.geometry.apply(line_start_point)
+    >>> traces['endpoint'] = traces.geometry.apply(line_end_point)
+    >>> sets = (1, 2)
+    >>> intersect_frame = get_intersect_frame(nodes, traces, sets)
+    >>> intersect_frame
+              node nodeclass sets error setpair
+    0  POINT (0 0)         Y  NaN   NaN  (2, 1)
+    1  POINT (1 1)         X  NaN   NaN  (1, 2)
+
+
+    :param intersecting_nodes_frame: GeoDataFrame with X- and Y-nodes that intersect both sets.
+    Contains columns: "c", "geometry"
+    :type intersecting_nodes_frame: GeoDataFrame
+    :param traceframe: GeoDataFrame of traces.  Contains columns: "set", "geometry", "startpoint", "endpoint"
+    :type traceframe: GeoDataFrame
+    :param set_tuple: Sets used in the comparison
+    :type set_tuple: tuple
+    :return: DataFrame with intersect results. Contains columns: 'node', 'nodeclass', 'sets', 'error':
+    (node = node as shapely.geometry.Point, nodeclass = classification, i.e. X or Y, sets = tuple (set 1, set 2),
+    error = possible error results)
+    :rtype: DataFrame
+    """
+
+    logger = logging.getLogger('logging_tool')
+    intersectframe = pd.DataFrame(columns=['node', 'nodeclass', 'sets', 'error'])
 
     set1, set2 = set_tuple[0], set_tuple[1]  # sets for comparison
 
     set1frame = traceframe.loc[traceframe.set == set1]  # cut first setframe
     set2frame = traceframe.loc[traceframe.set == set2]  # cut second setframe
-    #    print(set1frame)
-    #    print(set2frame)
-    #    print(f'sets: set1: {set1} set2: {set2}')         #DEBUGGING
+
     set1_prep, _ = prepare_geometry_traces(set1frame)
     set2_prep, _ = prepare_geometry_traces(set2frame)
+    # Creates a rtree from all start- and endpoints of set 1
+    # Used in deducting in which set a trace abuts (Y-node)
     set1pointtree = make_point_tree(set1frame)
 
-    #    counts = pd.DataFrame(columns=['l1', 'l2'])   #DEBUGGING
-
-    for idx, row in pointframe.iterrows():
-        point = row.geometry
+    for idx, row in intersecting_nodes_frame.iterrows():
+        node = row.geometry
         c = row.c
 
-        l1 = set1_prep.intersects(point.buffer(buffer_value))  # Checks if point intersects set 1 traces.
-        l2 = set2_prep.intersects(point.buffer(buffer_value))  # Checks if point intersects set 2 traces.
+        l1 = set1_prep.intersects(node.buffer(buffer_value))  # Checks if node intersects set 1 traces.
+        l2 = set2_prep.intersects(node.buffer(buffer_value))  # Checks if node intersects set 2 traces.
 
-        if (l1 == False) and (l2 == False):  # DEBUGGING
-            print(f'l1: {l1} l2: {l2}----both False, this shouldnt happen')  # DEBUGGING
-        #        counts = counts.append({'l1': l1, 'l2': l2}, ignore_index=True)            #DEBUGGING
+        if (l1 is False) and (l2 is False):  # DEBUGGING
+            logger.error(f'Node {node} does not intersect both sets {set1} and {set2}\n l1 is {l1} and l2 is {l2}')
+            raise Exception(f'Node {node} does not intersect both sets {set1} and {set2}\n l1 is {l1} and l2 is {l2}')
 
-        # NO RELATIONS FOR NODE (ERROR)
-        addition = {'point': point, 'pointclass': c, 'error': True}  # DEBUGGING
-        double_add = False
+        # NO RELATIONS FOR NODE IS GIVEN AS ERROR == TRUE (ERROR).
+        # addition gets overwritten if there are no errors
+        addition = {'node': node, 'nodeclass': c, 'sets': set_tuple, 'error': True}  # DEBUGGING
+
         # ALL X NODE RELATIONS
         if c == 'X':
-            #            print('passx')
-            #            print(l1, l2)
-            if (l1 == True) and (l2 == True):  # It's an x-node between sets
-                setpair = (set1, set2)
-                addition = {'point': point, 'pointclass': c, 'setpair': setpair}
-                double_add = True
-                setpair_d = (set2, set1)
-                addition_d = {'point': point, 'pointclass': c, 'setpair': setpair_d}
-            if (l1 == True) and (l2 == False):  # It's an x-node inside set 1
-                #                print(l1, l2)
-                #                print('pass2')
-                setpair = (set1, set1)
-                addition = {'point': point, 'pointclass': c, 'setpair': setpair}
-            if (l1 == False) and (l2 == True):  # It's an x-node inside set 2
-                #                print('pass3')
-                setpair = (set2, set2)
-                addition = {'point': point, 'pointclass': c, 'setpair': setpair}
+            if (l1 is True) and (l2 is True):  # It's an x-node between sets
+                sets = (set1, set2)
+                addition = {'node': node, 'nodeclass': c, 'sets': sets, 'error': False}
+
+            if (l1 is True) and (l2 is False):  # It's an x-node inside set 1
+                logger.error(f'Point {node} does not intersect both sets {set1} and {set2}\n l1 is {l1} and l2 is {l2}')
+                raise Exception(f'Node {node} does not intersect both sets {set1} and {set2}\n l1 is {l1} and l2 is {l2}')
+                # sets = (set1, set1)
+                # addition = {'node': node, 'nodeclass': c, 'sets': sets}
+
+            if (l1 is False) and (l2 is True):  # It's an x-node inside set 2
+                logger.error(f'Point {node} does not intersect both sets {set1} and {set2}\n l1 is {l1} and l2 is {l2}')
+                raise Exception(
+                    f'Node {node} does not intersect both sets {set1} and {set2}\n l1 is {l1} and l2 is {l2}')
+                # sets = (set2, set2)
+                # addition = {'node': node, 'nodeclass': c, 'sets': sets}
 
         # ALL Y NODE RELATIONS
-        if c == 'Y':
-
-            #            print('passy')
-            if (l1 == True) and (l2 == True):  # It's an y-node between sets
-                p1 = len(set1pointtree.query(point.buffer(
-                    buffer_value)))  # length of list of points from set1 traces that intersect with XYpoint
+        elif c == 'Y':
+            if (l1 is True) and (l2 is True):  # It's an y-node between sets
+                # p1 == length of list of nodes from set1 traces that intersect with X- or Y-node
+                p1 = len(set1pointtree.query(node.buffer(buffer_value)))
                 if p1 != 0:  # set 1 ends in set 2
-                    #                    print('pass4')
-                    setpair = (set1, set2)
+                    sets = (set1, set2)
                 else:  # set 2 ends in set 1
-                    #                    print('pass5')
-                    setpair = (set2, set1)
-                addition = {'point': point, 'pointclass': c, 'setpair': setpair}
+                    sets = (set2, set1)
+                addition = {'node': node, 'nodeclass': c, 'sets': sets, 'error': False}
 
-            if (l1 == True) and (l2 == False):  # It's a y-node inside set 1
-                #                print('pass6')
-                setpair = (set1, set1)
-                addition = {'point': point, 'pointclass': c, 'setpair': setpair}
-            if (l1 == False) and (l2 == True):  # It's a y-node inside set 2
-                #                print('pass7')
-                setpair = (set2, set2)
-                addition = {'point': point, 'pointclass': c, 'setpair': setpair}
+            if (l1 is True) and (l2 is False):  # It's a y-node inside set 1
+                logger.error(f'Point {node} does not intersect both sets {set1} and {set2}\n l1 is {l1} and l2 is {l2}')
+                raise Exception(
+                    f'Node {node} does not intersect both sets {set1} and {set2}\n l1 is {l1} and l2 is {l2}')
+                # sets = (set1, set1)
+                # addition = {'node': node, 'nodeclass': c, 'sets': sets}
+
+            if (l1 is False) and (l2 is True):  # It's a y-node inside set 2
+                logger.error(f'Point {node} does not intersect both sets {set1} and {set2}\n l1 is {l1} and l2 is {l2}')
+                raise Exception(
+                    f'Node {node} does not intersect both sets {set1} and {set2}\n l1 is {l1} and l2 is {l2}')
+                # sets = (set2, set2)
+                # addition = {'node': node, 'nodeclass': c, 'sets': sets}
+        else:
+            raise ValueError(
+                f'Node {node} neither X or Y')
 
         intersectframe = intersectframe.append(addition, ignore_index=True)  # Append frame with result
-        if double_add:
-            # Append frame with double addition from X-node between sets
-            intersectframe = intersectframe.append(addition_d, ignore_index=True)
-    #    print(len(intersectframe.loc[intersectframe['error'] == True]))            #DEBUGGING
-    #    print(f'l1 values array: {print(counts)}')            #DEBUGGING
-    # returns dataframe with ('point', 'pointclass', 'setpair'), pointclass == x
-    # or y, setpair(x,y) == "x" set of the branch that intersects other branch "y"
+
     return intersectframe
-    # setpair=(0,1), pointclass=Y, ==> set 0 trace ends in set 1
 
 
 def plot_ternary_xyi_subplot(nodeframe, ax, name):

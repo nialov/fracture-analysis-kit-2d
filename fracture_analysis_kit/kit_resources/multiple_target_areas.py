@@ -14,6 +14,7 @@ import pandas as pd
 import shapely
 import ternary
 from matplotlib.ticker import FormatStrFormatter
+from qgis.core import QgsMessageLog, Qgis
 
 # Own code imports
 from . import templates
@@ -51,7 +52,8 @@ class MultiTargetAreaQGIS:
         self.df = pd.DataFrame(columns=['name', 'lineframe', 'areaframe', 'nodeframe', 'group', 'cut_off'])
         # Assign None to later initialized attributes
         # TODO: TEST PROPERLY
-        self.set_list = None
+        self.set_ranges_list = None
+        self.set_df = None
         self.uniframe = None
         self.df_lineframe_main_concat = None
         self.uniframe_lineframe_main_concat = None
@@ -63,7 +65,8 @@ class MultiTargetAreaQGIS:
         self.df_topology_concat = None
         self.uniframe_topology_concat = None
         self.relations_set_counts_indiv = None
-        # 20 % of progress happens here for both traces and branches
+        self.relations_df = None
+        self.unified_relations_df = None
 
         # Iterate over all target areas
         for idx, row in table_df.iterrows():
@@ -131,17 +134,15 @@ class MultiTargetAreaQGIS:
         self.df_lineframe_main_concat = pd.concat([srs.lineframe_main for srs in self.df.TargetAreaLines],
                                                   sort=True)
 
-    def define_sets_for_all(self, list_of_tuples):
+    def define_sets_for_all(self, set_df):
         """
         Categorizes data based on azimuth to sets.
-        :param list_of_tuples: List of tuples of set limits e.g. [(0, 60), (60, 120), (120, 180)]
-        :type list_of_tuples: list
+        :param set_df: DataFrame with sets. Columns: "Set", "SetLimits"
+        :type set_df: DataFrame
         """
-        if list_of_tuples is None:
-            list_of_tuples = [(0, 60), (60, 120), (120, 180)]
-        self.set_list = list_of_tuples
+        self.set_df = set_df
         for idx, row in self.df.iterrows():
-            row['TargetAreaLines'].define_sets(list_of_tuples)
+            row['TargetAreaLines'].define_sets(set_df)
 
     def calc_curviness_for_all(self, use_branches_anyway=False):
         if use_branches_anyway:
@@ -296,7 +297,7 @@ class MultiTargetAreaQGIS:
 
         if use_sets:
             raise NotImplementedError('Not implemented. Yet.')
-            # for curr_set, s in enumerate(self.set_list):
+            # for curr_set, s in enumerate(self.set_ranges_list):
             #
             #     fig, ax = plt.subplots(figsize=figure_size)  # Figure for full LDs, for each set
             #     #                length_text = 'FULL, SET '+str(idx)+'\nCut Off Lengths (m)\n\n'
@@ -451,7 +452,7 @@ class MultiTargetAreaQGIS:
     #         plt.savefig(savename, dpi=150)
     #
     #     if use_sets:
-    #         for curr_set, s in enumerate(self.set_list):
+    #         for curr_set, s in enumerate(self.set_ranges_list):
     #
     #             fig, ax = plt.subplots(figsize=figure_size)  # Figure for full LDs, for each set
     #             #                length_text = 'FULL, SET '+str(idx)+'\nCut Off Lengths (m)\n\n'
@@ -535,7 +536,7 @@ class MultiTargetAreaQGIS:
     #         plt.savefig(savename, dpi=150)
     #
     #     if use_sets:
-    #         for curr_set, s in enumerate(self.set_list):
+    #         for curr_set, s in enumerate(self.set_ranges_list):
     #
     #             fig, ax = plt.subplots(figsize=figure_size)  # Figure for full LDs, for each set
     #             #                length_text = 'FULL, SET '+str(idx)+'\nCut Off Lengths (m)\n\n'
@@ -600,7 +601,7 @@ class MultiTargetAreaQGIS:
     #         plt.savefig(savename, dpi=150)
     #
     #     if use_sets:
-    #         for curr_set, s in enumerate(self.set_list):
+    #         for curr_set, s in enumerate(self.set_ranges_list):
     #
     #             fig, ax = plt.subplots(figsize=figure_size)  # Figure for full LDs, for each set
     #             #                length_text = 'FULL, SET '+str(idx)+'\nCut Off Lengths (m)\n\n'
@@ -868,73 +869,172 @@ class MultiTargetAreaQGIS:
     #         for idx, row in self.uniframe.iterrows():
     #             row['TargetAreaLines'].plot_azimuth(rose_type=rose_typesave=save, savefolder=savefolder, branches=branches)
 
-    def determine_xy_relations_unified(self, big_plot=True):
+    def determine_crosscut_abutting_relations(self, unified: bool):
+        """
+        Determines cross-cutting and abutting relationships between all inputted sets by using spatial intersects
+        between node and trace data. Sets result as a class parameter self.relations_df that is used for plotting.
+
+        :param unified: Calculate for unified datasets or individual target areas
+        :type unified: bool
+        """
         # Determines xy relations and dynamically creates a dataframe as an aid for plotting the relations
         # TODO: No within set relations.....yet... Problem?
         if self.using_branches:
             raise Exception('Age relations cannot be determined from BRANCH data.')
-        if self.uniframe is None:
-            print(f'Multiple_distribution fields: {dir(self)}')
-            raise Exception('Multiple distribution object doesnt contain unified frame.')
+
+        # name: Contains target area name, Sets: (1, 2),
+        # x: x nodes between the sets, y: 1 abuts to 2 y node count, y-reverse: 2 abuts to 1 y node count
+        relations_df = pd.DataFrame(columns=['name', 'sets', 'x', 'y', 'y-reverse', 'error-count'])
+
+        if unified:
+            frame = self.uniframe
         else:
-            uniframe = self.uniframe
+            frame = self.df
 
-        if big_plot:
+        plotting_set_counts = {}
+        for _, row in frame.iterrows():
+            name = row.TargetAreaNodes.name
+            nodeframe = row.TargetAreaNodes.nodeframe
+            traceframe = row.TargetAreaLines.lineframe_main
+            # Initializing
+            traceframe['startpoint'] = traceframe.geometry.apply(tools.line_start_point)
+            traceframe['endpoint'] = traceframe.geometry.apply(tools.line_end_point)
+            traceframe = traceframe.reset_index(drop=True)
+            nodeframe = nodeframe.loc[(nodeframe.c == 'X') | (nodeframe.c == 'Y')]
+            xypointsframe = nodeframe.reset_index(drop=True)
 
-            plot_loc_counter = 0
-            plotting_df = pd.DataFrame(columns=['name', 'r', 'c', 'ax', 'intersectframe', 'col_start'
-                , 'col_end'])
-            plotting_set_counts = {}
-            for _, row in uniframe.iterrows():
+            sets = self.set_df.Set.tolist()
 
-                name = row.TargetAreaNodes.name
-                nodeframe = row.TargetAreaNodes.nodeframe
-                traceframe = row.TargetAreaLines.lineframe_main
-                # Initializing
-                traceframe['startpoint'] = traceframe.geometry.apply(tools.line_start_point)
-                traceframe['endpoint'] = traceframe.geometry.apply(tools.line_end_point)
-                traceframe = traceframe.reset_index(drop=True)
-                nodeframe = nodeframe.loc[(nodeframe.c == 'X') | (nodeframe.c == 'Y')]
-                xypointsframe = nodeframe.reset_index(drop=True)
+            if len(sets) < 2:
+                # TODO: Move higher
+                raise Exception('Only one set defined. Cannot determine XY relations')
+            # COLOR CYCLE FOR BARS
 
-                sets = traceframe.set.loc[traceframe['set'] > -1].unique().tolist()
-                sets.sort()
-                set_counts = traceframe.groupby('set').count()
-                plotting_set_counts[name] = set_counts
-                if len(sets) < 2:
-                    raise Exception('Only one set defined. Cannot determine XY relations')
-                # COLOR CYCLE FOR BARS
-                start = 0
-                end = 2
-                # START OF COMPARISONS
-                for idx, s in enumerate(sets):
-                    # If final set: Skip the final set, comparison already done.
-                    if idx == len(sets) - 1:
-                        break
-                    compare_sets = sets[idx + 1:]
+            # START OF COMPARISONS
+            for idx, s in enumerate(sets):
+                # If final set: Skip the final set, comparison already done.
+                if idx == len(sets) - 1:
+                    break
+                compare_sets = sets[idx + 1:]
 
-                    for jdx, c_s in enumerate(compare_sets):
-                        bf = traceframe.loc[(traceframe['set'] == s) | (traceframe['set'] == c_s)]
-                        # TODO: More stats in age_relations?
-                        # bfs_count = len(traceframe.loc[(traceframe['set'] == s)])
-                        # bfcs_count = len(traceframe.loc[(traceframe['set'] == c_s)])
+                for jdx, c_s in enumerate(compare_sets):
 
-                        mpf = tools.get_matching_points(xypointsframe, bf)
+                    # QgsMessageLog.logMessage(message=f'traceframe: {traceframe}\n\n\nsets: {sets}\ns: {s}\nc_s: {c_s}'
+                    #                                  f'\ntraceframe sets {traceframe.set.unique().tolist()}')
 
-                        intersectframe = tools.get_intersect_frame(mpf, bf, (s, c_s))
-                        intersectframe = intersectframe.groupby(['pointclass', 'setpair']).size()
-                        intersectframe = intersectframe.unstack()
+                    traceframe_two_sets = traceframe.loc[(traceframe['set'] == s) | (traceframe['set'] == c_s)]
+                    # TODO: More stats in age_relations?
 
-                        addition = {'name': name, 'plot_loc_counter': plot_loc_counter,
-                                    'intersectframe': intersectframe, 'col_start': start, 'col_end': end}
-                        plotting_df = plotting_df.append(addition, ignore_index=True)
-                        # MOVE COLORS CYCLE
-                        start += 2
-                        end += 2
-                        # MOVE PLOT LOC COUNTER
-                        plot_loc_counter += 1
+                    intersecting_nodes_frame = tools.get_nodes_intersecting_sets(xypointsframe, traceframe_two_sets)
 
-        self.xy_relations_frame, self.relations_set_counts = plotting_df, plotting_set_counts
+                    intersectframe = tools.get_intersect_frame(intersecting_nodes_frame, traceframe_two_sets, (s, c_s))
+
+                    if len(intersectframe.error) > 0:
+                        QgsMessageLog.logMessage(message='There were errors in creating intersectframe.\n'
+                                                         f'Error count: {len(intersectframe.loc[intersectframe.error == True])}'
+                                                 , tag=__name__, level=Qgis.Warning)
+
+                    intersect_series = intersectframe.groupby(['nodeclass', 'sets']).size()
+
+                    x_count = 0
+                    y_count = 0
+                    y_reverse_count = 0
+
+                    for item in [s for s in intersect_series.iteritems()]:
+                        value = item[1]
+                        if item[0][0] == 'X':
+                            x_count = value
+                        elif item[0][0] == 'Y':
+                            if item[0][1] == (s, c_s): # it's set s abutting in set c_s
+                                y_count = value
+                            elif item[0][1] == (c_s, s): # it's set c_s abutting in set s
+                                y_reverse_count = value
+                            else:
+                                raise ValueError(f'item[0][1] doesnt equal {(s, c_s)} nor {(c_s, s)}\nitem[0][1]: {item[0][1]}')
+                        else:
+                            raise ValueError(f'item[0][0] doesnt match "X" or "Y"\nitem[0][0]: {item[0][0]}')
+
+                    addition = {'name': name, 'sets': (s, c_s)
+                        , 'x': x_count, 'y': y_count, 'y-reverse': y_reverse_count
+                        , 'error-count': len(intersectframe.loc[intersectframe.error == True])}
+
+
+                    relations_df = relations_df.append(addition, ignore_index=True)
+        if unified:
+            self.unified_relations_df = relations_df
+        else:
+            self.relations_df = relations_df
+
+
+
+
+    # def determine_xy_relations_unified(self, big_plot=True):
+    #     # Determines xy relations and dynamically creates a dataframe as an aid for plotting the relations
+    #     # TODO: No within set relations.....yet... Problem?
+    #     if self.using_branches:
+    #         raise Exception('Age relations cannot be determined from BRANCH data.')
+    #     if self.uniframe is None:
+    #         print(f'Multiple_distribution fields: {dir(self)}')
+    #         raise Exception('Multiple distribution object doesnt contain unified frame.')
+    #     else:
+    #         uniframe = self.uniframe
+    #
+    #     if big_plot:
+    #
+    #         plot_loc_counter = 0
+    #         plotting_df = pd.DataFrame(columns=['name', 'r', 'c', 'ax', 'intersectframe', 'col_start'
+    #             , 'col_end'])
+    #         plotting_set_counts = {}
+    #         for _, row in uniframe.iterrows():
+    #
+    #             name = row.TargetAreaNodes.name
+    #             nodeframe = row.TargetAreaNodes.nodeframe
+    #             traceframe = row.TargetAreaLines.lineframe_main
+    #             # Initializing
+    #             traceframe['startpoint'] = traceframe.geometry.apply(tools.line_start_point)
+    #             traceframe['endpoint'] = traceframe.geometry.apply(tools.line_end_point)
+    #             traceframe = traceframe.reset_index(drop=True)
+    #             nodeframe = nodeframe.loc[(nodeframe.c == 'X') | (nodeframe.c == 'Y')]
+    #             xypointsframe = nodeframe.reset_index(drop=True)
+    #
+    #             sets = traceframe.set.loc[traceframe['set'] > -1].unique().tolist()
+    #             sets.sort()
+    #             set_counts = traceframe.groupby('set').count()
+    #             plotting_set_counts[name] = set_counts
+    #             if len(sets) < 2:
+    #                 raise Exception('Only one set defined. Cannot determine XY relations')
+    #             # COLOR CYCLE FOR BARS
+    #             start = 0
+    #             end = 2
+    #             # START OF COMPARISONS
+    #             for idx, s in enumerate(sets):
+    #                 # If final set: Skip the final set, comparison already done.
+    #                 if idx == len(sets) - 1:
+    #                     break
+    #                 compare_sets = sets[idx + 1:]
+    #
+    #                 for jdx, c_s in enumerate(compare_sets):
+    #                     bf = traceframe.loc[(traceframe['set'] == s) | (traceframe['set'] == c_s)]
+    #                     # TODO: More stats in age_relations?
+    #                     # bfs_count = len(traceframe.loc[(traceframe['set'] == s)])
+    #                     # bfcs_count = len(traceframe.loc[(traceframe['set'] == c_s)])
+    #
+    #                     mpf = tools.get_nodes_intersecting_sets(xypointsframe, bf)
+    #
+    #                     intersectframe = tools.get_intersect_frame(mpf, bf, (s, c_s))
+    #                     intersectframe = intersectframe.groupby(['pointclass', 'setpair']).size()
+    #                     intersectframe = intersectframe.unstack()
+    #
+    #                     addition = {'name': name, 'plot_loc_counter': plot_loc_counter,
+    #                                 'intersectframe': intersectframe, 'col_start': start, 'col_end': end}
+    #                     plotting_df = plotting_df.append(addition, ignore_index=True)
+    #                     # MOVE COLORS CYCLE
+    #                     start += 2
+    #                     end += 2
+    #                     # MOVE PLOT LOC COUNTER
+    #                     plot_loc_counter += 1
+    #
+    #     self.xy_relations_frame, self.relations_set_counts = plotting_df, plotting_set_counts
 
     def plot_xy_age_relations_unified(self, save=False, savefolder=None):
         if self.using_branches:
@@ -944,8 +1044,8 @@ class MultiTargetAreaQGIS:
         box_prop = templates.styled_prop
         colors_cycle = templates.colors_for_xy_relations
         # SUBPLOTS, FIGURE SETUP
-        plot_count = len(self.uniframe) * len(self.set_list)
-        cols = len(self.set_list)
+        plot_count = len(self.uniframe) * len(self.set_ranges_list)
+        cols = len(self.set_ranges_list)
         if plot_count == cols:
             rows = 1
         if plot_count % cols == 0:
@@ -1034,7 +1134,7 @@ class MultiTargetAreaQGIS:
         # MULTIPLE LEGENDS
         leg_frame = rel_frame.loc[rel_frame.plot_loc_counter < cols]
         hl = []
-        for idx, s in enumerate(self.set_list):
+        for idx, s in enumerate(self.set_ranges_list):
             hand = handles[idx * 2:idx * 2 + 2]
             lab = labels[idx * 2:idx * 2 + 2]
             hl.append([hand, lab])
@@ -1050,66 +1150,66 @@ class MultiTargetAreaQGIS:
             savename = Path(savefolder + '/xy_relations_all.png')
             plt.savefig(savename, dpi=200)
 
-    def determine_xy_relations_all(self):
-        # Determines xy relations and dynamically creates a dataframe as an aid for plotting the relations
-        # TODO: No within set relations.....yet... Problem?
-        if self.using_branches:
-            raise Exception('Age relations cannot be determined from BRANCH data.')
-
-        plot_loc_counter = 0
-        plotting_df = pd.DataFrame(columns=['name', 'r', 'c', 'ax', 'intersectframe', 'col_start'
-            , 'col_end'])
-        plotting_set_counts = {}
-        for _, row in self.df.iterrows():
-            name = row.TargetAreaLines.name
-            nodeframe = row.TargetAreaNodes.nodeframe
-            traceframe = row.TargetAreaLines.lineframe_main
-            traceframe['startpoint'] = traceframe.geometry.apply(tools.line_start_point)
-            traceframe['endpoint'] = traceframe.geometry.apply(tools.line_end_point)
-            traceframe = traceframe.reset_index(drop=True)
-            xypointsframe = tools.get_xy_points_frame_from_frame(nodeframe)
-            sets = traceframe.set.loc[traceframe['set'] > -1].unique().tolist()
-            sets.sort()
-            set_counts = traceframe.groupby('set').count()
-            plotting_set_counts[name] = set_counts
-            if len(sets) < 2:
-                raise Exception('Only one set defined. Cannot determine XY relations')
-            # COLOR CYCLE FOR BARS
-            start = 0
-            end = 2
-            # START OF COMPARISONS
-            for idx, s in enumerate(sets):
-                # If final set: Skip the final set, comparison already done.
-                if idx == len(sets) - 1:
-                    break
-                compare_sets = sets[idx + 1:]
-
-                for jdx, c_s in enumerate(compare_sets):
-                    bf = traceframe.loc[(traceframe['set'] == s) | (traceframe['set'] == c_s)]
-                    # TODO: More stats in age_relations?
-                    # bfs_count = len(traceframe.loc[(traceframe['set'] == s)])
-                    # bfcs_count = len(traceframe.loc[(traceframe['set'] == c_s)])
-
-                    mpf = tools.get_matching_points(xypointsframe, bf)
-
-                    intersectframe = tools.get_intersect_frame(mpf, bf, (s, c_s))
-                    intersectframe = intersectframe.groupby(['pointclass', 'setpair']).size()
-                    intersectframe = intersectframe.unstack()
-
-                    addition = {'name': name, 'plot_loc_counter': plot_loc_counter,
-                                'intersectframe': intersectframe, 'col_start': start, 'col_end': end}
-                    plotting_df = plotting_df.append(addition, ignore_index=True)
-                    # MOVE COLORS CYCLE
-                    start += 2
-                    end += 2
-                    # MOVE PLOT LOC COUNTER
-                    plot_loc_counter += 1
-
-        logger = logging.getLogger('logging_tool')
-        logger.info(f'self.xy_relations_frame_indiv: \n\n {self.xy_relations_frame_indiv}\n\n')
-        logger.info(f'self.relations_set_counts_indiv: \n\n {self.relations_set_counts_indiv}')
-
-        self.xy_relations_frame_indiv, self.relations_set_counts_indiv = plotting_df, plotting_set_counts
+    # def determine_xy_relations_all(self):
+    #     # Determines xy relations and dynamically creates a dataframe as an aid for plotting the relations
+    #     # TODO: No within set relations.....yet... Problem?
+    #     if self.using_branches:
+    #         raise Exception('Age relations cannot be determined from BRANCH data.')
+    #
+    #     plot_loc_counter = 0
+    #     plotting_df = pd.DataFrame(columns=['name', 'r', 'c', 'ax', 'intersectframe', 'col_start'
+    #         , 'col_end'])
+    #     plotting_set_counts = {}
+    #     for _, row in self.df.iterrows():
+    #         name = row.TargetAreaLines.name
+    #         nodeframe = row.TargetAreaNodes.nodeframe
+    #         traceframe = row.TargetAreaLines.lineframe_main
+    #         traceframe['startpoint'] = traceframe.geometry.apply(tools.line_start_point)
+    #         traceframe['endpoint'] = traceframe.geometry.apply(tools.line_end_point)
+    #         traceframe = traceframe.reset_index(drop=True)
+    #         xypointsframe = tools.get_xy_points_frame_from_frame(nodeframe)
+    #         sets = traceframe.set.loc[traceframe['set'] > -1].unique().tolist()
+    #         sets.sort()
+    #         set_counts = traceframe.groupby('set').count()
+    #         plotting_set_counts[name] = set_counts
+    #         if len(sets) < 2:
+    #             raise Exception('Only one set defined. Cannot determine XY relations')
+    #         # COLOR CYCLE FOR BARS
+    #         start = 0
+    #         end = 2
+    #         # START OF COMPARISONS
+    #         for idx, s in enumerate(sets):
+    #             # If final set: Skip the final set, comparison already done.
+    #             if idx == len(sets) - 1:
+    #                 break
+    #             compare_sets = sets[idx + 1:]
+    #
+    #             for jdx, c_s in enumerate(compare_sets):
+    #                 bf = traceframe.loc[(traceframe['set'] == s) | (traceframe['set'] == c_s)]
+    #                 # TODO: More stats in age_relations?
+    #                 # bfs_count = len(traceframe.loc[(traceframe['set'] == s)])
+    #                 # bfcs_count = len(traceframe.loc[(traceframe['set'] == c_s)])
+    #
+    #                 mpf = tools.get_nodes_intersecting_sets(xypointsframe, bf)
+    #
+    #                 intersectframe = tools.get_intersect_frame(mpf, bf, (s, c_s))
+    #                 intersectframe = intersectframe.groupby(['pointclass', 'setpair']).size()
+    #                 intersectframe = intersectframe.unstack()
+    #
+    #                 addition = {'name': name, 'plot_loc_counter': plot_loc_counter,
+    #                             'intersectframe': intersectframe, 'col_start': start, 'col_end': end}
+    #                 plotting_df = plotting_df.append(addition, ignore_index=True)
+    #                 # MOVE COLORS CYCLE
+    #                 start += 2
+    #                 end += 2
+    #                 # MOVE PLOT LOC COUNTER
+    #                 plot_loc_counter += 1
+    #
+    #     logger = logging.getLogger('logging_tool')
+    #     logger.info(f'self.xy_relations_frame_indiv: \n\n {self.xy_relations_frame_indiv}\n\n')
+    #     logger.info(f'self.relations_set_counts_indiv: \n\n {self.relations_set_counts_indiv}')
+    #
+    #     self.xy_relations_frame_indiv, self.relations_set_counts_indiv = plotting_df, plotting_set_counts
 
     def plot_xy_age_relations_all(self, save=False, savefolder=None):
         if self.using_branches:
@@ -1119,8 +1219,8 @@ class MultiTargetAreaQGIS:
         box_prop = templates.styled_prop
         colors_cycle = templates.colors_for_xy_relations
         # SUBPLOTS, FIGURE SETUP
-        plot_count = len(self.df) * len(self.set_list)
-        cols = len(self.set_list)
+        plot_count = len(self.df) * len(self.set_ranges_list)
+        cols = len(self.set_ranges_list)
         if plot_count == cols:
             rows = 1
         elif plot_count % cols == 0:
@@ -1201,7 +1301,7 @@ class MultiTargetAreaQGIS:
         # MULTIPLE LEGENDS
         leg_frame = rel_frame.loc[rel_frame.plot_loc_counter < cols]
         hl = []
-        for idx, s in enumerate(self.set_list):
+        for idx, s in enumerate(self.set_ranges_list):
             hand = handles[idx * 2:idx * 2 + 2]
             labs = labels[idx * 2:idx * 2 + 2]
             hl.append([hand, labs])
@@ -1902,7 +2002,7 @@ class MultiTargetAreaQGIS:
 #         #
 #         # # Assign None to later initialized attributes
 #         # # TODO: TEST PROPERLY
-#         # self.set_list = None
+#         # self.set_ranges_list = None
 #         # self.uniframe = None
 #         # self.uniframe_lineframe_main_concat = None
 #         # self.uni_left, self.uni_right, self.uni_top, self.uni_bottom = None, None, None, None

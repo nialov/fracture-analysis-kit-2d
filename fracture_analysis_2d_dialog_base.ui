@@ -781,7 +781,7 @@ in range
              <string>E.g. 45</string>
             </property>
             <property name="text">
-             <string>50</string>
+             <string>90</string>
             </property>
            </widget>
           </item>
@@ -791,7 +791,7 @@ in range
              <string>E.g. 15</string>
             </property>
             <property name="text">
-             <string>0</string>
+             <string>45</string>
             </property>
            </widget>
           </item>

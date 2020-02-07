@@ -1,6 +1,7 @@
 import logging
 
 import pandas as pd
+from qgis.core import QgsMessageLog
 
 from . import fracture_analysis_kit_qgis_tools as qgis_tools
 from . import target_area_analysis_qgis as taaq
