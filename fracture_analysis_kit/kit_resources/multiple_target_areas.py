@@ -9,6 +9,7 @@ from pathlib import Path
 import geopandas as gpd
 import matplotlib.patheffects as path_effects
 import matplotlib.pyplot as plt
+import seaborn as sns
 import numpy as np
 import pandas as pd
 import shapely
@@ -19,6 +20,7 @@ from qgis.core import QgsMessageLog, Qgis
 # Own code imports
 from . import templates
 from . import tools
+from ... import config
 
 
 # import kit_resources.templates as templates  # Contains plotting templates
@@ -157,7 +159,7 @@ class MultiTargetAreaQGIS:
         Creates new datasets (TargetAreaLines + TargetAreaNodes for each group) based on groupings by user.
         """
         logger = logging.getLogger('logging_tool')
-        uniframe = pd.DataFrame(columns=['TargetAreaLines', 'TargetAreaNodes', 'group', 'uni_ld_area', 'cut_off'])
+        uniframe = pd.DataFrame(columns=['TargetAreaLines', 'TargetAreaNodes', 'group', 'name', 'uni_ld_area', 'cut_off'])
         for idx, group in enumerate(self.groups):
             frame = self.df.loc[self.df['group'] == group]
 
@@ -177,7 +179,7 @@ class MultiTargetAreaQGIS:
                 unif_nd_main = tools.unify_nds(frame.TargetAreaNodes.tolist(), group)
                 logger.info('Appending uniframe')
                 uniframe = uniframe.append(
-                    {'TargetAreaLines': unif_ld_main, 'TargetAreaNodes': unif_nd_main, 'group': group,
+                    {'TargetAreaLines': unif_ld_main, 'TargetAreaNodes': unif_nd_main, 'group': group, 'name': group,
                      'uni_ld_area': uni_ld_area, 'cut_off': cut_off},
                     ignore_index=True)
             else:
@@ -869,7 +871,7 @@ class MultiTargetAreaQGIS:
     #         for idx, row in self.uniframe.iterrows():
     #             row['TargetAreaLines'].plot_azimuth(rose_type=rose_typesave=save, savefolder=savefolder, branches=branches)
 
-    def determine_crosscut_abutting_relations(self, unified: bool):
+    def determine_crosscut_abutting_relationships(self, unified: bool):
         """
         Determines cross-cutting and abutting relationships between all inputted sets by using spatial intersects
         between node and trace data. Sets result as a class parameter self.relations_df that is used for plotting.
@@ -965,7 +967,112 @@ class MultiTargetAreaQGIS:
         else:
             self.relations_df = relations_df
 
+    def plot_crosscut_abutting_relationships(self, unified: bool, save=False, savefolder=''):
+        """
+        Plots cross-cutting and abutting relationships for individual target areas or for grouped data.
+        :param unified: Calculate for unified datasets or individual target areas
+        :type unified: bool
+        :param save: Save plots or not
+        :type save: bool
+        :param savefolder: Folder to save plots to
+        :type savefolder: str
+        """
+        if unified:
+            frame = self.uniframe
+            rel_frame = self.unified_relations_df
+        else:
+            frame = self.df
+            rel_frame = self.relations_df
 
+        if self.using_branches:
+            raise Exception('Age relations cannot be determined from BRANCH data.')
+
+        style = config.styled_text_dict
+        box_prop = config.styled_prop
+        colors_cycle = config.colors_for_xy_relations
+        # SUBPLOTS, FIGURE SETUP
+        cols = len(self.set_df)
+        width = 12
+        height = (width / cols) * 0.75
+        names = set(rel_frame.name.tolist())
+        with plt.style.context('default'):
+            for name in names:
+                rel_frame_with_name = rel_frame.loc[rel_frame.name == name]
+                frame_with_name = frame.loc[frame.name == name]
+                if len(frame_with_name) != 1:
+                    raise Exception(f'Multiple frames with name == name in frame. Unified: {unified}')
+                set_names = self.set_df.Set.tolist()
+                set_counts = []
+                lineframe = frame_with_name.iloc[0].TargetAreaLines.lineframe_main
+
+                for set_name in set_names:
+                    set_counts.append(len(lineframe.loc[lineframe.set == set_name]))
+
+
+
+                fig, axes = plt.subplots(ncols=cols, nrows=1, figsize=(width, height))
+
+                prop_title = dict(boxstyle='square', facecolor='linen', alpha=1, linewidth=2)
+
+                fig.suptitle(f'   {name}   ', x=0.19, y=1.0,
+                             fontsize=20, fontweight='bold', fontfamily='Calibri'
+                             , va='center', bbox=prop_title)
+
+                for ax, idx_row in zip(axes, rel_frame_with_name.iterrows()):
+                    row = idx_row[1]
+                    bars = ax.bar(x=[0.3, 0.55, 0.65]
+                                  , height=[row['x'], row['y'], row['y-reverse']]
+                                  , width=0.1
+                                  , color=['darkgrey', 'darkolivegreen', 'darkseagreen']
+                                  , linewidth=1
+                                  , edgecolor='black'
+                                  , alpha=0.95
+                                  , zorder=10)
+
+                    ax.legend(bars, (f'Sets {row.sets[0]} and {row.sets[1]} cross-cut'
+                                     , f'Set {row.sets[0]} abuts to set {row.sets[1]}'
+                                     , f'Set {row.sets[1]} abuts to set {row.sets[0]}')
+                              , framealpha=1
+                              , loc='upper center'
+                              , edgecolor='black'
+                              , prop={'family': 'Calibri'})
+
+                    ax.set_ylim(0, 1.6 * max([row['x'], row['y'], row['y-reverse']]))
+
+                    ax.grid(zorder=-10, color='black', alpha=0.5)
+
+                    xticks = [0.3, 0.6]
+                    xticklabels = ['X', 'Y']
+                    ax.set_xticks(xticks)
+                    ax.set_xticklabels(xticklabels)
+
+                    xticklabels = ax.get_xticklabels()
+
+                    for xtick in xticklabels:
+                        xtick.set_fontweight('bold')
+                        xtick.set_fontsize(12)
+
+                    ax.set_xlabel('Node type', fontweight='bold', fontsize=13, fontstyle='italic', fontfamily='Calibri')
+                    ax.set_ylabel('Node count', fontweight='bold', fontsize=13, fontstyle='italic', fontfamily='Calibri')
+
+                    plt.subplots_adjust(wspace=0.3)
+
+                    if ax == axes[-1]:
+                        text = ''
+                        prop = dict(boxstyle='square', facecolor='linen', alpha=1, pad=0.45)
+                        for set_label, set_len in zip(set_names, set_counts):
+                            text += f'Set {set_label} trace count: {set_len}'
+                            if not set_label == set_names[-1]:
+                                text += '\n'
+                        ax.text(1.1, 0.5, text
+                                , rotation=90
+                                , transform=ax.transAxes
+                                , va='center'
+                                , bbox=prop
+                                , fontfamily='Calibri')
+                if save:
+                    savename = Path(savefolder + f'/{name}_crosscutting_abutting_relationships.png')
+                    plt.savefig(savename, dpi=200, bbox_inches='tight')
 
 
     # def determine_xy_relations_unified(self, big_plot=True):

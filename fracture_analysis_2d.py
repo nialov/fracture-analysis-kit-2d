@@ -553,14 +553,14 @@ class FractureAnalysis2D:
                 return
 
         # Run analysis
-        # main_target_analysis.main_multi_target_area(self.table_df, results_folder, analysis_name,
-        #                                             self.gnames_cutoffs_df,
-        #                                             self.set_df, self.debug_logger)
-        # TODO: Implement more tasks (traces and branches)?
-        # Run as task
-        main_target_analysis.task_main_multi_target_area(self.table_df, results_folder, analysis_name,
+        main_target_analysis.main_multi_target_area(self.table_df, results_folder, analysis_name,
                                                     self.gnames_cutoffs_df,
                                                     self.set_df, self.debug_logger)
+        # TODO: Implement more tasks (traces and branches)?
+        # Run as task
+        # main_target_analysis.task_main_multi_target_area(self.table_df, results_folder, analysis_name,
+        #                                             self.gnames_cutoffs_df,
+        #                                             self.set_df, self.debug_logger)
 
         # Push finish message
         # self.iface.messageBar().pushMessage(

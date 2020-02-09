@@ -77,7 +77,7 @@ class TargetAreaAnalysis:
         self.branch_ta.define_sets()
 
     # Create folder structure for plots
-    # TODO: use self.plotting_directories
+
 
     def plots(self):
         self.trace_ta.plot_length_distribution(save=True, savefolder=self.plotting_directory)
@@ -91,7 +91,6 @@ class MultiTargetAreaAnalysis:
             self, table_df, plotting_directory, analysis_name, gnames_cutoffs_df, set_df
     ):
         self.logger = logging.getLogger('logging_tool')
-        # TODO: both dfs!!!
         self.set_df = set_df
         self.gnames_cutoffs_df = gnames_cutoffs_df
         self.table_df = table_df
@@ -131,19 +130,12 @@ class MultiTargetAreaAnalysis:
         # TODO: Check setframes
         # self.analysis_traces.create_setframes_for_all_unified()
 
-        # self.logger.info('DETERMINE XY RELATIONS ALL')
-        # self.analysis_traces.determine_xy_relations_all()
-        # self.logger.info('DETERMINE XY RELATIONS UNIF ALL')
-        # self.analysis_traces.determine_xy_relations_unified()
-        # self.logger.info('gather_topology_parameters(unified=False)')
-
         self.analysis_traces.gather_topology_parameters(unified=False)
-        self.logger.info('gather_topology_parameters(unified=True)')
         self.analysis_traces.gather_topology_parameters(unified=True)
 
         # Cross-cutting and abutting relationships
-        self.analysis_traces.determine_crosscut_abutting_relations(unified=False)
-        self.analysis_traces.determine_crosscut_abutting_relations(unified=True)
+        self.analysis_traces.determine_crosscut_abutting_relationships(unified=False)
+        self.analysis_traces.determine_crosscut_abutting_relationships(unified=True)
 
         # BRANCH DATA SETUP
         self.analysis_branches.calc_attributes_for_all()
@@ -260,6 +252,11 @@ class MultiTargetAreaAnalysis:
         # TODO: Fix for age relations single ax, put data into multiple images?
         # TODO: Fix whole age analysis
 
+        # Cross-cutting and abutting relationships
+        self.logger.info('Plotting crosscutting and abutting rels')
+        self.analysis_traces.plot_crosscut_abutting_relationships(unified=False, save=True, savefolder=self.plotting_directory + '/age_relations/indiv')
+        self.analysis_traces.plot_crosscut_abutting_relationships(unified=True, save=True, savefolder=self.plotting_directory + '/age_relations')
+        self.logger.info('Plotting crosscutting and abutting rels ENDED')
         # logger.info(f'self.table_df:\n\n{self.table_df}')
         #
         # self.logger.info(f'Shape of self.table_df: {self.table_df.shape}')

@@ -26,7 +26,6 @@
 
 # import sys, os
 
-# Add kit directory to python path TODO: Fix
 # currentPath = os.path.dirname( __file__ )
 # sys.path.append(os.path.abspath(os.path.dirname(__file__) + '/fracture_analysis_kit'))
 
