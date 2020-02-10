@@ -47,13 +47,13 @@ def styling_plots(style):
     """
     plt.rc('font', size=13, family='Times New Roman')
     if style == 'traces':
-        plt.rc('axes', facecolor='seashell', linewidth=0.75, grid=True)
+        plt.rc('axes', facecolor='oldlace', linewidth=0.75, grid=True)
     if style == 'branches':
-        plt.rc('axes', facecolor='#CDFFE6', linewidth=0.75, grid=True)
+        plt.rc('axes', facecolor='whitesmoke', linewidth=0.75, grid=True)
     if style == 'gray':
         plt.rc('axes', facecolor='lightgrey', linewidth=0.75, grid=True)
     plt.rc('grid', linewidth=0.75, c='k', alpha=0.5)
-    plt.rc('legend', facecolor='wheat', shadow=True, framealpha=1, edgecolor='k')
+    plt.rc('legend', facecolor='white', shadow=False, framealpha=1, edgecolor='k')
     plt.rc('scatter', marker='+')
     plt.rc('figure', edgecolor='k', frameon=True, figsize=(8, 6))
     plt.rc('xtick', bottom=True)

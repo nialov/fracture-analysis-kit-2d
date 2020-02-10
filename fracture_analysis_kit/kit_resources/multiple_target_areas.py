@@ -18,7 +18,6 @@ from matplotlib.ticker import FormatStrFormatter
 from qgis.core import QgsMessageLog, Qgis
 
 # Own code imports
-from . import templates
 from . import tools
 from ... import config
 
@@ -762,6 +761,37 @@ class MultiTargetAreaQGIS:
             fig.savefig(savename, dpi=150)
             fig_w.savefig(savename_w, dpi=150)
 
+    def plot_azimuths_weighted(self, unified: bool, save=False, savefolder=''):
+        branches = self.using_branches
+
+        if unified:
+            frame = self.uniframe
+        else:
+            frame = self.df
+
+        # Individual plots
+        for idx, row in frame.iterrows():
+            name = row.TargetAreaLines.name
+            ph = 'group' if unified else 'area'
+            fold = 'branches' if branches else 'traces'
+            row['TargetAreaLines'].plot_azimuth_weighted(rose_type='equal-radius', set_visualization=False)
+            if save:
+                if unified:
+                    savename = Path(savefolder + f'/equal_radius/{fold}/{name}_{ph}_weighted_azimuths.png')
+                else:
+                    savename = Path(savefolder + f'/equal_radius/{fold}/{name}_{ph}_weighted_azimuths.png')
+
+                plt.savefig(savename, dpi=150, bbox_inches='tight')
+
+            row['TargetAreaLines'].plot_azimuth_weighted(rose_type='equal-area', set_visualization=False)
+            if save:
+                if unified:
+                    savename = Path(savefolder + f'/equal_area/{fold}/{name}_{ph}_weighted_azimuths.png')
+                else:
+                    savename = Path(savefolder + f'/equal_area/{fold}/{name}_{ph}_weighted_azimuths.png')
+
+                plt.savefig(savename, dpi=150, bbox_inches='tight')
+
     # def plot_all_azimuths(self, save=False, savefolder=None, big_plots=True, small_text=False):
     #     if big_plots:
     #         plot_count = len(self.df)
@@ -1143,119 +1173,119 @@ class MultiTargetAreaQGIS:
     #
     #     self.xy_relations_frame, self.relations_set_counts = plotting_df, plotting_set_counts
 
-    def plot_xy_age_relations_unified(self, save=False, savefolder=None):
-        if self.using_branches:
-            raise Exception('Age relations cannot be determined from BRANCH data.')
-        rel_frame = self.xy_relations_frame
-        style = templates.styled_text_dict
-        box_prop = templates.styled_prop
-        colors_cycle = templates.colors_for_xy_relations
-        # SUBPLOTS, FIGURE SETUP
-        plot_count = len(self.uniframe) * len(self.set_ranges_list)
-        cols = len(self.set_ranges_list)
-        if plot_count == cols:
-            rows = 1
-        if plot_count % cols == 0:
-            rows = plot_count // cols
-        else:
-            rows = plot_count // cols + 1
-        width = 18
-        height = (width / cols) * (rows * 0.75)
-
-        fig, axes = plt.subplots(ncols=cols, nrows=rows, figsize=(width, height))
-        rel_frame['axe'] = None
-        for idx, row in rel_frame.iterrows():
-            intersectframe = row.intersectframe
-            colors = colors_cycle[row.col_start:row.col_end]
-            plot_loc_counter = row.plot_loc_counter
-            name = row.name
-            r = plot_loc_counter // cols
-            c = plot_loc_counter % cols
-            if rows == 1:
-                ax = axes[int(c)]
-            else:
-                ax = axes[int(r)][int(c)]
-            rel_frame.axe.iloc[idx] = ax
-            try:
-                ipb = intersectframe.plot.bar(title=None, ax=ax, legend=None
-                                              , colors=colors, linewidth=1, edgecolor='k', zorder=5)
-                ipb.patches = ipb.patches[1:]
-                ipb.patches[1].xy = (-0.125, 0)
-                ipb.patches[1].width = 2
-                ipb.patches[1].linewidth = 5
-            except TypeError:
-                logger = logging.getLogger('logging_tool')
-                logger.exception('type error in age relations')
-                continue
-            # TICK FORMATS
-            ax.yaxis.set_major_formatter(FormatStrFormatter('%.0f'))
-            labels = ax.get_yticklabels()
-            for label in labels:
-                label.set_fontsize(20)
-                label.set_rotation(0)
-            # plt.yticks(ax.get_yticks(), l, fontsize=20)
-            # TITLES ON THE LEFT SIDE
-            if c == 0:
-                name = name
-                ax.text(s=name, x=-0.55, y=0.5, transform=ax.transAxes
-                        , fontdict=style, bbox=box_prop
-                        , ha='center', va='center'
-                        , multialignment='center', fontsize=27)
-
-            if c == cols - 1:
-                count_text = 'SET\nTRACE COUNTS'
-                set_counts = self.relations_set_counts[name]
-                for idx_, row_ in set_counts.iterrows():
-                    if idx_ == -1:
-                        continue
-                    count_text = count_text + '\nSET {}: {}'.format(idx_, row_.geometry)
-                ax.text(s=count_text, x=1.45, y=0.5, transform=ax.transAxes
-                        , bbox=box_prop
-                        , ha='center', va='center'
-                        , multialignment='center', fontsize=20)
-            # TICK LABELS
-            ax.set_xlabel('')
-            plt.xticks()
-            labels = ax.get_xticklabels()
-            # l = []
-            for label in labels:
-                label.set_fontsize(22)
-                label.set_fontweight('semibold')
-                label.set_rotation(0)
-                # l.append(label)
-            # plt.xticks(ax.get_xticks(), l, fontsize=22)
-            # XLABEL AT BOTTOM ONLY
-            if r == len(axes) - 1:
-                ax.set_xlabel('NODE CLASS', fontsize='28', style='italic')
-
-        df = pd.DataFrame(columns=['handle', 'label'])
-        for axe in axes:
-            for ax in axe:
-                handles, labels = ax.get_legend_handles_labels()
-                for handle, label in zip(handles, labels):
-                    df = df.append({'handle': handle, 'label': label}, ignore_index=True)
-
-        df = df.drop_duplicates(subset='label')
-        handles = df.handle.tolist()
-        labels = df.label.tolist()
-        # MULTIPLE LEGENDS
-        leg_frame = rel_frame.loc[rel_frame.plot_loc_counter < cols]
-        hl = []
-        for idx, s in enumerate(self.set_ranges_list):
-            hand = handles[idx * 2:idx * 2 + 2]
-            lab = labels[idx * 2:idx * 2 + 2]
-            hl.append([hand, lab])
-        legs = []
-        for idx, row in leg_frame.iterrows():
-            leg = row.axe.legend(hl[idx][0], hl[idx][1], loc=(0.3, 1.2), fontsize=20)
-            legs.append(leg)
-        for legenda in legs:
-            fig.add_artist(legenda)
-        # fig.legend(handles, labels, loc='center right', fontsize=20, borderaxespad=1)
-        plt.subplots_adjust(right=0.8, left=0.2)
-        if save:
-            savename = Path(savefolder + '/xy_relations_all.png')
-            plt.savefig(savename, dpi=200)
+    # def plot_xy_age_relations_unified(self, save=False, savefolder=None):
+    #     if self.using_branches:
+    #         raise Exception('Age relations cannot be determined from BRANCH data.')
+    #     rel_frame = self.xy_relations_frame
+    #     style = templates.styled_text_dict
+    #     box_prop = templates.styled_prop
+    #     colors_cycle = templates.colors_for_xy_relations
+    #     # SUBPLOTS, FIGURE SETUP
+    #     plot_count = len(self.uniframe) * len(self.set_ranges_list)
+    #     cols = len(self.set_ranges_list)
+    #     if plot_count == cols:
+    #         rows = 1
+    #     if plot_count % cols == 0:
+    #         rows = plot_count // cols
+    #     else:
+    #         rows = plot_count // cols + 1
+    #     width = 18
+    #     height = (width / cols) * (rows * 0.75)
+    #
+    #     fig, axes = plt.subplots(ncols=cols, nrows=rows, figsize=(width, height))
+    #     rel_frame['axe'] = None
+    #     for idx, row in rel_frame.iterrows():
+    #         intersectframe = row.intersectframe
+    #         colors = colors_cycle[row.col_start:row.col_end]
+    #         plot_loc_counter = row.plot_loc_counter
+    #         name = row.name
+    #         r = plot_loc_counter // cols
+    #         c = plot_loc_counter % cols
+    #         if rows == 1:
+    #             ax = axes[int(c)]
+    #         else:
+    #             ax = axes[int(r)][int(c)]
+    #         rel_frame.axe.iloc[idx] = ax
+    #         try:
+    #             ipb = intersectframe.plot.bar(title=None, ax=ax, legend=None
+    #                                           , colors=colors, linewidth=1, edgecolor='k', zorder=5)
+    #             ipb.patches = ipb.patches[1:]
+    #             ipb.patches[1].xy = (-0.125, 0)
+    #             ipb.patches[1].width = 2
+    #             ipb.patches[1].linewidth = 5
+    #         except TypeError:
+    #             logger = logging.getLogger('logging_tool')
+    #             logger.exception('type error in age relations')
+    #             continue
+    #         # TICK FORMATS
+    #         ax.yaxis.set_major_formatter(FormatStrFormatter('%.0f'))
+    #         labels = ax.get_yticklabels()
+    #         for label in labels:
+    #             label.set_fontsize(20)
+    #             label.set_rotation(0)
+    #         # plt.yticks(ax.get_yticks(), l, fontsize=20)
+    #         # TITLES ON THE LEFT SIDE
+    #         if c == 0:
+    #             name = name
+    #             ax.text(s=name, x=-0.55, y=0.5, transform=ax.transAxes
+    #                     , fontdict=style, bbox=box_prop
+    #                     , ha='center', va='center'
+    #                     , multialignment='center', fontsize=27)
+    #
+    #         if c == cols - 1:
+    #             count_text = 'SET\nTRACE COUNTS'
+    #             set_counts = self.relations_set_counts[name]
+    #             for idx_, row_ in set_counts.iterrows():
+    #                 if idx_ == -1:
+    #                     continue
+    #                 count_text = count_text + '\nSET {}: {}'.format(idx_, row_.geometry)
+    #             ax.text(s=count_text, x=1.45, y=0.5, transform=ax.transAxes
+    #                     , bbox=box_prop
+    #                     , ha='center', va='center'
+    #                     , multialignment='center', fontsize=20)
+    #         # TICK LABELS
+    #         ax.set_xlabel('')
+    #         plt.xticks()
+    #         labels = ax.get_xticklabels()
+    #         # l = []
+    #         for label in labels:
+    #             label.set_fontsize(22)
+    #             label.set_fontweight('semibold')
+    #             label.set_rotation(0)
+    #             # l.append(label)
+    #         # plt.xticks(ax.get_xticks(), l, fontsize=22)
+    #         # XLABEL AT BOTTOM ONLY
+    #         if r == len(axes) - 1:
+    #             ax.set_xlabel('NODE CLASS', fontsize='28', style='italic')
+    #
+    #     df = pd.DataFrame(columns=['handle', 'label'])
+    #     for axe in axes:
+    #         for ax in axe:
+    #             handles, labels = ax.get_legend_handles_labels()
+    #             for handle, label in zip(handles, labels):
+    #                 df = df.append({'handle': handle, 'label': label}, ignore_index=True)
+    #
+    #     df = df.drop_duplicates(subset='label')
+    #     handles = df.handle.tolist()
+    #     labels = df.label.tolist()
+    #     # MULTIPLE LEGENDS
+    #     leg_frame = rel_frame.loc[rel_frame.plot_loc_counter < cols]
+    #     hl = []
+    #     for idx, s in enumerate(self.set_ranges_list):
+    #         hand = handles[idx * 2:idx * 2 + 2]
+    #         lab = labels[idx * 2:idx * 2 + 2]
+    #         hl.append([hand, lab])
+    #     legs = []
+    #     for idx, row in leg_frame.iterrows():
+    #         leg = row.axe.legend(hl[idx][0], hl[idx][1], loc=(0.3, 1.2), fontsize=20)
+    #         legs.append(leg)
+    #     for legenda in legs:
+    #         fig.add_artist(legenda)
+    #     # fig.legend(handles, labels, loc='center right', fontsize=20, borderaxespad=1)
+    #     plt.subplots_adjust(right=0.8, left=0.2)
+    #     if save:
+    #         savename = Path(savefolder + '/xy_relations_all.png')
+    #         plt.savefig(savename, dpi=200)
 
     # def determine_xy_relations_all(self):
     #     # Determines xy relations and dynamically creates a dataframe as an aid for plotting the relations
@@ -1318,111 +1348,111 @@ class MultiTargetAreaQGIS:
     #
     #     self.xy_relations_frame_indiv, self.relations_set_counts_indiv = plotting_df, plotting_set_counts
 
-    def plot_xy_age_relations_all(self, save=False, savefolder=None):
-        if self.using_branches:
-            raise Exception('Age relations cannot be determined from BRANCH data.')
-        rel_frame = self.xy_relations_frame_indiv
-        style = templates.styled_text_dict
-        box_prop = templates.styled_prop
-        colors_cycle = templates.colors_for_xy_relations
-        # SUBPLOTS, FIGURE SETUP
-        plot_count = len(self.df) * len(self.set_ranges_list)
-        cols = len(self.set_ranges_list)
-        if plot_count == cols:
-            rows = 1
-        elif plot_count % cols == 0:
-            rows = plot_count // cols
-        else:
-            rows = plot_count // cols + 1
-        width = 16
-        height = (width / cols) * (rows * 0.75)
-
-        # BIG PLOT
-        fig, axes = plt.subplots(ncols=cols, nrows=rows, figsize=(width, height), sharex='col')
-        rel_frame['axe'] = None
-        # START PLOTTING AXES
-        for idx, row in rel_frame.iterrows():
-            intersectframe = row.intersectframe
-            colors = colors_cycle[row.col_start:row.col_end]
-            plot_loc_counter = row.plot_loc_counter
-            name = row.name
-            r = plot_loc_counter // cols
-            c = plot_loc_counter % cols
-            if rows == 1:
-                ax = axes[int(c)]
-            else:
-                ax = axes[int(r)][int(c)]
-            rel_frame.axe.iloc[idx] = ax
-            try:
-                ipb = intersectframe.plot.bar(title=None, ax=ax, legend=None
-                                              , colors=colors, linewidth=1, edgecolor='k', zorder=5)
-            except TypeError:
-                continue
-            # TICK FORMATS
-            ax.yaxis.set_major_formatter(FormatStrFormatter('%.0f'))
-            # TITLES ON THE LEFT SIDE
-            if c == 0:
-                ax.text(s=name, x=-0.36, y=0.5, transform=ax.transAxes
-                        , fontdict=style, bbox=box_prop
-                        , ha='center', va='center'
-                        , multialignment='center', fontsize=18)
-
-            if c == cols - 1:
-                count_text = 'SET\nTRACE COUNTS'
-
-                logger = logging.getLogger('logging_tool')
-                logger.info(f'self.relations_set_counts_indiv: \n\n {self.relations_set_counts_indiv}\n\n')
-                logger.info(f'rel_frame: \n\n {rel_frame}')
-
-                set_counts = self.relations_set_counts_indiv[name]
-                for idx_, row_ in set_counts.iterrows():
-                    if idx_ == -1:
-                        continue
-                    count_text = count_text + '\nSET {}: {}'.format(idx, row_.geometry)
-                ax.text(s=count_text, x=1.28, y=0.5, transform=ax.transAxes
-                        , bbox=box_prop
-                        , ha='center', va='center'
-                        , multialignment='center', fontsize=13)
-            # TICK LABELS AT BOTTOM
-            if r == rows - 1:
-                labels = ax.get_xticklabels()
-                labs = []
-                for label in labels:
-                    label.set_fontsize(19)
-                    label.set_fontweight('semibold')
-                    label.set_rotation(0)
-                    labs.append(label)
-                plt.xticks(ax.get_xticks(), labs)
-
-                ax.set_xlabel('NODE CLASS', fontsize='22', style='italic')
-
-        df = pd.DataFrame(columns=['handle', 'label'])
-        for axe in axes:
-            for ax in axe:
-                handles, labels = ax.get_legend_handles_labels()
-                for handle, label in zip(handles, labels):
-                    df = df.append({'handle': handle, 'label': label}, ignore_index=True)
-        df = df.drop_duplicates(subset='label')
-        handles = df.handle.tolist()
-        labels = df.label.tolist()
-        # MULTIPLE LEGENDS
-        leg_frame = rel_frame.loc[rel_frame.plot_loc_counter < cols]
-        hl = []
-        for idx, s in enumerate(self.set_ranges_list):
-            hand = handles[idx * 2:idx * 2 + 2]
-            labs = labels[idx * 2:idx * 2 + 2]
-            hl.append([hand, labs])
-        legs = []
-        for idx, row in leg_frame.iterrows():
-            leg = row.axe.legend(hl[idx][0], hl[idx][1], loc=(0.3, 1.2), fontsize=20)
-            legs.append(leg)
-        for legenda in legs:
-            fig.add_artist(legenda)
-        # fig.legend(handles, labels, loc='center right', fontsize=20, borderaxespad=1)
-        plt.subplots_adjust(right=0.85, left=0.15)
-        if save:
-            savename = Path(savefolder + '/xy_relations_indiv_all.png')
-            plt.savefig(savename, dpi=200)
+    # def plot_xy_age_relations_all(self, save=False, savefolder=None):
+    #     if self.using_branches:
+    #         raise Exception('Age relations cannot be determined from BRANCH data.')
+    #     rel_frame = self.xy_relations_frame_indiv
+    #     style = templates.styled_text_dict
+    #     box_prop = templates.styled_prop
+    #     colors_cycle = templates.colors_for_xy_relations
+    #     # SUBPLOTS, FIGURE SETUP
+    #     plot_count = len(self.df) * len(self.set_ranges_list)
+    #     cols = len(self.set_ranges_list)
+    #     if plot_count == cols:
+    #         rows = 1
+    #     elif plot_count % cols == 0:
+    #         rows = plot_count // cols
+    #     else:
+    #         rows = plot_count // cols + 1
+    #     width = 16
+    #     height = (width / cols) * (rows * 0.75)
+    #
+    #     # BIG PLOT
+    #     fig, axes = plt.subplots(ncols=cols, nrows=rows, figsize=(width, height), sharex='col')
+    #     rel_frame['axe'] = None
+    #     # START PLOTTING AXES
+    #     for idx, row in rel_frame.iterrows():
+    #         intersectframe = row.intersectframe
+    #         colors = colors_cycle[row.col_start:row.col_end]
+    #         plot_loc_counter = row.plot_loc_counter
+    #         name = row.name
+    #         r = plot_loc_counter // cols
+    #         c = plot_loc_counter % cols
+    #         if rows == 1:
+    #             ax = axes[int(c)]
+    #         else:
+    #             ax = axes[int(r)][int(c)]
+    #         rel_frame.axe.iloc[idx] = ax
+    #         try:
+    #             ipb = intersectframe.plot.bar(title=None, ax=ax, legend=None
+    #                                           , colors=colors, linewidth=1, edgecolor='k', zorder=5)
+    #         except TypeError:
+    #             continue
+    #         # TICK FORMATS
+    #         ax.yaxis.set_major_formatter(FormatStrFormatter('%.0f'))
+    #         # TITLES ON THE LEFT SIDE
+    #         if c == 0:
+    #             ax.text(s=name, x=-0.36, y=0.5, transform=ax.transAxes
+    #                     , fontdict=style, bbox=box_prop
+    #                     , ha='center', va='center'
+    #                     , multialignment='center', fontsize=18)
+    #
+    #         if c == cols - 1:
+    #             count_text = 'SET\nTRACE COUNTS'
+    #
+    #             logger = logging.getLogger('logging_tool')
+    #             logger.info(f'self.relations_set_counts_indiv: \n\n {self.relations_set_counts_indiv}\n\n')
+    #             logger.info(f'rel_frame: \n\n {rel_frame}')
+    #
+    #             set_counts = self.relations_set_counts_indiv[name]
+    #             for idx_, row_ in set_counts.iterrows():
+    #                 if idx_ == -1:
+    #                     continue
+    #                 count_text = count_text + '\nSET {}: {}'.format(idx, row_.geometry)
+    #             ax.text(s=count_text, x=1.28, y=0.5, transform=ax.transAxes
+    #                     , bbox=box_prop
+    #                     , ha='center', va='center'
+    #                     , multialignment='center', fontsize=13)
+    #         # TICK LABELS AT BOTTOM
+    #         if r == rows - 1:
+    #             labels = ax.get_xticklabels()
+    #             labs = []
+    #             for label in labels:
+    #                 label.set_fontsize(19)
+    #                 label.set_fontweight('semibold')
+    #                 label.set_rotation(0)
+    #                 labs.append(label)
+    #             plt.xticks(ax.get_xticks(), labs)
+    #
+    #             ax.set_xlabel('NODE CLASS', fontsize='22', style='italic')
+    #
+    #     df = pd.DataFrame(columns=['handle', 'label'])
+    #     for axe in axes:
+    #         for ax in axe:
+    #             handles, labels = ax.get_legend_handles_labels()
+    #             for handle, label in zip(handles, labels):
+    #                 df = df.append({'handle': handle, 'label': label}, ignore_index=True)
+    #     df = df.drop_duplicates(subset='label')
+    #     handles = df.handle.tolist()
+    #     labels = df.label.tolist()
+    #     # MULTIPLE LEGENDS
+    #     leg_frame = rel_frame.loc[rel_frame.plot_loc_counter < cols]
+    #     hl = []
+    #     for idx, s in enumerate(self.set_ranges_list):
+    #         hand = handles[idx * 2:idx * 2 + 2]
+    #         labs = labels[idx * 2:idx * 2 + 2]
+    #         hl.append([hand, labs])
+    #     legs = []
+    #     for idx, row in leg_frame.iterrows():
+    #         leg = row.axe.legend(hl[idx][0], hl[idx][1], loc=(0.3, 1.2), fontsize=20)
+    #         legs.append(leg)
+    #     for legenda in legs:
+    #         fig.add_artist(legenda)
+    #     # fig.legend(handles, labels, loc='center right', fontsize=20, borderaxespad=1)
+    #     plt.subplots_adjust(right=0.85, left=0.15)
+    #     if save:
+    #         savename = Path(savefolder + '/xy_relations_indiv_all.png')
+    #         plt.savefig(savename, dpi=200)
 
     def plot_xyi(self, unified: bool, save=False, savefolder=None):
         """
@@ -1773,8 +1803,8 @@ class MultiTargetAreaQGIS:
         branches = self.using_branches
         log_scale_columns = ['Mean Length', 'Areal Frequency B20',
                              'Fracture Intensity B21', 'Fracture Intensity P21', 'Areal Frequency P20']
-        prop = templates.styled_prop
-        units_for_columns = templates.units_for_columns
+        prop = config.styled_prop
+        units_for_columns = config.units_for_columns
         if unified:
             topology_concat = self.uniframe_topology_concat
         else:
@@ -2060,8 +2090,8 @@ class MultiTargetAreaQGIS:
         for idx, row in frame.iterrows():
             row.TargetAreaLines.calc_anisotropy()
             row.TargetAreaLines.plot_anisotropy_styled()
-            style = templates.styled_text_dict
-            prop = templates.styled_prop
+            style = config.styled_text_dict
+            prop = config.styled_prop
             plt.title(row.TargetAreaLines.name, loc='left', fontdict=style, fontsize=25, bbox=prop)
             if save:
                 if unified:

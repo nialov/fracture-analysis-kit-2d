@@ -1,11 +1,11 @@
 import logging
 
+
 from . import fracture_analysis_kit_qgis_tools as qgis_tools
 from .kit_resources import multiple_target_areas as mta
 # from .kit_resources import layers_to_pandas as lap
 from .kit_resources import target_area as ta
-from .kit_resources import templates
-
+from .. import config
 
 
 class TargetAreaAnalysis:
@@ -155,7 +155,7 @@ class MultiTargetAreaAnalysis:
         self.logger.info('__________________BRANCH DATA PLOTTING START______________________')
 
         # ___________________BRANCH DATA_______________________
-        templates.styling_plots("branches")
+        config.styling_plots("branches")
         # Length distributions
         self.analysis_branches.plot_lengths(unified=False, save=True,
                                             savefolder=self.plotting_directory + '/length_distributions/indiv/branches')
@@ -168,25 +168,29 @@ class MultiTargetAreaAnalysis:
         #         save=True, savefolder=self.plotting_directory + '/length_distributions/branches/predictions', predict_with=p)
 
         # Azimuths
-        self.analysis_branches.plot_azimuths(unified=False, rose_type='equal-radius', save=True
-                                             ,
-                                             savefolder=self.plotting_directory + '/azimuths/equal_radius/indiv/branches')
-        self.analysis_branches.plot_azimuths(unified=True, rose_type='equal-radius', save=True
-                                             , savefolder=self.plotting_directory + '/azimuths/equal_radius/branches')
-        self.analysis_branches.plot_azimuths(unified=False, rose_type='equal-area', save=True
-                                             ,
-                                             savefolder=self.plotting_directory + '/azimuths/equal_area/indiv/branches')
-        self.analysis_branches.plot_azimuths(unified=True, rose_type='equal-area', save=True
-                                             , savefolder=self.plotting_directory + '/azimuths/equal_area/branches')
-
-        # Experimental azimuth
-        self.analysis_branches.plot_azimuths_exp(unified=True, rose_type='equal-area', save=True
-                                                 , savefolder=self.plotting_directory + '/azimuths/equal_area/branches')
+        # self.analysis_branches.plot_azimuths(unified=False, rose_type='equal-radius', save=True
+        #                                      ,
+        #                                      savefolder=self.plotting_directory + '/azimuths/equal_radius/indiv/branches')
+        # self.analysis_branches.plot_azimuths(unified=True, rose_type='equal-radius', save=True
+        #                                      , savefolder=self.plotting_directory + '/azimuths/equal_radius/branches')
+        # self.analysis_branches.plot_azimuths(unified=False, rose_type='equal-area', save=True
+        #                                      ,
+        #                                      savefolder=self.plotting_directory + '/azimuths/equal_area/indiv/branches')
+        # self.analysis_branches.plot_azimuths(unified=True, rose_type='equal-area', save=True
+        #                                      , savefolder=self.plotting_directory + '/azimuths/equal_area/branches')
+        #
+        # # Experimental azimuth
+        # self.analysis_branches.plot_azimuths_exp(unified=True, rose_type='equal-area', save=True
+        #                                          , savefolder=self.plotting_directory + '/azimuths/equal_area/branches')
         # XYI
         self.analysis_branches.plot_xyi(unified=False, save=True,
                                         savefolder=self.plotting_directory + "/xyi/individual")
         self.analysis_branches.plot_xyi(unified=True, save=True,
                                         savefolder=self.plotting_directory + "/xyi")
+
+        self.analysis_branches.plot_azimuths_weighted(unified=False, save=True, savefolder=self.plotting_directory + '/azimuths/indiv')
+        self.analysis_branches.plot_azimuths_weighted(unified=True, save=True, savefolder=self.plotting_directory + '/azimuths')
+
         # Topo parameters
         self.analysis_branches.plot_topology(unified=False, save=True,
                                              savefolder=self.plotting_directory + '/topology/branches')
@@ -216,7 +220,7 @@ class MultiTargetAreaAnalysis:
         self.logger.info('__________________TRACE DATA PLOTTING START______________________')
 
         # __________________TRACE DATA______________________
-        templates.styling_plots('traces')
+        config.styling_plots('traces')
 
         self.analysis_traces.plot_lengths(unified=False, save=True,
                                           savefolder=self.plotting_directory + '/length_distributions/indiv/traces')
@@ -229,14 +233,18 @@ class MultiTargetAreaAnalysis:
         #         save=True, savefolder=self.plotting_directory + '/length_distributions/traces/predictions', predict_with=p)
 
         # Azimuths
-        self.analysis_traces.plot_azimuths(unified=False, rose_type='equal-radius', save=True
-                                           , savefolder=self.plotting_directory + '/azimuths/equal_radius/traces')
-        self.analysis_traces.plot_azimuths(unified=True, rose_type='equal-radius', save=True
-                                           , savefolder=self.plotting_directory + '/azimuths/equal_radius/traces')
-        self.analysis_traces.plot_azimuths(unified=False, rose_type='equal-area', save=True
-                                           , savefolder=self.plotting_directory + '/azimuths/equal_area/traces')
-        self.analysis_traces.plot_azimuths(unified=True, rose_type='equal-area', save=True
-                                           , savefolder=self.plotting_directory + '/azimuths/equal_area/traces')
+        self.analysis_traces.plot_azimuths_weighted(unified=False, save=True,
+                                                      savefolder=self.plotting_directory + '/azimuths/indiv')
+        self.analysis_traces.plot_azimuths_weighted(unified=True, save=True,
+                                                      savefolder=self.plotting_directory + '/azimuths')
+        # self.analysis_traces.plot_azimuths(unified=False, rose_type='equal-radius', save=True
+        #                                    , savefolder=self.plotting_directory + '/azimuths/equal_radius/traces')
+        # self.analysis_traces.plot_azimuths(unified=True, rose_type='equal-radius', save=True
+        #                                    , savefolder=self.plotting_directory + '/azimuths/equal_radius/traces')
+        # self.analysis_traces.plot_azimuths(unified=False, rose_type='equal-area', save=True
+        #                                    , savefolder=self.plotting_directory + '/azimuths/equal_area/traces')
+        # self.analysis_traces.plot_azimuths(unified=True, rose_type='equal-area', save=True
+        #                                    , savefolder=self.plotting_directory + '/azimuths/equal_area/traces')
         # Topo parameters
         self.analysis_traces.plot_topology(unified=False, save=True,
                                            savefolder=self.plotting_directory + '/topology/traces')

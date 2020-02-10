@@ -18,7 +18,6 @@ from shapely import strtree
 
 # import multiple_target_areas as mta
 
-from . import templates
 from . import target_area as ta
 from ... import config
 

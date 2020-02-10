@@ -563,6 +563,8 @@ class FractureAnalysis2D:
         #                                             self.set_df, self.debug_logger)
 
         # Push finish message
+        QMessageBox.information(None, "Success!"
+                             , f'Plots of {analysis_name} were made into {results_folder}.')
         # self.iface.messageBar().pushMessage(
         #     "Success",
         #     f"Plots were of {analysis_name} made into {results_folder}",

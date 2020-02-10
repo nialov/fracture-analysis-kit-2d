@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="c31abe43-014e-4ee7-b756-2d5f1f62f453" name="Default Changelist" comment="squash! Working version v0.1.2 - Implemented QgsTask">
+    <list default="true" id="c31abe43-014e-4ee7-b756-2d5f1f62f453" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/config.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fracture_analysis_2d.py" beforeDir="false" afterPath="$PROJECT_DIR$/fracture_analysis_2d.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fracture_analysis_kit/fracture_analysis_kit_qgis_tools.py" beforeDir="false" afterPath="$PROJECT_DIR$/fracture_analysis_kit/fracture_analysis_kit_qgis_tools.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fracture_analysis_kit/kit_resources/multiple_target_areas.py" beforeDir="false" afterPath="$PROJECT_DIR$/fracture_analysis_kit/kit_resources/multiple_target_areas.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fracture_analysis_kit/main_target_analysis.py" beforeDir="false" afterPath="$PROJECT_DIR$/fracture_analysis_kit/main_target_analysis.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fracture_analysis_kit/kit_resources/target_area.py" beforeDir="false" afterPath="$PROJECT_DIR$/fracture_analysis_kit/kit_resources/target_area.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fracture_analysis_kit/kit_resources/tools.py" beforeDir="false" afterPath="$PROJECT_DIR$/fracture_analysis_kit/kit_resources/tools.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fracture_analysis_kit/target_area_analysis_qgis.py" beforeDir="false" afterPath="$PROJECT_DIR$/fracture_analysis_kit/target_area_analysis_qgis.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -209,6 +211,16 @@
     </task>
     <option name="localTasksCounter" value="7" />
     <servers />
+  </component>
+  <component name="Vcs.Log.History.Properties">
+    <option name="COLUMN_ORDER">
+      <list>
+        <option value="0" />
+        <option value="2" />
+        <option value="3" />
+        <option value="1" />
+      </list>
+    </option>
   </component>
   <component name="Vcs.Log.Tabs.Properties">
     <option name="TAB_STATES">

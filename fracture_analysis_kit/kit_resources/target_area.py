@@ -15,9 +15,9 @@ import seaborn as sns
 import ternary
 from scipy.interpolate import make_interp_spline
 
-from . import templates
 # Own code imports
 from . import tools
+from ... import config
 
 
 # Classes
@@ -386,7 +386,7 @@ class TargetAreaLines:
                          , ax=None, ax_w=None):
         """
 
-        :param rose_type: Whether to plot equal-radius or equal-area rose plot e.g. 'equal-radius' or 'equal-area'
+        :param rose_type: Whether to plot equal-radius or equal-area rose plot: 'equal-radius' or 'equal-area'
         :type rose_type: str
         :param save: Whether to save
         :type save: bool
@@ -473,6 +473,8 @@ class TargetAreaLines:
         ax.set_theta_zero_location('N')
         ax.set_theta_direction(-1)
         ax.set_thetagrids(np.arange(0, 181, 45), fontweight='bold')
+        ax.set_thetamin(0)
+        ax.set_thetamax(180)
         ax.set_rgrids(np.linspace(np.sqrt(number_of_azimuths).mean(), np.sqrt(number_of_azimuths).max() * 1.05, num=2),
                       angle=0, weight='black', fmt='%d', fontsize=7)
         ax.grid(linewidth=1, color='k')
@@ -503,6 +505,90 @@ class TargetAreaLines:
             label._y = -0.05
             label._fontproperties._size = 24
             label._fontproperties._weight = 'bold'
+
+    def plot_azimuth_weighted(self, rose_type, set_visualization):
+        """
+        Plot weighted azimuth rose-plot. Type can be 'equal-radius' or 'equal-area'
+        :param rose_type: Whether to plot equal-radius or equal-area rose plot: 'equal-radius' or 'equal-area'
+        :type rose_type: str
+        :param set_visualization: Whether to visualize sets into the same plot
+        :type set_visualization: bool
+        """
+        fig, ax = plt.subplots(subplot_kw=dict(polar=True), figsize=(6.5, 5.1))
+        self.plot_azimuth_ax_weighted(set_visualization=set_visualization, ax=ax, name=self.name, rose_type=rose_type)
+
+    def plot_azimuth_ax_weighted(self, set_visualization, ax, name, rose_type):
+        """
+        Plot weighted azimuth rose-plot to given ax. Type can be 'equal-radius' or 'equal-area'
+        :param set_visualization: Whether to visualize sets into the same plot
+        :type set_visualization: bool
+        :param ax: Polar axis to plot on.
+        :type ax: matplotlib.projections.polar.PolarAxes
+        :param name: Name of the target area or group
+        :type name: str
+        :param rose_type: Type can be 'equal-radius' or 'equal-area'
+        :type rose_type: str
+        """
+
+        if rose_type == 'equal-radius':
+            number_of_azimuths = self.number_of_azimuths
+        elif rose_type == 'equal-area':
+            number_of_azimuths = np.sqrt(self.number_of_azimuths)
+        else:
+            raise Exception('Unknown weighted rose type')
+
+        # Plot azimuth rose plot
+        ax.bar(np.deg2rad(self.bin_locs), number_of_azimuths, width=np.deg2rad(self.bin_width), bottom=0.0,
+               color='darkgrey',
+               edgecolor='k', alpha=0.85, zorder=4)
+
+        # Plot setup
+        ax.set_theta_zero_location('N')
+        ax.set_theta_direction(-1)
+        ax.set_thetagrids(np.arange(0, 181, 45), fontweight='bold', fontfamily='Calibri', fontsize=11, alpha=0.95)
+        ax.set_thetamin(0)
+        ax.set_thetamax(180)
+        ax.set_rgrids(radii=[number_of_azimuths.mean()],
+                                        angle=0, fmt='', fontsize=1, alpha=0.8, ha='left')
+        ax.grid(linewidth=1, color='k', alpha=0.8)
+
+        # Title is the name of the target area or group
+        prop_title = dict(boxstyle='square', facecolor='linen', alpha=1, linewidth=2)
+        ax.set_title(f'   {name}   ', x=0.94, y=0.8,
+                     fontsize=20, fontweight='bold', fontfamily='Calibri'
+                     , va='top', bbox=prop_title, transform=ax.transAxes, ha='center')
+
+        # Fractions of length for each set
+        prop = dict(boxstyle='square', facecolor='linen', alpha=1, pad=0.45)
+        text = 'n = ' + str(len(self.lineframe_main)) + '\n'
+        text = text + tools.create_azimuth_set_text(self.lineframe_main)
+        ax.text(0.94, 0.3, text, transform=ax.transAxes, fontsize=12, weight='roman'
+                , bbox=prop, fontfamily='Calibri', va='top', ha='center')
+
+        # TickLabels
+        labels = ax.get_xticklabels()
+        for label in labels:
+            label._y = -0.01
+            label._fontproperties._size = 15
+            label._fontproperties._weight = 'bold'
+        # Set ranges visualized if set_visualization is True
+        if set_visualization:
+            for _, row in self.set_df.iterrows():
+                set_range = row.SetLimits
+                if set_range[0] < set_range[1]:
+                    diff = set_range[1] - set_range[0]
+                    set_loc = set_range[0] + diff / 2
+                else:
+                    diff = 360 - set_range[0] + set_range[1]
+                    if 180 - set_range[0] > set_range[1]:
+                        set_loc = set_range[0] + diff / 2
+                    else:
+                        set_loc = set_range[1] - diff / 2
+
+                ax.bar([np.deg2rad(set_loc)], [number_of_azimuths.mean()], width=np.deg2rad(diff), bottom=0.0,
+                       alpha=0.5, label=f'Set {row.Set}')
+                ax.legend(loc=(-0.02, 0.41), edgecolor='black'
+                          , prop={'family': 'Calibri', 'size': 12})
 
     def topology_parameters_2d_branches(self, branches=False):
         """
@@ -552,10 +638,7 @@ class TargetAreaLines:
 
         point = [(ccp, iip, cip)]
         tax.scatter(point, marker='X', color='black', alpha=1, zorder=3, s=175)
-        try:
-            tax.scatter(point, marker='x', color=templates.color_dict[name], label=name, alpha=1, zorder=4, s=100)
-        except KeyError:
-            tax.scatter(point, marker='x', label=name, alpha=1, zorder=4, s=100)
+        tax.scatter(point, marker='x', label=name, alpha=1, zorder=4, s=100)
 
     # def calc_ellipse_weights(self, a, b, phi):
     #     self.lineframe_main = tools.calc_ellipse_weight(self.lineframe_main, a, b, phi)
@@ -593,7 +676,7 @@ class TargetAreaLines:
         :rtype:
         """
         double_anisotropy = list(self.anisotropy) + list(self.anisotropy)
-        angles_of_study = templates.angles_for_examination
+        angles_of_study = config.angles_for_examination
         opp_angles = [i + 180 for i in angles_of_study]
         angles = list(angles_of_study) + opp_angles
         if for_ax:

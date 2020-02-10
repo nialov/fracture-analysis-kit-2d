@@ -58,19 +58,23 @@ def plotting_directories(results_folder, name):
         os.mkdir(Path(f"{plotting_directory}/anisotropy"))
         os.mkdir(Path(f"{plotting_directory}/anisotropy/indiv"))
         os.mkdir(Path(f"{plotting_directory}/azimuths"))
+        os.mkdir(Path(f"{plotting_directory}/azimuths/indiv"))
         os.mkdir(Path(f"{plotting_directory}/azimuths/equal_radius"))
         os.mkdir(Path(f"{plotting_directory}/azimuths/equal_radius/traces"))
         os.mkdir(Path(f"{plotting_directory}/azimuths/equal_radius/branches"))
-        os.mkdir(Path(f"{plotting_directory}/azimuths/equal_radius/indiv"))
-        os.mkdir(Path(f"{plotting_directory}/azimuths/equal_radius/indiv/traces"))
-        os.mkdir(Path(f"{plotting_directory}/azimuths/equal_radius/indiv/branches"))
 
         os.mkdir(Path(f"{plotting_directory}/azimuths/equal_area"))
         os.mkdir(Path(f"{plotting_directory}/azimuths/equal_area/traces"))
         os.mkdir(Path(f"{plotting_directory}/azimuths/equal_area/branches"))
-        os.mkdir(Path(f"{plotting_directory}/azimuths/equal_area/indiv"))
-        os.mkdir(Path(f"{plotting_directory}/azimuths/equal_area/indiv/traces"))
-        os.mkdir(Path(f"{plotting_directory}/azimuths/equal_area/indiv/branches"))
+        
+        os.mkdir(Path(f"{plotting_directory}/azimuths/indiv/equal_radius"))
+        os.mkdir(Path(f"{plotting_directory}/azimuths/indiv/equal_radius/traces"))
+        os.mkdir(Path(f"{plotting_directory}/azimuths/indiv/equal_radius/branches"))
+
+        os.mkdir(Path(f"{plotting_directory}/azimuths/indiv/equal_area"))
+        os.mkdir(Path(f"{plotting_directory}/azimuths/indiv/equal_area/traces"))
+        os.mkdir(Path(f"{plotting_directory}/azimuths/indiv/equal_area/branches"))
+
 
         os.mkdir(Path(f"{plotting_directory}/branch_class"))
         os.mkdir(Path(f"{plotting_directory}/length_distributions"))
