@@ -168,28 +168,19 @@ class MultiTargetAreaAnalysis:
         #         save=True, savefolder=self.plotting_directory + '/length_distributions/branches/predictions', predict_with=p)
 
         # Azimuths
-        # self.analysis_branches.plot_azimuths(unified=False, rose_type='equal-radius', save=True
-        #                                      ,
-        #                                      savefolder=self.plotting_directory + '/azimuths/equal_radius/indiv/branches')
-        # self.analysis_branches.plot_azimuths(unified=True, rose_type='equal-radius', save=True
-        #                                      , savefolder=self.plotting_directory + '/azimuths/equal_radius/branches')
-        # self.analysis_branches.plot_azimuths(unified=False, rose_type='equal-area', save=True
-        #                                      ,
-        #                                      savefolder=self.plotting_directory + '/azimuths/equal_area/indiv/branches')
-        # self.analysis_branches.plot_azimuths(unified=True, rose_type='equal-area', save=True
-        #                                      , savefolder=self.plotting_directory + '/azimuths/equal_area/branches')
-        #
-        # # Experimental azimuth
-        # self.analysis_branches.plot_azimuths_exp(unified=True, rose_type='equal-area', save=True
-        #                                          , savefolder=self.plotting_directory + '/azimuths/equal_area/branches')
+        self.analysis_branches.plot_azimuths_weighted(unified=False, save=True,
+                                                      savefolder=self.plotting_directory + '/azimuths/indiv')
+        self.analysis_branches.plot_azimuths_weighted(unified=True, save=True,
+                                                      savefolder=self.plotting_directory + '/azimuths')
         # XYI
-        self.analysis_branches.plot_xyi(unified=False, save=True,
-                                        savefolder=self.plotting_directory + "/xyi/individual")
-        self.analysis_branches.plot_xyi(unified=True, save=True,
+        # self.analysis_branches.plot_xyi(unified=False, save=True,
+        #                                 savefolder=self.plotting_directory + "/xyi/individual")
+        # self.analysis_branches.plot_xyi(unified=True, save=True,
+        #                                 savefolder=self.plotting_directory + "/xyi")
+        self.analysis_branches.plot_xyi_ternary(unified=False, save=True,
                                         savefolder=self.plotting_directory + "/xyi")
-
-        self.analysis_branches.plot_azimuths_weighted(unified=False, save=True, savefolder=self.plotting_directory + '/azimuths/indiv')
-        self.analysis_branches.plot_azimuths_weighted(unified=True, save=True, savefolder=self.plotting_directory + '/azimuths')
+        self.analysis_branches.plot_xyi_ternary(unified=True, save=True,
+                                                savefolder=self.plotting_directory + "/xyi")
 
         # Topo parameters
         self.analysis_branches.plot_topology(unified=False, save=True,

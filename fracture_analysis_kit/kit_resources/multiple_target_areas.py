@@ -253,7 +253,6 @@ class MultiTargetAreaQGIS:
             srs['TargetAreaLines'].plot_length_distribution_ax(ax=ax)
 
         tools.setup_ax_for_ld(ax, self, font_multiplier=1, predictions=False)
-
         # Save figure
         if save:
             if unified:
@@ -261,16 +260,11 @@ class MultiTargetAreaQGIS:
             else:
                 savename = Path(savefolder + '/ALL_FULL_LD.png')
             plt.savefig(savename, dpi=150)
-        logger.info('Plotted full lds')
 
         # Figure setup for CUT LDs
         fig, ax = plt.subplots(figsize=figure_size)
         ax.set_xlim(self.uni_left, self.uni_right)
         ax.set_ylim(self.uni_bottom, self.uni_top)
-
-        logger.info('Starting to plot cut lds')
-        logger.info('Uniframe:\n\n{}'.format(frame))
-        logger.info('Uniframe d types:\n\n{}'.format(frame.dtypes))
 
         # Plot cut lds
         for idx, srs in frame.iterrows():
@@ -279,10 +273,8 @@ class MultiTargetAreaQGIS:
             name = srs['group']
             length_text = f'{name} : {str(round(min_length, 2))}'
 
-        logger.info('Plotted cut lds')
         # Plot fit for cut lds
         tools.plot_fit_for_uniframe(self, ax=ax, cut=True, use_sets=False, unified=unified)
-        logger.info('Fit done')
         # Setup ax
         ax.set_xlim(self.uni_left, self.uni_right)
         ax.set_ylim(self.uni_bottom, self.uni_top)
@@ -291,7 +283,6 @@ class MultiTargetAreaQGIS:
                 verticalalignment='center',
                 bbox=props, fontfamily='Times New Roman')
         # Save figure
-        logger.info('saving')
         if save:
             savename = Path(savefolder + '/UNIFIED_CUT_LD_WITH_FIT.png')
             plt.savefig(savename, dpi=150)
@@ -1454,30 +1445,22 @@ class MultiTargetAreaQGIS:
     #         savename = Path(savefolder + '/xy_relations_indiv_all.png')
     #         plt.savefig(savename, dpi=200)
 
-    def plot_xyi(self, unified: bool, save=False, savefolder=None):
+    def plot_xyi_ternary(self, unified: bool, save=False, savefolder=None):
         """
-        Plots XYI-ternary plots
+        Plots XYI-ternary plots for target areas or grouped areas.
         :param unified: Plot unified datasets or individual target areas
         :type unified: bool
         :param save: Whether to save
         :type save: bool
         :param savefolder: Folder to save to
         :type savefolder: str
-        :return:
-        :rtype:
         """
         if unified:
             frame = self.uniframe
         else:
             frame = self.df
 
-        # MAKE INDIVIDUAL PLOTS
-        for idx, row in frame.iterrows():
-            fig, ax = plt.subplots(figsize=(8, 8))
-            nd = row['TargetAreaNodes']
-            nd.plot_xyi(save=save, savefolder=savefolder)
-
-        fig, ax = plt.subplots(figsize=(8, 8))
+        fig, ax = plt.subplots(figsize=(6.5, 5.1))
         scale = 100
 
         fig, tax = ternary.figure(ax=ax, scale=scale)
@@ -1486,17 +1469,20 @@ class MultiTargetAreaQGIS:
             nd = row['TargetAreaNodes']
             nd.plot_xyi_point(tax=tax)
         tools.tern_plot_the_fing_lines(tax)
-        tax.legend(loc=(-0.10, 0.85), fontsize=20,
-                   prop={'family': 'Times New Roman', 'weight': 'heavy'})
-
-        fig.subplots_adjust(top=0.8)
+        tax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.15), title = 'XYI-Nodes', title_fontsize='xx-large',
+                   prop={'family': 'Calibri', 'weight': 'heavy', 'size': 'x-large'}, edgecolor='black', ncol=2,
+                   columnspacing=0.7, shadow=True)
         if save:
             if unified:
                 savename = Path(savefolder + '/unified_xyi_points.png')
             else:
                 savename = Path(savefolder + '/all_xyi_points.png')
+            plt.savefig(savename, dpi=150, bbox_inches='tight')
 
-            plt.savefig(savename, dpi=150)
+        # MAKE INDIVIDUAL XYI PLOTS
+        for idx, row in frame.iterrows():
+            row['TargetAreaNodes'].plot_xyi_plot(unified=unified, save=save, savefolder=savefolder)
+
 
     # def plot_all_xyi(self, save=False, savefolder=None):
     #     # MAKE INDIVIDUAL PLOTS
@@ -1529,7 +1515,7 @@ class MultiTargetAreaQGIS:
 
     def plot_branch_ternary(self, unified: bool, save=False, savefolder=None):
         """
-        Plots Branch classification-ternary plots
+        Plots Branch classification-ternary plots for target areas or grouped data.
         :param unified: Plot unified datasets or individual target areas
         :type unified: bool
         :param save: Whether to save
@@ -1541,7 +1527,7 @@ class MultiTargetAreaQGIS:
         """
         if not self.using_branches:
             raise Exception('Branch classifications cannot be determined from traces.')
-        fig, ax = plt.subplots(figsize=(8, 8))
+        fig, ax = plt.subplots(figsize=(6.5, 5.1))
         scale = 100
         fig, tax = ternary.figure(ax=ax, scale=scale)
         tools.initialize_ternary_branches_points(ax, tax)
@@ -1553,15 +1539,20 @@ class MultiTargetAreaQGIS:
             ld = row['TargetAreaLines']
             ld.plot_branch_ternary_point(tax=tax)
         tools.tern_plot_branch_lines(tax)
-        tax.legend(loc=(-0.10, 0.85), fontsize=11,
-                   prop={'family': 'Times New Roman', 'weight': 'heavy'})
-        plt.subplots_adjust(top=0.8)
+        tax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.15), title='Branch Classes', title_fontsize='xx-large',
+                   prop={'family': 'Calibri', 'weight': 'heavy', 'size': 'x-large'}, edgecolor='black', ncol=2,
+                   columnspacing=0.7, shadow=True)
+        # plt.subplots_adjust(top=0.8)
         if save:
             if unified:
                 savename = Path(savefolder + '/unified_branch_points.png')
             else:
                 savename = Path(savefolder + '/all_branch_points.png')
-            plt.savefig(savename, dpi=150)
+            plt.savefig(savename, dpi=150, bbox_inches='tight')
+
+        for idx, row in frame.iterrows():
+            row['TargetAreaLines'].plot_branch_ternary_plot(unified=unified, save=True, savefolder=savefolder)
+
 
     # def plot_all_branch_ternary_unified(self, save=False, savefolder=None):
     #     if not self.using_branches:

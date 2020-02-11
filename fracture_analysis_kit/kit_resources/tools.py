@@ -1815,88 +1815,46 @@ def get_intersect_frame(intersecting_nodes_frame, traceframe, set_tuple):
     return intersectframe
 
 
-def plot_ternary_xyi_subplot(nodeframe, ax, name):
-    xcount = len(nodeframe.loc[nodeframe['c'] == 'X'])
-    ycount = len(nodeframe.loc[nodeframe['c'] == 'Y'])
-    icount = len(nodeframe.loc[nodeframe['c'] == 'I'])
 
-    sumcount = xcount + ycount + icount
-
-    xp = 100 * xcount / sumcount
-    yp = 100 * ycount / sumcount
-    ip = 100 * icount / sumcount
-
-    point = [(xp, ip, yp)]
-
-    # Scatter Plot
-    scale = 100
-
-    fig, tax = ternary.figure(ax=ax, scale=scale)
-    initialize_ternary_points(ax, tax)
-
-    text = 'n: ' + str(len(nodeframe)) \
-           + '\nX-nodes: ' + str(xcount) \
-           + '\nY-nodes: ' + str(ycount) \
-           + '\nI-nodes: ' + str(icount)
-
-    props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
-    ax.text(0.7, 1.05, text, transform=ax.transAxes, fontsize=20, weight='roman', verticalalignment='top', bbox=props,
-            fontfamily='Times New Roman')
-    try:
-        tax.scatter(point, s=100, marker='o', label=name, alpha=1, zorder=4)
-    except KeyError:
-        tax.scatter(point, s=100, marker='o', label=name, alpha=1, zorder=4)
-
-    # tax.legend(loc=(-0.10, 0.85), fontsize=28, prop={'family': 'Times New Roman', 'weight': 'heavy'})
-    ax.legend(loc=(-0.14, 0.9), fontsize=28, prop={'family': 'Times New Roman', 'weight': 'heavy', 'size': 20})
 
 
 def initialize_ternary_points(ax, tax):
     ax.get_xaxis().set_visible(False)
     ax.get_yaxis().set_visible(False)
     ax.set_frame_on(False)
-    tax.boundary(linewidth=3.0)
-    tax.gridlines(linewidth=1.2, multiple=20, color='red', alpha=0.8)
-    tax.ticks(axis='lbr', linewidth=1, multiple=20, offset=0.035, tick_formats="%d%%", fontsize=17)
+    tax.boundary(linewidth=1.5)
+    tax.gridlines(linewidth=0.9, multiple=20, color='red', alpha=0.6)
+    tax.ticks(axis='lbr', linewidth=1, multiple=20, offset=0.035, tick_formats="%d%%", fontsize='small')
     tax.clear_matplotlib_ticks()
     tax.get_axes().axis('off')
-    ax.text(-0.1, -0.03, 'Y', transform=ax.transAxes, fontsize=25, weight='bold', fontdict=style)
-    ax.text(1.03, -0.03, 'X', transform=ax.transAxes, fontsize=25, weight='bold', fontdict=style)
-    ax.text(0.5, 1.06, 'I', transform=ax.transAxes, fontsize=25, weight='bold', fontdict=style)
+    fontsize = 25
+    fdict = {'path_effects': [path_effects.withStroke(linewidth=3, foreground='k')]
+        , 'c': 'w', 'family': 'Calibri', 'size': fontsize, 'weight': 'bold'}
+    ax.text(-0.1, -0.03, 'Y', transform=ax.transAxes, fontdict=fdict)
+    ax.text(1.03, -0.03, 'X', transform=ax.transAxes, fontdict=fdict)
+    ax.text(0.5, 1.07, 'I', transform=ax.transAxes, fontdict=fdict, ha='center')
     # tax.set_title(name, x=0.1, y=1, fontsize=14, fontweight='heavy', fontfamily='Times New Roman')
 
 
-def plot_ternary_xyi_point(nodeframe, tax, name):
-    # Setup
-    xcount = len(nodeframe.loc[nodeframe['c'] == 'X'])
-    ycount = len(nodeframe.loc[nodeframe['c'] == 'Y'])
-    icount = len(nodeframe.loc[nodeframe['c'] == 'I'])
-    sumcount = xcount + ycount + icount
-    xp = 100 * xcount / sumcount
-    yp = 100 * ycount / sumcount
-    ip = 100 * icount / sumcount
-    point = [(xp, ip, yp)]
-    # Plotting
-    tax.scatter(point, marker='o', alpha=1, zorder=3, s=50, c='black')
-    try:
-        tax.scatter(point, marker='o', label=name, alpha=1, zorder=4, s=20)
-    except KeyError:
-        tax.scatter(point, marker='o', label=name, alpha=1, zorder=4, s=20)
+
+
 
 
 def initialize_ternary_branches_points(ax, tax):
     ax.get_xaxis().set_visible(False)
     ax.get_yaxis().set_visible(False)
     ax.set_frame_on(False)
-    tax.boundary(linewidth=5)
-    tax.gridlines(linewidth=1.2, multiple=20, color='red', alpha=0.8)
-    tax.ticks(axis='lbr', linewidth=0.9, multiple=20, offset=0.035, tick_formats="%d%%", fontsize=17)
+    tax.boundary(linewidth=1.5)
+    tax.gridlines(linewidth=0.9, multiple=20, color='black', alpha=0.6)
+    tax.ticks(axis='lbr', linewidth=0.9, multiple=20, offset=0.03, tick_formats="%d%%", fontsize='small', alpha=0.6)
     tax.clear_matplotlib_ticks()
     tax.get_axes().axis('off')
-    ax.text(-0.13, -0.06, 'I - C', transform=ax.transAxes, fontsize=22, weight='bold', fontdict=style)
-    ax.text(1.0, -0.06, 'C - C', transform=ax.transAxes, fontsize=22, weight='bold', fontdict=style)
-    ax.text(0.5, 1.07, 'I - I', transform=ax.transAxes, fontsize=22, weight='bold', fontdict=style, ha='center')
-    # tax.set_title(name, x=0.
+    fontsize = 20
+    fdict = {'path_effects': [path_effects.withStroke(linewidth=3, foreground='k')]
+    , 'c': 'w', 'family': 'Calibri', 'size': fontsize, 'weight': 'bold'}
+    ax.text(-0.1, -0.06, 'I - C', transform=ax.transAxes, fontdict=fdict)
+    ax.text(1.0, -0.06, 'C - C', transform=ax.transAxes, fontdict=fdict)
+    ax.text(0.5, 1.07, 'I - I', transform=ax.transAxes, fontdict=fdict, ha='center')
 
 
 def get_individual_xy_relations(ld, nd, for_ax=False, ax=None):
@@ -1906,22 +1864,22 @@ def get_individual_xy_relations(ld, nd, for_ax=False, ax=None):
         nd.determine_XY_relation(length_distribution_for_relation=ld)
 
 
-def setup_ax_for_ld(ax_for_setup, length_distribution, font_multiplier=1, predictions=False):
+def setup_ax_for_ld(ax_for_setup, length_distribution, predictions=False):
     # Function to setup ax for length distributions
     ax = ax_for_setup
     # LABELS
     if length_distribution.using_branches:
-        ax.set_xlabel('Branch Length (m)', fontsize=36 * font_multiplier, fontfamily='Times New Roman', style='italic')
+        ax.set_xlabel('Branch Length (m)', fontsize='medium', fontfamily='Times New Roman', style='italic')
     else:
-        ax.set_xlabel('Trace Length (m)', fontsize=36 * font_multiplier, fontfamily='Times New Roman', style='italic')
-    ax.set_ylabel('Complementary Cumulative Number', fontsize=36 * font_multiplier, fontfamily='Times New Roman'
+        ax.set_xlabel('Trace Length (m)', fontsize='medium', fontfamily='Times New Roman', style='italic')
+    ax.set_ylabel('Complementary Cumulative Number', fontsize='medium', fontfamily='Times New Roman'
                   , style='italic')
     # TICKS
-    plt.xticks(c='black', fontsize=30 * font_multiplier)
-    plt.yticks(c='black', fontsize=30 * font_multiplier)
+    plt.xticks(c='black', fontsize='medium')
+    plt.yticks(c='black', fontsize='medium')
     plt.tick_params(axis='both', width=1.2)
     # LEGEND
-    lgnd = plt.legend(fontsize=24 * font_multiplier, loc='upper right')
+    lgnd = plt.legend(fontsize='medium', loc='upper right')
     for lh in lgnd.legendHandles:
         lh._sizes = [750]
         lh.set_linewidth(4)

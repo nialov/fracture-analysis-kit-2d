@@ -548,7 +548,6 @@ class FractureAnalysis2D:
                                                  ignore_index=True)
                 self.set_df = self.set_df.append({'Set': str(3), 'SetLimits': (171, 15)},
                                                  ignore_index=True)
-
             else:
                 return
 

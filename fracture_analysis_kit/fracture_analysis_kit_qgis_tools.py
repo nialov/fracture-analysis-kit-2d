@@ -66,7 +66,7 @@ def plotting_directories(results_folder, name):
         os.mkdir(Path(f"{plotting_directory}/azimuths/equal_area"))
         os.mkdir(Path(f"{plotting_directory}/azimuths/equal_area/traces"))
         os.mkdir(Path(f"{plotting_directory}/azimuths/equal_area/branches"))
-        
+
         os.mkdir(Path(f"{plotting_directory}/azimuths/indiv/equal_radius"))
         os.mkdir(Path(f"{plotting_directory}/azimuths/indiv/equal_radius/traces"))
         os.mkdir(Path(f"{plotting_directory}/azimuths/indiv/equal_radius/branches"))
@@ -75,8 +75,8 @@ def plotting_directories(results_folder, name):
         os.mkdir(Path(f"{plotting_directory}/azimuths/indiv/equal_area/traces"))
         os.mkdir(Path(f"{plotting_directory}/azimuths/indiv/equal_area/branches"))
 
-
         os.mkdir(Path(f"{plotting_directory}/branch_class"))
+        os.mkdir(Path(f"{plotting_directory}/branch_class/indiv"))
         os.mkdir(Path(f"{plotting_directory}/length_distributions"))
         os.mkdir(Path(f"{plotting_directory}/length_distributions/branches"
                       )
@@ -92,7 +92,7 @@ def plotting_directories(results_folder, name):
         os.mkdir(Path(f"{plotting_directory}/topology/branches"))
         os.mkdir(Path(f"{plotting_directory}/topology/traces"))
         os.mkdir(Path(f"{plotting_directory}/xyi"))
-        os.mkdir(Path(f"{plotting_directory}/xyi/individual"))
+        os.mkdir(Path(f"{plotting_directory}/xyi/indiv"))
         os.mkdir(Path(f"{plotting_directory}/hexbinplots"))
 
     # Should not be needed. Will run if only SOME of the above folders are present.

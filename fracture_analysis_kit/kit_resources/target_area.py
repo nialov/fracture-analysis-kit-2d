@@ -172,29 +172,24 @@ class TargetAreaLines:
         :return:
         :rtype:
         """
-        logger = logging.getLogger('logging_tool')
-        ld = self
         if cut and use_sets:
-            setframes_cut = self.setframes_cut
-            for setframe_cut in setframes_cut:
-                s = setframe_cut.set.iloc[0]
-                if s == curr_set:
-                    setframe_cut = pd.DataFrame(setframe_cut)
-                    name = self.name
-                    setframe_cut.plot.scatter(x='length', y='y', logx=True, logy=True,
-                                              label=name + '_cut_set_' + str(s), ax=ax,
-                                              color='black')
+            raise Exception('not implemented')
+            # setframes_cut = self.setframes_cut
+            # for setframe_cut in setframes_cut:
+            #     s = setframe_cut.set.iloc[0]
+            #     if s == curr_set:
+            #         setframe_cut = pd.DataFrame(setframe_cut)
+            #         name = self.name
+            #         setframe_cut.plot.scatter(x='length', y='y', logx=True, logy=True,
+            #                                   label=name + '_cut_set_' + str(s), ax=ax,
+            #                                   color='black')
 
         elif cut:
-            logger.info('elif cut')
-            logger.info('self.lineframe_main_cut:\n\n {}'.format(self.lineframe_main_cut))
-
             lineframe_cut = self.lineframe_main_cut
             lineframe_cut = pd.DataFrame(lineframe_cut)
-            logger.info('lineframe_cut: {}'.format(lineframe_cut))
-            logger.info(f'nans: {lineframe_cut.isnull().sum().sum()}')
-            lineframe_cut.plot.scatter(x='length', y='y', logx=True, logy=True, label=self.name + '_cut', ax=ax,
-                                       color='black')
+            # logger.info('lineframe_cut: {}'.format(lineframe_cut))
+            # logger.info(f'nans: {lineframe_cut.isnull().sum().sum()}')
+            lineframe_cut.plot.scatter(x='length', y='y', logx=True, logy=True, label=self.name + '_cut', ax=ax)
 
         elif use_sets:
             raise Exception('not implemented')
@@ -217,8 +212,7 @@ class TargetAreaLines:
             # with open(r'C:\QGIS_Files\log\log.txt', mode='a') as logfile:
             #     logfile.write('lineframe_main print after\n{}'.format(lineframe_main))
             #     logfile.write('----------------------------')
-            lineframe_main.plot.scatter(x='length', y='y', s=50, logx=True, logy=True, label=self.name + '_full', ax=ax,
-                                        color='black')
+            lineframe_main.plot.scatter(x='length', y='y', s=50, logx=True, logy=True, label=self.name, ax=ax)
 
     def plot_curviness(self, cut_data=False):
         fig = plt.figure()
@@ -617,17 +611,17 @@ class TargetAreaLines:
         else:
             return fracture_intensity, aerial_frequency, characteristic_length, dimensionless_intensity, number_of_lines
 
-    def plot_branch_ternary_point(self, tax):
-
+    def plot_branch_ternary_plot(self, unified: bool, save=False, savefolder=''):
         """
-        Plot a branch classification ternary plot to a tax
-        :param tax: python-ternary AxesSubPlot
-        :type tax: ternary.TernaryAxesSubplot
-        :return:
-        :rtype:
+        Plot a branch classification ternary plot to a new ternary figure. Single point in each figure.
+        :param unified: Plot for target area or grouped data
+        :type unified: bool
+        :param save: Save or not
+        :type save: bool
+        :param savefolder: Folder to save plot to
+        :type savefolder: str
         """
         connection_dict = self.lineframe_main.Connection.value_counts().to_dict()
-        name = self.name
         cc = connection_dict['C - C']
         ci = connection_dict['C - I']
         ii = connection_dict['I - I']
@@ -637,8 +631,51 @@ class TargetAreaLines:
         iip = 100 * ii / sumcount
 
         point = [(ccp, iip, cip)]
-        tax.scatter(point, marker='X', color='black', alpha=1, zorder=3, s=175)
-        tax.scatter(point, marker='x', label=name, alpha=1, zorder=4, s=100)
+
+        fig, ax = plt.subplots(figsize=(6.5, 5.1))
+        scale = 100
+        fig, tax = ternary.figure(ax=ax, scale=scale)
+        text = 'n: ' + str(len(self.lineframe_main)) \
+               + '\nC-C branches: ' + str(cc) \
+               + '\nC-I branches: ' + str(ci) \
+               + '\nI-I branches: ' + str(ii)
+        prop = dict(boxstyle='square', facecolor='linen', alpha=1, pad=0.45)
+        ax.text(0.86, 1.05, text, transform=ax.transAxes, fontsize='medium', weight='roman', verticalalignment='top',
+                bbox=prop,
+                fontfamily='Calibri', ha='center')
+        tools.initialize_ternary_branches_points(ax, tax)
+        # tax.scatter(point, marker='X', color='black', alpha=1, zorder=3, s=210)
+
+        tax.scatter(point, marker='X', label=self.name, alpha=1, zorder=4, s=125)
+        tools.tern_plot_branch_lines(tax)
+        tax.legend(loc='upper center', bbox_to_anchor=(0.1, 1.05),
+                   prop={'family': 'Calibri', 'weight': 'heavy', 'size': 'x-large'}, edgecolor='black', ncol=2, columnspacing=0.7, shadow=True)
+        if save:
+            if unified:
+                savename = Path(savefolder + f'/indiv/{self.name}_group_branch_point.png')
+            else:
+                savename = Path(savefolder + f'/indiv/{self.name}_area_branch_point.png')
+            plt.savefig(savename, dpi=150, bbox_inches='tight')
+
+    def plot_branch_ternary_point(self, tax):
+
+        """
+        Plot a branch classification ternary scatter point to a given tax.
+        :param tax: python-ternary AxesSubPlot
+        :type tax: ternary.TernaryAxesSubplot
+        """
+        connection_dict = self.lineframe_main.Connection.value_counts().to_dict()
+        cc = connection_dict['C - C']
+        ci = connection_dict['C - I']
+        ii = connection_dict['I - I']
+        sumcount = cc + ci + ii
+        ccp = 100 * cc / sumcount
+        cip = 100 * ci / sumcount
+        iip = 100 * ii / sumcount
+
+        point = [(ccp, iip, cip)]
+        # tax.scatter(point, marker='X', color='black', alpha=1, zorder=3, s=210)
+        tax.scatter(point, marker='X', label=self.name, alpha=1, zorder=4, s=125)
 
     # def calc_ellipse_weights(self, a, b, phi):
     #     self.lineframe_main = tools.calc_ellipse_weight(self.lineframe_main, a, b, phi)
@@ -732,39 +769,71 @@ class TargetAreaNodes:
         self.name = name
         self.group = group
 
-    def plot_xyi(self, save=False, savefolder=None, for_ax=False, ax=None):
+    def plot_xyi_plot(self, unified: bool, save=False, savefolder=''):
         """
-        Plot a single XYI-ternary figure to ready-made ax or its own
-        :param save: Whether to save
+        Plot a XYI-node ternary plot to a new ternary figure. Single point in each figure.
+        :param unified: Plot for target area or grouped data
+        :type unified: bool
+        :param save: Save or not
         :type save: bool
-        :param savefolder: Folder to save to
+        :param savefolder: Folder to save plot to
         :type savefolder: str
-        :param for_ax: Whether plotting to a ready-made ax or not
-        :type for_ax: bool
-        :param ax: ax to plot to (optional)
-        :type ax: matplotlib.axes.Axes
-        :return:
-        :rtype:
         """
-        if for_ax:
-            pass
-        else:
-            fig, ax = plt.subplots(figsize=(7, 7))
-        tools.plot_ternary_xyi_subplot(self.nodeframe, ax=ax, name=self.name)
+        xcount = len(self.nodeframe.loc[self.nodeframe['c'] == 'X'])
+        ycount = len(self.nodeframe.loc[self.nodeframe['c'] == 'Y'])
+        icount = len(self.nodeframe.loc[self.nodeframe['c'] == 'I'])
+
+        sumcount = xcount + ycount + icount
+
+        xp = 100 * xcount / sumcount
+        yp = 100 * ycount / sumcount
+        ip = 100 * icount / sumcount
+
+        point = [(xp, ip, yp)]
+
+        # Scatter Plot
+        scale = 100
+        fig, ax = plt.subplots(figsize=(6.5, 5.1))
+        fig, tax = ternary.figure(ax=ax, scale=scale)
+        tools.initialize_ternary_points(ax, tax)
+        tools.tern_plot_the_fing_lines(tax)
+        text = 'n: ' + str(len(self.nodeframe)) \
+               + '\nX-nodes: ' + str(xcount) \
+               + '\nY-nodes: ' + str(ycount) \
+               + '\nI-nodes: ' + str(icount)
+        prop = dict(boxstyle='square', facecolor='linen', alpha=1, pad=0.45)
+        ax.text(0.85, 1.05, text, transform=ax.transAxes, fontsize='medium', weight='roman', verticalalignment='top',
+                bbox=prop,
+                fontfamily='Calibri', ha='center')
+
+        tax.scatter(point, s=50, marker='o', label=self.name, alpha=1, zorder=4)
+        tax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.15),
+                   prop={'family': 'Calibri', 'weight': 'heavy', 'size': 'x-large'}, edgecolor='black', ncol=2,
+                   columnspacing=0.7, shadow=True)
         if save:
-            name = self.name
-            savename = Path(savefolder + '/{}_xyi.png'.format(name))
-            plt.savefig(savename, dpi=150)
+            if unified:
+                savename = Path(savefolder + f'/indiv/{self.name}_group_xyi_point.png')
+            else:
+                savename = Path(savefolder + f'/indiv/{self.name}_area_xyi_point.png')
+            plt.savefig(savename, dpi=150, bbox_inches='tight')
 
     def plot_xyi_point(self, tax):
         """
-        Plot XYI-point into a ready-made ternary axis
+        Plot a XYI-node ternary scatter point to a given tax.
         :param tax: python-ternary AxesSubPlot
         :type tax: ternary.TernaryAxesSubplot
-        :return:
-        :rtype:
         """
-        tools.plot_ternary_xyi_point(self.nodeframe, tax, name=self.name)
+        # Setup
+        xcount = len(self.nodeframe.loc[self.nodeframe['c'] == 'X'])
+        ycount = len(self.nodeframe.loc[self.nodeframe['c'] == 'Y'])
+        icount = len(self.nodeframe.loc[self.nodeframe['c'] == 'I'])
+        sumcount = xcount + ycount + icount
+        xp = 100 * xcount / sumcount
+        yp = 100 * ycount / sumcount
+        ip = 100 * icount / sumcount
+        point = [(xp, ip, yp)]
+        # Plotting
+        tax.scatter(point, marker='o', label=self.name, alpha=1, zorder=4, s=50)
 
     def topology_parameters_2d_nodes(self):
         """
