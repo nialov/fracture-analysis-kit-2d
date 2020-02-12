@@ -2,13 +2,17 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="c31abe43-014e-4ee7-b756-2d5f1f62f453" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/dictionaries/nikke.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dictionaries/nikke.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/config.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fracture_analysis_2d.py" beforeDir="false" afterPath="$PROJECT_DIR$/fracture_analysis_2d.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fracture_analysis_kit/fracture_analysis_kit_qgis_tools.py" beforeDir="false" afterPath="$PROJECT_DIR$/fracture_analysis_kit/fracture_analysis_kit_qgis_tools.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fracture_analysis_kit/kit_resources/multiple_target_areas.py" beforeDir="false" afterPath="$PROJECT_DIR$/fracture_analysis_kit/kit_resources/multiple_target_areas.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fracture_analysis_kit/kit_resources/target_area.py" beforeDir="false" afterPath="$PROJECT_DIR$/fracture_analysis_kit/kit_resources/target_area.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fracture_analysis_kit/kit_resources/tools.py" beforeDir="false" afterPath="$PROJECT_DIR$/fracture_analysis_kit/kit_resources/tools.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fracture_analysis_kit/main_target_analysis.py" beforeDir="false" afterPath="$PROJECT_DIR$/fracture_analysis_kit/main_target_analysis.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fracture_analysis_kit/target_area_analysis_qgis.py" beforeDir="false" afterPath="$PROJECT_DIR$/fracture_analysis_kit/target_area_analysis_qgis.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/help/source/conf.py" beforeDir="false" afterPath="$PROJECT_DIR$/help/source/conf.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -66,7 +70,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.agerel_test">
+  <component name="RunManager" selected="Python.target_area">
     <configuration name="agerel_test" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="fracture_analysis_2d" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -153,7 +157,7 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.agerel_test" />
+        <item itemvalue="Python.target_area" />
         <item itemvalue="Python.agerel_test" />
         <item itemvalue="Python.agerel_test" />
         <item itemvalue="Python.agerel_test" />
@@ -214,7 +218,13 @@
       <option name="presentableId" value="LOCAL−00007" />
       <updated>1581366637909</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL−00008" summary="- Revised branch and XYI plotting - Started length distribution plot revising in spyder">
+      <created>1581444383399</created>
+      <option name="number" value="LOCAL−00008" />
+      <option name="presentableId" value="LOCAL−00008" />
+      <updated>1581444383399</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="Vcs.Log.History.Properties">
@@ -248,6 +258,7 @@
     <MESSAGE value="Working version v0.1.1&#10;- Revised cross-cutting and abutting relationships analysis" />
     <MESSAGE value="Working version v0.1.2&#10;- Implemented QgsTask" />
     <MESSAGE value="- Revised azimuth plotting - Removed templates.py dependencies" />
-    <option name="LAST_COMMIT_MESSAGE" value="- Revised azimuth plotting - Removed templates.py dependencies" />
+    <MESSAGE value="- Revised branch and XYI plotting - Started length distribution plot revising in spyder" />
+    <option name="LAST_COMMIT_MESSAGE" value="- Revised branch and XYI plotting - Started length distribution plot revising in spyder" />
   </component>
 </project>

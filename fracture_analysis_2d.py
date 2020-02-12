@@ -80,8 +80,8 @@ class FractureAnalysis2D:
         self.line_layers = None
         self.polygon_layers = None
         self.point_layers = None
-        self.table_df = pd.DataFrame(columns=['Trace', 'Branch', 'Node', 'Area', 'Name', 'Group'])
-        self.gnames_cutoffs_df = pd.DataFrame(columns=['Group', 'CutOff'])
+        self.layer_table_df = pd.DataFrame(columns=['Trace', 'Branch', 'Node', 'Area', 'Name', 'Group'])
+        self.group_names_cutoffs_df = pd.DataFrame(columns=['Group', 'CutOff'])
         self.set_df = pd.DataFrame(columns=['Set', 'SetLimits'])
         # Debug logger
         self.debug_logger = debug_logger
@@ -211,11 +211,11 @@ class FractureAnalysis2D:
 
     def clear_group_name_cut_off_table(self):
         self.dlg.tableWidget_tab2_gnames.clearContents()
-        self.gnames_cutoffs_df = self.gnames_cutoffs_df.iloc[0:0]
+        self.group_names_cutoffs_df = self.group_names_cutoffs_df.iloc[0:0]
 
     def populate_groups(self):
         # Get group name list
-        gname_list = self.gnames_cutoffs_df.Group.tolist()
+        gname_list = self.group_names_cutoffs_df.Group.tolist()
         # Clear contents
         self.dlg.comboBox_tab2_gnames.clear()
         self.dlg.comboBox_tab2_gnames.addItems(gname_list)
@@ -270,9 +270,9 @@ class FractureAnalysis2D:
         self.dlg.tableWidget_tab2.setItem(curr_row, 2, QTableWidgetItem(node_layer.name()))
         self.dlg.tableWidget_tab2.setItem(curr_row, 3, QTableWidgetItem(area_layer.name()))
         self.dlg.tableWidget_tab2.setItem(curr_row, 5, QTableWidgetItem(target_area_group))
-        self.table_df = self.table_df.append({'Trace': trace_layer, 'Branch': branch_layer, 'Node': node_layer
+        self.layer_table_df = self.layer_table_df.append({'Trace': trace_layer, 'Branch': branch_layer, 'Node': node_layer
                                                  , 'Area': area_layer, 'Name': name, 'Group': target_area_group}
-                                             , ignore_index=True)
+                                                         , ignore_index=True)
         # Switch list item with a dummy
         # TODO: Further testing required
         self.line_layers[self.dlg.comboBox_trace_2.currentIndex()] = DummyLayer()
@@ -289,7 +289,7 @@ class FractureAnalysis2D:
             self.dlg.tableWidget_tab2.removeRow(i)
         self.dlg.tableWidget_tab2.clearContents()
 
-        self.table_df = self.table_df.iloc[0:0]
+        self.layer_table_df = self.layer_table_df.iloc[0:0]
         self.fetch_correct_vector_layers()
         self.update_layers_tab2()
 
@@ -355,8 +355,8 @@ class FractureAnalysis2D:
         self.dlg.tableWidget_tab2_gnames.setItem(curr_row, 0, QTableWidgetItem(group_name))
         self.dlg.tableWidget_tab2_gnames.setItem(curr_row, 1, QTableWidgetItem(cut_off))
         # Append to DataFrame as float
-        self.gnames_cutoffs_df = self.gnames_cutoffs_df.append({'Group': group_name, 'CutOff': cut_off_float},
-                                                               ignore_index=True)
+        self.group_names_cutoffs_df = self.group_names_cutoffs_df.append({'Group': group_name, 'CutOff': cut_off_float},
+                                                                         ignore_index=True)
         # Populate names to target area group button
         self.populate_groups()
         # Clear name and cut_off text boxes
@@ -473,7 +473,7 @@ class FractureAnalysis2D:
             # Clear set table
             self.dlg.pushButton_tab2_set_clear.clicked.connect(self.clear_set_table)
 
-            QgsMessageLog.logMessage(message="Plugin initialized", tag=f'{__name__}', level=Qgis.Info)
+            QgsMessageLog.logMessage(message="Plugin initialized.", tag=f'{__name__}', level=Qgis.Info)
 
         self.fetch_correct_vector_layers()
         self.update_layers_tab2()
@@ -489,30 +489,31 @@ class FractureAnalysis2D:
             QMessageBox.critical(None, "Error"
                                  , f'Single Target Area Analysis Not Implemented')
             return
-            # Do something useful here - delete the line containing pass and
-            # substitute with your code.
-            results_folder = self.dlg.lineEdit_folder.text()
-            name = self.dlg.lineEdit_name.text()
-            # TODO: Uses same layers as multi target: errors with list popping feature possible
-            trace_layer = self.line_layers[self.dlg.comboBox_trace.currentIndex()]
-            branch_layer = self.line_layers[self.dlg.comboBox_branch.currentIndex()]
-            node_layer = self.point_layers[self.dlg.comboBox_node.currentIndex()]
-            area_layer = self.polygon_layers[self.dlg.comboBox_area.currentIndex()]
-
-            # Start analysis
-
-            _ = main_target_analysis.main_single_target_area(
-                results_folder, name, trace_layer, branch_layer, node_layer, area_layer, self.debug_logger)
-
-            # self.debug_logger.write_to_log_time('table_df:' + str(self.table_df))
-
-            # Push finish message
-            self.iface.messageBar().pushMessage(
-                "Success",
-                f"Plots were of {name} made into {results_folder}",
-                level=Qgis.Success,
-                duration=10,
-            )
+            # # Do something useful here - delete the line containing pass and
+            # # substitute with your code.
+            # results_folder = self.dlg.lineEdit_folder.text()
+            # name = self.dlg.lineEdit_name.text()
+            # # TODO: Uses same layers as multi target: errors with list popping feature possible
+            # TODO: Reimplement using df functionality
+            # trace_layer = self.line_layers[self.dlg.comboBox_trace.currentIndex()]
+            # branch_layer = self.line_layers[self.dlg.comboBox_branch.currentIndex()]
+            # node_layer = self.point_layers[self.dlg.comboBox_node.currentIndex()]
+            # area_layer = self.polygon_layers[self.dlg.comboBox_area.currentIndex()]
+            #
+            # # Start analysis
+            #
+            # _ = main_target_analysis.main_single_target_area(
+            #     results_folder, name, trace_layer, branch_layer, node_layer, area_layer, self.debug_logger)
+            #
+            # # self.debug_logger.write_to_log_time('layer_table_df:' + str(self.layer_table_df))
+            #
+            # # Push finish message
+            # self.iface.messageBar().pushMessage(
+            #     "Success",
+            #     f"Plots were of {name} made into {results_folder}",
+            #     level=Qgis.Success,
+            #     duration=10,
+            # )
 
     def run_multi_target_analysis(self):
         # Log start
@@ -527,11 +528,11 @@ class FractureAnalysis2D:
                                  , f'Empty results folder or analysis name inputs: {results_folder, analysis_name}\n'
                                    f'Try again with fixed inputs.')
             return
-        if len(self.table_df) == 0:
+        if len(self.layer_table_df) == 0:
             QMessageBox.critical(None, "Error"
                                  , f'Empty trace, branch and area layer table.')
             return
-        if len(self.gnames_cutoffs_df) == 0:
+        if len(self.group_names_cutoffs_df) == 0:
             QMessageBox.critical(None, "Error"
                                  , f'Empty Group name and Cut-off table.')
             return
@@ -552,13 +553,13 @@ class FractureAnalysis2D:
                 return
 
         # Run analysis
-        main_target_analysis.main_multi_target_area(self.table_df, results_folder, analysis_name,
-                                                    self.gnames_cutoffs_df,
+        main_target_analysis.main_multi_target_area(self.layer_table_df, results_folder, analysis_name,
+                                                    self.group_names_cutoffs_df,
                                                     self.set_df, self.debug_logger)
         # TODO: Implement more tasks (traces and branches)?
         # Run as task
-        # main_target_analysis.task_main_multi_target_area(self.table_df, results_folder, analysis_name,
-        #                                             self.gnames_cutoffs_df,
+        # main_target_analysis.task_main_multi_target_area(self.layer_table_df, results_folder, analysis_name,
+        #                                             self.group_names_cutoffs_df,
         #                                             self.set_df, self.debug_logger)
 
         # Push finish message

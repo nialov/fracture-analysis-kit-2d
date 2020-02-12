@@ -39,7 +39,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'FractureAnalysis2D'
-copyright = u'2013, Nikolas Ovaskainen'
+copyright = u'2020, Nikolas Ovaskainen'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

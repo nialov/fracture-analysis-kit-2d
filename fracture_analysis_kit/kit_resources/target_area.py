@@ -1,6 +1,7 @@
 # Python Windows co-operation imports
 import logging
 from pathlib import Path
+from textwrap import wrap
 
 import geopandas as gpd
 import matplotlib.patches as patches
@@ -14,6 +15,7 @@ import pandas as pd
 import seaborn as sns
 import ternary
 from scipy.interpolate import make_interp_spline
+from qgis.core import QgsMessageLog, Qgis
 
 # Own code imports
 from . import tools
@@ -37,7 +39,7 @@ class TargetAreaLines:
         :type group: str
         :param using_branches: Branches or traces
         :type using_branches: bool
-        :param cut_off: Cut-off value
+        :param cut_off: Cut-off value. Default 1.0 i.e. no cut-off applied.
         :type cut_off: float
         """
 
@@ -88,9 +90,8 @@ class TargetAreaLines:
 
     def calc_attributes(self):
         """
-        Calculates important attributes of target area
-        :return:
-        :rtype:
+        Calculates important attributes of target area.
+
         """
         self.lineframe_main = self.lineframe.sort_values(by=['length'], ascending=False)
         self.lineframe_main = tools.calc_y_distribution(self.lineframe_main, self.area)
@@ -113,21 +114,16 @@ class TargetAreaLines:
         self.top, self.bottom = tools.calc_ylims(self.lineframe_main)
 
         self.lineframe_main_cut = self.lineframe_main.loc[self.lineframe_main['length'] >= self.cut_off_length]
-        # Reinforce numeric columns
 
-        logger = logging.getLogger('logging_tool')
-        # logger.info('self.lineframe_main\n\n{}'.format(self.lineframe_main))
-        # logger.info('self.lineframe_main dtypes\n\n{}'.format(self.lineframe_main.dtypes))
-        # logger.info('self.lineframe_main_cut\n\n{}'.format(self.lineframe_main_cut))
-        # logger.info('self.lineframe_main_cut dtypes\n\n{}'.format(self.lineframe_main_cut.dtypes))
 
-    # list_of_tuples, tuples must be between 0-180
     def define_sets(self, set_df):
         """
-        Categorizes both non-cut and cut DataFrames with set limits
-        :param set_df: DataFrame with set limits and set names
-        :type set_df: DataFrame
+        Categorizes both non-cut and cut DataFrames with set limits.
+
+        :param set_df: DataFrame with set limits and set names.
+        :type set_df: pandas.DataFrame
         """
+
         self.lineframe_main['set'] = self.lineframe_main.apply(lambda x: tools.define_set(x['halved'], set_df)
                                                                , axis=1)
         self.lineframe_main_cut['set'] = self.lineframe_main_cut.apply(
@@ -140,79 +136,55 @@ class TargetAreaLines:
     def calc_curviness(self):
         self.lineframe_main['curviness'] = self.lineframe_main.geometry.apply(tools.curviness)
 
-    def plot_length_distribution(self, save=False, savefolder=None):
+    def plot_length_distribution(self, unified: bool, color_for_plot='black', save=False, savefolder=''):
         """
         Plots a length distribution to its own figure.
+
+        :param unified: Is data from target area or grouped data.
+        :type unified: bool
+        :param color_for_plot: Color for scatter plot points.
+        :type color_for_plot: str or tuple
         :param save: Whether to save
         :type save: bool
         :param savefolder: Folder to save to
         :type savefolder: str
-        :return:
-        :rtype:
         """
-        fig, ax = plt.subplots()
-        self.plot_length_distribution_ax(ax)
-        tools.setup_ax_for_ld(ax, self, font_multiplier=0.5)
+        fig, ax = plt.subplots(figsize=(7, 7))
+        self.plot_length_distribution_ax(ax, color_for_plot=color_for_plot)
+        tools.setup_ax_for_ld(ax, unified)
         if save:
             name = self.name
-            savename = Path(savefolder + '/{}_indiv_full.png'.format(name))
-            plt.savefig(savename, dpi=150)
+            if unified:
+                savename = Path(savefolder + f'/{name}_group_indiv_full.png')
+            else:
+                savename = Path(savefolder + f'/{name}_area_indiv_full.png')
+            plt.savefig(savename, dpi=150, bbox_inches='tight')
 
-    def plot_length_distribution_ax(self, ax, cut=False, use_sets=False, curr_set=-1):
+    def plot_length_distribution_ax(self, ax, cut=False, color_for_plot='black'):
         """
-        Plots a length distribution to a given figure
+        Plots a length distribution to a given ax.
+
         :param ax: Ax to plot to
         :type ax: matplotlib.axes.Axes
-        :param cut: Whether to cut length distribution using cut-off
+        :param cut: Whether to plot length distribution using cut-off
         :type cut: bool
-        :param use_sets: Plot length distribution for each set
-        :type use_sets: bool
-        :param curr_set:
-        :type curr_set: int
-        :return:
-        :rtype:
+        :param color_for_plot: Color for scatter plot points.
+        :type color_for_plot: str or tuple
         """
-        if cut and use_sets:
-            raise Exception('not implemented')
-            # setframes_cut = self.setframes_cut
-            # for setframe_cut in setframes_cut:
-            #     s = setframe_cut.set.iloc[0]
-            #     if s == curr_set:
-            #         setframe_cut = pd.DataFrame(setframe_cut)
-            #         name = self.name
-            #         setframe_cut.plot.scatter(x='length', y='y', logx=True, logy=True,
-            #                                   label=name + '_cut_set_' + str(s), ax=ax,
-            #                                   color='black')
 
-        elif cut:
+        # Cut length distribution
+        if cut:
             lineframe_cut = self.lineframe_main_cut
             lineframe_cut = pd.DataFrame(lineframe_cut)
-            # logger.info('lineframe_cut: {}'.format(lineframe_cut))
-            # logger.info(f'nans: {lineframe_cut.isnull().sum().sum()}')
-            lineframe_cut.plot.scatter(x='length', y='y', logx=True, logy=True, label=self.name + '_cut', ax=ax)
+            lineframe_cut.plot.scatter(x='length', y='y', s=50
+                                       , logx=True, logy=True, label=self.name + '_cut', ax=ax, color=color_for_plot)
 
-        elif use_sets:
-            raise Exception('not implemented')
-            # setframes = self.setframes
-            # for setframe in setframes:
-            #     s = setframe.set.iloc[0]
-            #     if s == curr_set:
-            #         setframe = pd.DataFrame(setframe)
-            #
-            #         setframe.plot.scatter(x='length', y='y', logx=True, logy=True, label=self.name + '_full_set_' + str(s),
-            #                               ax=ax, color='black')
-
+        # Full length distribution
         else:
-            # with open(r'C:\QGIS_Files\log\log.txt', mode='a') as logfile:
-            #     logfile.write('lineframe_main print before gdf to df\n{}'.format(self.lineframe_main))
-            #     logfile.write('----------------------------')
-
             lineframe_main = self.lineframe_main
             lineframe_main = pd.DataFrame(lineframe_main)
-            # with open(r'C:\QGIS_Files\log\log.txt', mode='a') as logfile:
-            #     logfile.write('lineframe_main print after\n{}'.format(lineframe_main))
-            #     logfile.write('----------------------------')
-            lineframe_main.plot.scatter(x='length', y='y', s=50, logx=True, logy=True, label=self.name, ax=ax)
+            lineframe_main.plot.scatter(x='length', y='y', s=50
+                                        , logx=True, logy=True, label=self.name, ax=ax, color=color_for_plot)
 
     def plot_curviness(self, cut_data=False):
         fig = plt.figure()
@@ -263,7 +235,7 @@ class TargetAreaLines:
         self.setframes = setframes
         self.setframes_cut = setframes_cut
 
-    def plot_azimuth(self, rose_type, save=False, savefolder=None, branches=False, big_plots=False
+    def plot_azimuth(self, rose_type, save=False, savefolder='', branches=False, big_plots=False
                      , ax=None, ax_w=None):
         """
         Plot azimuth to either ax or to its own figure,
@@ -312,6 +284,7 @@ class TargetAreaLines:
     def plot_azimuth_ax(self, ax, name, weights, rose_type, font_multiplier=1.0):
         """
         Plot azimuth to ax. Text size can be changed with a multiplier.
+
         :param ax: Polar axis to plot to.
         :type ax: matplotlib.projections.polar.PolarAxes
         :param name: Name used
@@ -330,7 +303,7 @@ class TargetAreaLines:
             elif rose_type == 'equal-area':
                 two_halves = np.sqrt(self.two_halves_weighted)
             else:
-                raise Exception('Unknown weighted rose type')
+                raise ValueError('Unknown weighted rose type')
         else:
             if rose_type == 'equal-radius':
                 two_halves = self.two_halves_non_weighted
@@ -376,7 +349,7 @@ class TargetAreaLines:
             label._fontproperties._size = 24
             label._fontproperties._weight = 'bold'
 
-    def plot_azimuth_exp(self, rose_type, save=False, savefolder=None, branches=False, big_plots=False
+    def plot_azimuth_exp(self, rose_type, save=False, savefolder='', branches=False, big_plots=False
                          , ax=None, ax_w=None):
         """
 
@@ -502,7 +475,8 @@ class TargetAreaLines:
 
     def plot_azimuth_weighted(self, rose_type, set_visualization):
         """
-        Plot weighted azimuth rose-plot. Type can be 'equal-radius' or 'equal-area'
+        Plot weighted azimuth rose-plot. Type can be 'equal-radius' or 'equal-area'.
+
         :param rose_type: Whether to plot equal-radius or equal-area rose plot: 'equal-radius' or 'equal-area'
         :type rose_type: str
         :param set_visualization: Whether to visualize sets into the same plot
@@ -513,7 +487,8 @@ class TargetAreaLines:
 
     def plot_azimuth_ax_weighted(self, set_visualization, ax, name, rose_type):
         """
-        Plot weighted azimuth rose-plot to given ax. Type can be 'equal-radius' or 'equal-area'
+        Plot weighted azimuth rose-plot to given ax. Type can be 'equal-radius' or 'equal-area'.
+
         :param set_visualization: Whether to visualize sets into the same plot
         :type set_visualization: bool
         :param ax: Polar axis to plot on.
@@ -522,6 +497,7 @@ class TargetAreaLines:
         :type name: str
         :param rose_type: Type can be 'equal-radius' or 'equal-area'
         :type rose_type: str
+        :raise ValueError: When given invalid rose_type string. Valid: 'equal-radius' or 'equal-area'
         """
 
         if rose_type == 'equal-radius':
@@ -529,7 +505,7 @@ class TargetAreaLines:
         elif rose_type == 'equal-area':
             number_of_azimuths = np.sqrt(self.number_of_azimuths)
         else:
-            raise Exception('Unknown weighted rose type')
+            raise ValueError(f'Unknown weighted rose type: {rose_type}')
 
         # Plot azimuth rose plot
         ax.bar(np.deg2rad(self.bin_locs), number_of_azimuths, width=np.deg2rad(self.bin_width), bottom=0.0,
@@ -548,7 +524,8 @@ class TargetAreaLines:
 
         # Title is the name of the target area or group
         prop_title = dict(boxstyle='square', facecolor='linen', alpha=1, linewidth=2)
-        ax.set_title(f'   {name}   ', x=0.94, y=0.8,
+        title = '\n'.join(wrap(f'{name}', 10))
+        ax.set_title(title, x=0.94, y=0.8,
                      fontsize=20, fontweight='bold', fontfamily='Calibri'
                      , va='top', bbox=prop_title, transform=ax.transAxes, ha='center')
 
@@ -587,8 +564,11 @@ class TargetAreaLines:
     def topology_parameters_2d_branches(self, branches=False):
         """
         Gather topology parameters for branch data.
+
         :param branches: Branches or traces
         :type branches: bool
+        :raise AttributeError: When given vector layer doesn't contain valid column names.
+        e.g. (Connection: ['C - C', 'C - I', ...]
         """
         # SAME METHOD FOR BOTH TRACES AND BRANCHES.
         # MAKE SURE YOU KNOW WHICH YOU ARE USING.
@@ -601,21 +581,26 @@ class TargetAreaLines:
             try:
                 connection_dict = self.lineframe_main.Connection.value_counts().to_dict()
             except AttributeError:
-                raise AttributeError('branches=True BUT given lineframe doesnt contain branch attributes.')
+                QgsMessageLog.logMessage(message="Given vector layer doesn't contain valid column names.\n"
+                                                 f"Columns in self.lineframe_main: {self.lineframe_main.columns}"
+                                         , tag=__name__, level=Qgis.Critical)
+                raise AttributeError("Given vector layer doesn't contain valid column names.")
             if connection_dict['C - C'] == 0:
-                print('*************WARNING*************')
-                print('Connection dictionary had no C - C branches...')
-                print('IN METHOD: topology_parameters_2d_branches')
-                print('*************WARNING*************')
+                QgsMessageLog.logMessage(message="Given vector layer doesn't contain any C - C branches."
+                                                 f"Target area name: {self.name}"
+                                         , tag=__name__, level=Qgis.Warning)
             return fracture_intensity, aerial_frequency, characteristic_length, dimensionless_intensity, number_of_lines, connection_dict
         else:
             return fracture_intensity, aerial_frequency, characteristic_length, dimensionless_intensity, number_of_lines
 
-    def plot_branch_ternary_plot(self, unified: bool, save=False, savefolder=''):
+    def plot_branch_ternary_plot(self, unified: bool, color_for_plot='black', save=False, savefolder=''):
         """
         Plot a branch classification ternary plot to a new ternary figure. Single point in each figure.
+
         :param unified: Plot for target area or grouped data
         :type unified: bool
+        :param color_for_plot: Color for point in plot.
+        :type color_for_plot: str or tuple
         :param save: Save or not
         :type save: bool
         :param savefolder: Folder to save plot to
@@ -646,7 +631,7 @@ class TargetAreaLines:
         tools.initialize_ternary_branches_points(ax, tax)
         # tax.scatter(point, marker='X', color='black', alpha=1, zorder=3, s=210)
 
-        tax.scatter(point, marker='X', label=self.name, alpha=1, zorder=4, s=125)
+        tax.scatter(point, marker='X', label=self.name, alpha=1, zorder=4, s=125, c=color_for_plot)
         tools.tern_plot_branch_lines(tax)
         tax.legend(loc='upper center', bbox_to_anchor=(0.1, 1.05),
                    prop={'family': 'Calibri', 'weight': 'heavy', 'size': 'x-large'}, edgecolor='black', ncol=2, columnspacing=0.7, shadow=True)
@@ -657,12 +642,15 @@ class TargetAreaLines:
                 savename = Path(savefolder + f'/indiv/{self.name}_area_branch_point.png')
             plt.savefig(savename, dpi=150, bbox_inches='tight')
 
-    def plot_branch_ternary_point(self, tax):
+    def plot_branch_ternary_point(self, tax, color_for_plot='black'):
 
         """
         Plot a branch classification ternary scatter point to a given tax.
+
         :param tax: python-ternary AxesSubPlot
         :type tax: ternary.TernaryAxesSubplot
+        :param color_for_plot: Color for point in plot.
+        :type color_for_plot: str or tuple
         """
         connection_dict = self.lineframe_main.Connection.value_counts().to_dict()
         cc = connection_dict['C - C']
@@ -675,7 +663,7 @@ class TargetAreaLines:
 
         point = [(ccp, iip, cip)]
         # tax.scatter(point, marker='X', color='black', alpha=1, zorder=3, s=210)
-        tax.scatter(point, marker='X', label=self.name, alpha=1, zorder=4, s=125)
+        tax.scatter(point, marker='X', label=self.name, alpha=1, zorder=4, s=125, c=color_for_plot)
 
     # def calc_ellipse_weights(self, a, b, phi):
     #     self.lineframe_main = tools.calc_ellipse_weight(self.lineframe_main, a, b, phi)
@@ -740,6 +728,7 @@ class TargetAreaLines:
         angles = np.array(angles)
         double_anisotropy = np.array(double_anisotropy)
         # INTERPOLATE BETWEEN CALCULATED POINTS
+        # noinspection PyArgumentList
         xnew = np.linspace(angles.min(), angles.max(), 300)
         spl = make_interp_spline(angles, double_anisotropy, k=3)
         power_smooth = spl(xnew)
@@ -757,7 +746,8 @@ class TargetAreaLines:
 class TargetAreaNodes:
     def __init__(self, nodeframe, name, group):
         """
-        Init of TargetAreaNodes
+        Init of TargetAreaNodes.
+
         :param nodeframe: DataFrame with node data
         :type nodeframe: gpd.GeoDataFrame
         :param name: Name of the target area
@@ -769,11 +759,14 @@ class TargetAreaNodes:
         self.name = name
         self.group = group
 
-    def plot_xyi_plot(self, unified: bool, save=False, savefolder=''):
+    def plot_xyi_plot(self, unified: bool, color_for_plot='black', save=False, savefolder=''):
         """
         Plot a XYI-node ternary plot to a new ternary figure. Single point in each figure.
+
         :param unified: Plot for target area or grouped data
         :type unified: bool
+        :param color_for_plot: Color for point.
+        :type color_for_plot: str or tuple
         :param save: Save or not
         :type save: bool
         :param savefolder: Folder to save plot to
@@ -806,7 +799,7 @@ class TargetAreaNodes:
                 bbox=prop,
                 fontfamily='Calibri', ha='center')
 
-        tax.scatter(point, s=50, marker='o', label=self.name, alpha=1, zorder=4)
+        tax.scatter(point, s=50, marker='o', label=self.name, alpha=1, zorder=4, c=color_for_plot)
         tax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.15),
                    prop={'family': 'Calibri', 'weight': 'heavy', 'size': 'x-large'}, edgecolor='black', ncol=2,
                    columnspacing=0.7, shadow=True)
@@ -817,11 +810,14 @@ class TargetAreaNodes:
                 savename = Path(savefolder + f'/indiv/{self.name}_area_xyi_point.png')
             plt.savefig(savename, dpi=150, bbox_inches='tight')
 
-    def plot_xyi_point(self, tax):
+    def plot_xyi_point(self, tax, color_for_plot='black'):
         """
         Plot a XYI-node ternary scatter point to a given tax.
+
         :param tax: python-ternary AxesSubPlot
         :type tax: ternary.TernaryAxesSubplot
+        :param color_for_plot: Color for plotting point.
+        :type color_for_plot: str or tuple
         """
         # Setup
         xcount = len(self.nodeframe.loc[self.nodeframe['c'] == 'X'])
@@ -833,7 +829,7 @@ class TargetAreaNodes:
         ip = 100 * icount / sumcount
         point = [(xp, ip, yp)]
         # Plotting
-        tax.scatter(point, marker='o', label=self.name, alpha=1, zorder=4, s=50)
+        tax.scatter(point, marker='o', label=self.name, alpha=1, zorder=4, s=50, c=color_for_plot)
 
     def topology_parameters_2d_nodes(self):
         """

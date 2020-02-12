@@ -1,6 +1,7 @@
 import logging
 import math
 import os
+from textwrap import wrap
 
 import geopandas as gpd
 import matplotlib.patheffects as path_effects
@@ -9,7 +10,6 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 import shapely
-import sklearn.metrics as sklm
 import ternary
 from shapely.geometry import LineString
 from shapely.geometry import Point
@@ -419,23 +419,24 @@ def azimuth_plot_attributes(lineframe, weights=False):
     :rtype: tuple
     """
 
-    def get_statistics(lineframe):
-        df = lineframe
-        df['halved'] = df.azimu.apply(azimu_half)
-        df = df.loc[:, 'halved']
-        stats = df.describe()
-        count = round(stats[0], 2)
-        mean = round(stats[1], 2)
-        std = round(stats[2], 2)
-        min_len = round(stats[3], 5)
-        max_len = round(stats[7], 2)
-        median = round(df.median(), 2)
-        return {'count': count, 'mean': mean, 'std': std, 'minLen': min_len, 'maxLen': max_len, 'median': median}
+    # def get_statistics(lineframe):
+    #     df = lineframe
+    #     df['halved'] = df.azimu.apply(azimu_half)
+    #     df = df.loc[:, 'halved']
+    #     stats = df.describe()
+    #     count = round(stats[0], 2)
+    #     mean = round(stats[1], 2)
+    #     std = round(stats[2], 2)
+    #     min_len = round(stats[3], 5)
+    #     max_len = round(stats[7], 2)
+    #     median = round(df.median(), 2)
+    #     return {'count': count, 'mean': mean, 'std': std, 'minLen': min_len, 'maxLen': max_len, 'median': median}
 
     lineframe = lineframe.dropna(subset=['azimu'])
     # stats = get_statistics(lineframe)
     azimuths = lineframe.loc[:, 'azimu'].values
     bin_edges = np.arange(-5, 366, 10)
+    lengths = None
     if weights:
         lengths = lineframe.loc[:, 'length'].values
         number_of_azimuths, bin_edges = np.histogram(azimuths, bin_edges, weights=lengths)
@@ -464,18 +465,18 @@ def azimuth_plot_attributes_experimental(lineframe, weights=False):
     :rtype: tuple
     """
 
-    def get_statistics(lineframe):
-        df = lineframe
-        df['halved'] = df.azimu.apply(azimu_half)
-        df = df.loc[:, 'halved']
-        stats = df.describe()
-        count = round(stats[0], 2)
-        mean = round(stats[1], 2)
-        std = round(stats[2], 2)
-        min_len = round(stats[3], 5)
-        max_len = round(stats[7], 2)
-        median = round(df.median(), 2)
-        return {'count': count, 'mean': mean, 'std': std, 'minLen': min_len, 'maxLen': max_len, 'median': median}
+    # def get_statistics(lineframe):
+    #     df = lineframe
+    #     df['halved'] = df.azimu.apply(azimu_half)
+    #     df = df.loc[:, 'halved']
+    #     stats = df.describe()
+    #     count = round(stats[0], 2)
+    #     mean = round(stats[1], 2)
+    #     std = round(stats[2], 2)
+    #     min_len = round(stats[3], 5)
+    #     max_len = round(stats[7], 2)
+    #     median = round(df.median(), 2)
+    #     return {'count': count, 'mean': mean, 'std': std, 'minLen': min_len, 'maxLen': max_len, 'median': median}
 
     def calc_ideal_bin_width(n, axial=True):
         """
@@ -501,10 +502,10 @@ def azimuth_plot_attributes_experimental(lineframe, weights=False):
         if n <= 0:
             raise ValueError('Sample size cannot be 0 or lower')
         if axial:
-            range = 180
+            degree_range = 180
         else:
-            range = 360
-        return range / (2 * n ** (1 / 3))
+            degree_range = 360
+        return degree_range / (2 * n ** (1 / 3))
 
     def calc_bins(ideal_bin_width):
         """
@@ -1126,7 +1127,7 @@ def define_set(azimuth, set_df):  # Uses HALVED azimuth: 0-180
 
 
 def construct_length_distribution_base(lineframe: gpd.GeoDataFrame, areaframe: gpd.GeoDataFrame, name: str, group: str,
-                                       cut_off=1, norm=1,
+                                       cut_off=1,
                                        using_branches=False):
     ld = ta.TargetAreaLines(lineframe, areaframe, name, group, using_branches, cut_off)
     return ld
@@ -1259,181 +1260,182 @@ def unite_areaframes(list_of_areaframes):
     return united
 
 
-def plot_fit_for_uniframe(mult_distrib, ax, cut, use_sets, unified: bool, curr_set=-1, font_multiplier=1,
-                          predicting_mode=False,
-                          predict_with=None):
-    def create_text(lineframe_for_text, ax_for_text, font_multiplier=font_multiplier, multi=False):
-        msle = sklm.mean_squared_log_error(lineframe_for_text.y.values, lineframe_for_text.y_fit.values)
-        r2score = sklm.r2_score(lineframe_for_text.y.values, lineframe_for_text.y_fit.values)
+# def plot_fit_for_uniframe(mult_distrib, ax, cut, use_sets, unified: bool, curr_set=-1, font_multiplier=1,
+#                           predicting_mode=False,
+#                           predict_with=None):
+#     def create_text(lineframe_for_text, ax_for_text, font_multiplier=font_multiplier, multi=False):
+#         msle = sklm.mean_squared_log_error(lineframe_for_text.y.values, lineframe_for_text.y_fit.values)
+#         r2score = sklm.r2_score(lineframe_for_text.y.values, lineframe_for_text.y_fit.values)
+#
+#         text = 'Exponent: ' + str(np.round(m, 2)) \
+#                + '\nConstant: ' + str(np.round(c, 2)) \
+#                + '\nMSLE: ' + str(np.round(msle, 2)) \
+#                + '\nR^2: ' + str(np.round(r2score, 5))
+#
+#         props = dict(boxstyle='round', pad=1, facecolor='wheat',
+#                      path_effects=[path_effects.SimplePatchShadow(), path_effects.Normal()])
+#         if multi:
+#             x_loc = lineframe_for_text.length.mean()
+#             y_loc = lineframe_for_text.y.mean()
+#             text = 'E: ' + str(np.round(m, 2)) \
+#                    + '\nC: ' + str(np.round(c, 2))
+#             ax_for_text.text(x_loc, y_loc, text, bbox=props
+#                              , fontsize='10', fontfamily='Times New Roman', ha='center', alpha=0.5)
+#         else:
+#             ax_for_text.text(0.86, 0.48, text, transform=ax_for_text.transAxes
+#                              , bbox=props, style='italic'
+#                              , fontsize='28', fontfamily='Times New Roman', ha='center', linespacing=2)
+#             func_text = '$n (L) = {{{}}} * L^{{{}}}$'.format(np.round(c, 2), np.round(m, 2))
+#             ax_for_text.text(0.85, 0.16, func_text, transform=ax_for_text.transAxes, ha='center', fontsize='28'
+#                              , rotation=-50)
+#
+#     if unified:
+#         frame = mult_distrib.uniframe
+#         frame_lineframe_main_concat = mult_distrib.uniframe_lineframe_main_concat
+#     else:
+#         frame = mult_distrib.df
+#         # TODO: mult_distrib.df_lineframe_main_concat
+#         frame_lineframe_main_concat = mult_distrib.df_lineframe_main_concat
+#
+#     if cut and use_sets:
+#         lineframe = pd.concat([srs.setframes_cut[curr_set] for srs in frame.TargetAreaLines])
+#         lineframe = pd.DataFrame(lineframe)
+#         lineframe['logLen'] = lineframe.length.apply(np.log)
+#         lineframe['logY'] = lineframe.y.apply(np.log)
+#
+#         # log(y) = m*log(x) + c fitted     y = c*x^m
+#         vals = np.polyfit(lineframe['logLen'].values, lineframe['logY'].values, 1)
+#         if len(vals) == 2:
+#             m, c = vals[0], vals[1]
+#         else:
+#             raise Exception('Too many values from np.polyfit, 2 expected')
+#
+#         y_fit = np.exp(m * lineframe['logLen'].values + c)  # calculate the fitted values of y
+#         lineframe['y_fit'] = y_fit
+#         lineframe.plot(x='length', y='y_fit', c='k', ax=ax, label='FIT', linestyle='dotted', linewidth=7, alpha=.8)
+#         create_text(lineframe, ax)
+#
+#     elif cut and predicting_mode and (predict_with is not None):
+#         # FIND RIGHT PREDICTION FRAMES
+#         idx_to_keep = []
+#         for idx, row in frame.iterrows():
+#             print(predict_with)
+#             print(row.name)
+#             if row.name in predict_with:
+#                 idx_to_keep.append(idx)
+#                 print(idx, row.name)
+#         frame_pred = frame.iloc[idx_to_keep]
+#
+#         lineframe = pd.concat([srs.lineframe_main_cut for srs in frame_pred.TargetAreaLines], sort=True)
+#         names = [srs.name for srs in frame_pred.TargetAreaLines]
+#
+#         lineframe = pd.DataFrame(lineframe)
+#
+#         # lineframe['fit_length'] = np.linspace(mult_distrib.uni_left, mult_distrib.uni_right, num=len(lineframe))
+#         lineframe['logLen'] = lineframe.length.apply(np.log)
+#         lineframe['logY'] = lineframe.y.apply(np.log)
+#
+#         # log(y) = m*log(x) + c fitted     y = c*x^m
+#         vals = np.polyfit(lineframe['logLen'].values, lineframe['logY'].values, 1)
+#         if len(vals) == 2:
+#             m, c = vals[0], vals[1]
+#         else:
+#             raise Exception('Too many values from np.polyfit, 2 expected')
+#
+#         plotframe = pd.DataFrame({'x': np.linspace(mult_distrib.uni_left, mult_distrib.uni_right, num=200)})
+#         plotframe['log_x'] = plotframe.x.apply(np.log)
+#         y_fit = np.exp(m * plotframe.log_x.values + c)  # calculate the fitted values of y for plotframe
+#         y_fit_2 = np.exp(m * lineframe.logLen.values + c)  # calculate the fitted values of y for statistics
+#         lineframe['y_fit'] = y_fit_2
+#         plotframe['y_fit'] = y_fit
+#         plotframe.plot(x='x', y='y_fit', c='k', ax=ax, label='FIT', linestyle='dotted', linewidth=7, alpha=.8)
+#         # FIT STATISTICS
+#         msle = sklm.mean_squared_log_error(lineframe.y.values, lineframe.y_fit.values)
+#         r2score = sklm.r2_score(lineframe.y.values, lineframe.y_fit.values)
+#         # TEXT WITH INFO
+#         text_1 = 'Fitted with:\n{}'.format(str(names).replace('[', '').replace(']', '')).replace(',', '\n')
+#         text_2 = 'Exponent: {} \nConstant: {} \nMSLE: {} \nR^2: {}' \
+#             .format(str(np.round(m, 2))
+#                     , str(np.round(c, 2))
+#                     , str(np.round(msle, 2))
+#                     , str(np.round(r2score, 2)))
+#
+#         props = dict(boxstyle='round', pad=1, facecolor='wheat')
+#         x_loc = 0.22
+#         y_loc = 0.5
+#         ax.text(x_loc, y_loc, text_1, transform=ax.transAxes, bbox=props
+#                 , fontsize='26', fontfamily='Times New Roman', ha='center')
+#         x_loc = 0.84
+#         y_loc = 0.48
+#         ax.text(x_loc, y_loc, text_2, transform=ax.transAxes, bbox=props
+#                 , fontsize='28', fontfamily='Times New Roman'
+#                 , style='italic', ha='center', linespacing=2)
+#
+#     elif cut and predicting_mode:
+#         lineframes = [srs.lineframe_main_cut for srs in frame.TargetAreaLines]
+#         names = [srs.name for srs in frame.TargetAreaLines]
+#         texts = []
+#         for lineframe, name in zip(lineframes, names):
+#             lineframe = pd.DataFrame(lineframe)
+#             lineframe['logLen'] = lineframe.length.apply(np.log)
+#             lineframe['logY'] = lineframe.y.apply(np.log)
+#             # log(y) = m*log(x) + c fitted     y = c*x^m
+#             vals = np.polyfit(lineframe['logLen'].values, lineframe['logY'].values, 1)
+#             if len(vals) == 2:
+#                 m, c = vals[0], vals[1]
+#             else:
+#                 raise Exception('Too many values from np.polyfit, 2 expected')
+#
+#             y_fit = np.exp(m * lineframe['logLen'].values + c)  # calculate the fitted values of y
+#             lineframe['y_fit'] = y_fit
+#             lineframe.plot(x='length', y='y_fit', c='k', ax=ax, label='FIT')
+#             text = '{} E:{} C:{}'.format(name, str(np.round(m, 2)), str(np.round(c, 2)))
+#             texts.append(text)
+#         props = dict(boxstyle='round', pad=1, facecolor='wheat')
+#         x_loc = 0.86
+#         y_loc = 0.9
+#         for t in texts:
+#             ax.text(x_loc, y_loc, t, transform=ax.transAxes, bbox=props
+#                     , fontsize='12', fontfamily='Times New Roman', ha='center')
+#             y_loc -= 0.12
+#
+#     elif cut:
+#
+#         lineframe = pd.concat([srs.lineframe_main_cut for srs in frame.TargetAreaLines])
+#         lineframe = pd.DataFrame(lineframe)
+#         lineframe['logLen'] = lineframe.length.apply(np.log)
+#         lineframe['logY'] = lineframe.y.apply(np.log)
+#
+#         # log(y) = m*log(x) + c fitted     y = c*x^m
+#         vals = np.polyfit(lineframe['logLen'].values, lineframe['logY'].values, 1)
+#         if len(vals) == 2:
+#             m, c = vals[0], vals[1]
+#         else:
+#             raise Exception('Too many values from np.polyfit, 2 expected')
+#
+#         y_fit = np.exp(m * lineframe['logLen'].values + c)  # calculate the fitted values of y
+#         lineframe['y_fit'] = y_fit
+#         lineframe.plot(x='length', y='y_fit', c='k', ax=ax, label='FIT', linestyle='dotted', linewidth=7, alpha=.8)
+#         create_text(lineframe, ax)
+#
+#     else:
+#         lineframe = frame_lineframe_main_concat
+#         lineframe = pd.DataFrame(lineframe)
+#         lineframe['logLen'] = lineframe.length.apply(np.log)
+#         lineframe['logY'] = lineframe.y.apply(np.log)
+#
+#         # log(y) = m*log(x) + c fitted     y = c*x^m
+#         vals = np.polyfit(lineframe['logLen'].values, lineframe['logY'].values, 1)
+#         if len(vals) == 2:
+#             m, c = vals[0], vals[1]
+#         else:
+#             raise Exception('Too many values from np.polyfit, 2 expected')
+#
+#         y_fit = np.exp(m * lineframe['logLen'].values + c)  # calculate the fitted values of y
+#         lineframe['y_fit'] = y_fit
+#         lineframe.plot(x='length', y='y_fit', c='k', ax=ax, label='FIT', linestyle='dotted', linewidth=7, alpha=.8)
+#         create_text(lineframe, ax)
 
-        text = 'Exponent: ' + str(np.round(m, 2)) \
-               + '\nConstant: ' + str(np.round(c, 2)) \
-               + '\nMSLE: ' + str(np.round(msle, 2)) \
-               + '\nR^2: ' + str(np.round(r2score, 5))
-
-        props = dict(boxstyle='round', pad=1, facecolor='wheat',
-                     path_effects=[path_effects.SimplePatchShadow(), path_effects.Normal()])
-        if multi:
-            x_loc = lineframe_for_text.length.mean()
-            y_loc = lineframe_for_text.y.mean()
-            text = 'E: ' + str(np.round(m, 2)) \
-                   + '\nC: ' + str(np.round(c, 2))
-            ax_for_text.text(x_loc, y_loc, text, bbox=props
-                             , fontsize='10', fontfamily='Times New Roman', ha='center', alpha=0.5)
-        else:
-            ax_for_text.text(0.86, 0.48, text, transform=ax_for_text.transAxes
-                             , bbox=props, style='italic'
-                             , fontsize='28', fontfamily='Times New Roman', ha='center', linespacing=2)
-            func_text = '$n (L) = {{{}}} * L^{{{}}}$'.format(np.round(c, 2), np.round(m, 2))
-            ax_for_text.text(0.85, 0.16, func_text, transform=ax_for_text.transAxes, ha='center', fontsize='28'
-                             , rotation=-50)
-
-    if unified:
-        frame = mult_distrib.uniframe
-        frame_lineframe_main_concat = mult_distrib.uniframe_lineframe_main_concat
-    else:
-        frame = mult_distrib.df
-        # TODO: mult_distrib.df_lineframe_main_concat
-        frame_lineframe_main_concat = mult_distrib.df_lineframe_main_concat
-
-    if cut and use_sets:
-        lineframe = pd.concat([srs.setframes_cut[curr_set] for srs in frame.TargetAreaLines])
-        lineframe = pd.DataFrame(lineframe)
-        lineframe['logLen'] = lineframe.length.apply(np.log)
-        lineframe['logY'] = lineframe.y.apply(np.log)
-
-        # log(y) = m*log(x) + c fitted     y = c*x^m
-        vals = np.polyfit(lineframe['logLen'].values, lineframe['logY'].values, 1)
-        if len(vals) == 2:
-            m, c = vals[0], vals[1]
-        else:
-            raise Exception('Too many values from np.polyfit, 2 expected')
-
-        y_fit = np.exp(m * lineframe['logLen'].values + c)  # calculate the fitted values of y
-        lineframe['y_fit'] = y_fit
-        lineframe.plot(x='length', y='y_fit', c='k', ax=ax, label='FIT', linestyle='dotted', linewidth=7, alpha=.8)
-        create_text(lineframe, ax)
-
-    elif cut and predicting_mode and (predict_with is not None):
-        # FIND RIGHT PREDICTION FRAMES
-        idx_to_keep = []
-        for idx, row in frame.iterrows():
-            print(predict_with)
-            print(row.name)
-            if row.name in predict_with:
-                idx_to_keep.append(idx)
-                print(idx, row.name)
-        frame_pred = frame.iloc[idx_to_keep]
-
-        lineframe = pd.concat([srs.lineframe_main_cut for srs in frame_pred.TargetAreaLines], sort=True)
-        names = [srs.name for srs in frame_pred.TargetAreaLines]
-
-        lineframe = pd.DataFrame(lineframe)
-
-        # lineframe['fit_length'] = np.linspace(mult_distrib.uni_left, mult_distrib.uni_right, num=len(lineframe))
-        lineframe['logLen'] = lineframe.length.apply(np.log)
-        lineframe['logY'] = lineframe.y.apply(np.log)
-
-        # log(y) = m*log(x) + c fitted     y = c*x^m
-        vals = np.polyfit(lineframe['logLen'].values, lineframe['logY'].values, 1)
-        if len(vals) == 2:
-            m, c = vals[0], vals[1]
-        else:
-            raise Exception('Too many values from np.polyfit, 2 expected')
-
-        plotframe = pd.DataFrame({'x': np.linspace(mult_distrib.uni_left, mult_distrib.uni_right, num=200)})
-        plotframe['log_x'] = plotframe.x.apply(np.log)
-        y_fit = np.exp(m * plotframe.log_x.values + c)  # calculate the fitted values of y for plotframe
-        y_fit_2 = np.exp(m * lineframe.logLen.values + c)  # calculate the fitted values of y for statistics
-        lineframe['y_fit'] = y_fit_2
-        plotframe['y_fit'] = y_fit
-        plotframe.plot(x='x', y='y_fit', c='k', ax=ax, label='FIT', linestyle='dotted', linewidth=7, alpha=.8)
-        # FIT STATISTICS
-        msle = sklm.mean_squared_log_error(lineframe.y.values, lineframe.y_fit.values)
-        r2score = sklm.r2_score(lineframe.y.values, lineframe.y_fit.values)
-        # TEXT WITH INFO
-        text_1 = 'Fitted with:\n{}'.format(str(names).replace('[', '').replace(']', '')).replace(',', '\n')
-        text_2 = 'Exponent: {} \nConstant: {} \nMSLE: {} \nR^2: {}' \
-            .format(str(np.round(m, 2))
-                    , str(np.round(c, 2))
-                    , str(np.round(msle, 2))
-                    , str(np.round(r2score, 2)))
-
-        props = dict(boxstyle='round', pad=1, facecolor='wheat')
-        x_loc = 0.22
-        y_loc = 0.5
-        ax.text(x_loc, y_loc, text_1, transform=ax.transAxes, bbox=props
-                , fontsize='26', fontfamily='Times New Roman', ha='center')
-        x_loc = 0.84
-        y_loc = 0.48
-        ax.text(x_loc, y_loc, text_2, transform=ax.transAxes, bbox=props
-                , fontsize='28', fontfamily='Times New Roman'
-                , style='italic', ha='center', linespacing=2)
-
-    elif cut and predicting_mode:
-        lineframes = [srs.lineframe_main_cut for srs in frame.TargetAreaLines]
-        names = [srs.name for srs in frame.TargetAreaLines]
-        texts = []
-        for lineframe, name in zip(lineframes, names):
-            lineframe = pd.DataFrame(lineframe)
-            lineframe['logLen'] = lineframe.length.apply(np.log)
-            lineframe['logY'] = lineframe.y.apply(np.log)
-            # log(y) = m*log(x) + c fitted     y = c*x^m
-            vals = np.polyfit(lineframe['logLen'].values, lineframe['logY'].values, 1)
-            if len(vals) == 2:
-                m, c = vals[0], vals[1]
-            else:
-                raise Exception('Too many values from np.polyfit, 2 expected')
-
-            y_fit = np.exp(m * lineframe['logLen'].values + c)  # calculate the fitted values of y
-            lineframe['y_fit'] = y_fit
-            lineframe.plot(x='length', y='y_fit', c='k', ax=ax, label='FIT')
-            text = '{} E:{} C:{}'.format(name, str(np.round(m, 2)), str(np.round(c, 2)))
-            texts.append(text)
-        props = dict(boxstyle='round', pad=1, facecolor='wheat')
-        x_loc = 0.86
-        y_loc = 0.9
-        for t in texts:
-            ax.text(x_loc, y_loc, t, transform=ax.transAxes, bbox=props
-                    , fontsize='12', fontfamily='Times New Roman', ha='center')
-            y_loc -= 0.12
-
-    elif cut:
-
-        lineframe = pd.concat([srs.lineframe_main_cut for srs in frame.TargetAreaLines])
-        lineframe = pd.DataFrame(lineframe)
-        lineframe['logLen'] = lineframe.length.apply(np.log)
-        lineframe['logY'] = lineframe.y.apply(np.log)
-
-        # log(y) = m*log(x) + c fitted     y = c*x^m
-        vals = np.polyfit(lineframe['logLen'].values, lineframe['logY'].values, 1)
-        if len(vals) == 2:
-            m, c = vals[0], vals[1]
-        else:
-            raise Exception('Too many values from np.polyfit, 2 expected')
-
-        y_fit = np.exp(m * lineframe['logLen'].values + c)  # calculate the fitted values of y
-        lineframe['y_fit'] = y_fit
-        lineframe.plot(x='length', y='y_fit', c='k', ax=ax, label='FIT', linestyle='dotted', linewidth=7, alpha=.8)
-        create_text(lineframe, ax)
-
-    else:
-        lineframe = frame_lineframe_main_concat
-        lineframe = pd.DataFrame(lineframe)
-        lineframe['logLen'] = lineframe.length.apply(np.log)
-        lineframe['logY'] = lineframe.y.apply(np.log)
-
-        # log(y) = m*log(x) + c fitted     y = c*x^m
-        vals = np.polyfit(lineframe['logLen'].values, lineframe['logY'].values, 1)
-        if len(vals) == 2:
-            m, c = vals[0], vals[1]
-        else:
-            raise Exception('Too many values from np.polyfit, 2 expected')
-
-        y_fit = np.exp(m * lineframe['logLen'].values + c)  # calculate the fitted values of y
-        lineframe['y_fit'] = y_fit
-        lineframe.plot(x='length', y='y_fit', c='k', ax=ax, label='FIT', linestyle='dotted', linewidth=7, alpha=.8)
-        create_text(lineframe, ax)
 
 
 def curviness(linestring):
@@ -1509,6 +1511,7 @@ def plot_azimuths_sub_plot(lineframe, ax, filename, weights, striations=False, s
     stats = get_azimu_statistics(lineframe)
     azimuths = lineframe.loc[:, 'azimu'].values
     bin_edges = np.arange(-5, 366, 10)
+    lengths = None
     if weights:
         lineframe['length'] = lineframe.geometry.length
         lengths = lineframe.loc[:, 'length'].values
@@ -1815,9 +1818,6 @@ def get_intersect_frame(intersecting_nodes_frame, traceframe, set_tuple):
     return intersectframe
 
 
-
-
-
 def initialize_ternary_points(ax, tax):
     ax.get_xaxis().set_visible(False)
     ax.get_yaxis().set_visible(False)
@@ -1834,10 +1834,6 @@ def initialize_ternary_points(ax, tax):
     ax.text(1.03, -0.03, 'X', transform=ax.transAxes, fontdict=fdict)
     ax.text(0.5, 1.07, 'I', transform=ax.transAxes, fontdict=fdict, ha='center')
     # tax.set_title(name, x=0.1, y=1, fontsize=14, fontweight='heavy', fontfamily='Times New Roman')
-
-
-
-
 
 
 def initialize_ternary_branches_points(ax, tax):
@@ -1857,32 +1853,46 @@ def initialize_ternary_branches_points(ax, tax):
     ax.text(0.5, 1.07, 'I - I', transform=ax.transAxes, fontdict=fdict, ha='center')
 
 
-def get_individual_xy_relations(ld, nd, for_ax=False, ax=None):
-    if for_ax:
-        nd.determine_XY_relation(length_distribution_for_relation=ld, for_ax=True, ax=ax)
-    else:
-        nd.determine_XY_relation(length_distribution_for_relation=ld)
+# def get_individual_xy_relations(ld, nd, for_ax=False, ax=None):
+#     if for_ax:
+#         nd.determine_XY_relation(length_distribution_for_relation=ld, for_ax=True, ax=ax)
+#     else:
+#         nd.determine_XY_relation(length_distribution_for_relation=ld)
 
 
-def setup_ax_for_ld(ax_for_setup, length_distribution, predictions=False):
-    # Function to setup ax for length distributions
+def setup_ax_for_ld(ax_for_setup, using_branches):
+    """
+    Function to setup ax for length distribution plots.
+
+    :param ax_for_setup: Ax to setup.
+    :type ax_for_setup: matplotlib.axes.Axes
+    :param using_branches: Are the lines branches or traces.
+    :type using_branches: bool
+    """
+    #
     ax = ax_for_setup
     # LABELS
-    if length_distribution.using_branches:
-        ax.set_xlabel('Branch Length (m)', fontsize='medium', fontfamily='Times New Roman', style='italic')
+    if using_branches:
+        ax.set_xlabel('Branch Length (m)', fontsize='xx-large', fontfamily='Calibri', style='italic', labelpad=16)
     else:
-        ax.set_xlabel('Trace Length (m)', fontsize='medium', fontfamily='Times New Roman', style='italic')
-    ax.set_ylabel('Complementary Cumulative Number', fontsize='medium', fontfamily='Times New Roman'
+        ax.set_xlabel('Trace Length (m)', fontsize='xx-large', fontfamily='Calibri', style='italic', labelpad=16)
+    ccm_unit = r'$(\frac{1}{m^2})$'
+    ax.set_ylabel('Complementary Cumulative Number '+ccm_unit, fontsize='xx-large', fontfamily='Calibri'
                   , style='italic')
     # TICKS
-    plt.xticks(c='black', fontsize='medium')
-    plt.yticks(c='black', fontsize='medium')
+    plt.xticks(c='black', fontsize='x-large')
+    plt.yticks(c='black', fontsize='x-large')
     plt.tick_params(axis='both', width=1.2)
     # LEGEND
-    lgnd = plt.legend(fontsize='medium', loc='upper right')
+    handles, labels = ax.get_legend_handles_labels()
+    labels = ['\n'.join(wrap(l, 13)) for l in labels]
+    lgnd = plt.legend(handles, labels, loc='upper center', bbox_to_anchor=(1.34, 1.02), ncol=2, columnspacing=0.5
+                      , shadow=True
+                      , prop={'family': 'Calibri', 'weight': 'heavy', 'size': 'large'})
     for lh in lgnd.legendHandles:
-        lh._sizes = [750]
-        lh.set_linewidth(4)
+        # lh._sizes = [750]
+        lh.set_linewidth(3)
+    ax.grid(zorder=-10, color='black', alpha=0.5)
 
 
 def create_azimuth_set_text(lineframe):

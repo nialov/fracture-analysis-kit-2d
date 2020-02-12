@@ -6,6 +6,8 @@ from pathlib import Path
 # Math and analysis imports
 # Plotting imports
 # DataFrame analysis imports
+from textwrap import wrap
+
 import geopandas as gpd
 import matplotlib.patheffects as path_effects
 import matplotlib.pyplot as plt
@@ -15,9 +17,12 @@ import pandas as pd
 import shapely
 import ternary
 from matplotlib.ticker import FormatStrFormatter
+import sklearn.metrics as sklm
+from pandas import Series
 from qgis.core import QgsMessageLog, Qgis
 
 # Own code imports
+from . import target_area as ta
 from . import tools
 from ... import config
 
@@ -44,7 +49,7 @@ class MultiTargetAreaQGIS:
         logger = logging.getLogger('logging_tool')
         self.gnames_cutoffs_df = gnames_cutoffs_df
         self.groups = gnames_cutoffs_df.Group.tolist()
-        # self.codes = gnames_cutoffs_df
+        # self.codes = group_names_cutoffs_df
         self.table_df = table_df
 
         self.using_branches = branches
@@ -57,7 +62,9 @@ class MultiTargetAreaQGIS:
         self.set_df = None
         self.uniframe = None
         self.df_lineframe_main_concat = None
+        self.df_lineframe_main_cut_concat = None
         self.uniframe_lineframe_main_concat = None
+        self.uniframe_lineframe_main_cut_concat = None
         self.uni_left, self.uni_right, self.uni_top, self.uni_bottom = None, None, None, None
         self.relations_set_counts = None
         self.xy_relations_frame = None
@@ -70,7 +77,7 @@ class MultiTargetAreaQGIS:
         self.unified_relations_df = None
 
         # Iterate over all target areas
-        for idx, row in table_df.iterrows():
+        for _, row in table_df.iterrows():
             name = row.Name
             if self.using_branches:
                 lineframe = row.Branch_frame
@@ -84,9 +91,10 @@ class MultiTargetAreaQGIS:
             cut_off = self.gnames_cutoffs_df.loc[self.gnames_cutoffs_df.Group == group].CutOff.iloc[0]
             try:
                 cut_off = float(cut_off)
-            except TypeError as te:
-                logger.exception(
-                    f'Cut-off value was an iterable or not convertible to float. -- CutOff value: {cut_off}')
+            except TypeError:
+                QgsMessageLog.logMessage(message=
+                                         f'Cut-off value was an iterable or not convertible to float. CutOff value: {cut_off}'
+                                         f'Type: {str(type(cut_off))}', tag=__name__, level=Qgis.Critical)
                 raise
 
             # Initialize DataFrames with additional columns
@@ -97,9 +105,9 @@ class MultiTargetAreaQGIS:
             # Change MultiLineStrings to LineStrings. Delete unmergeable MultiLineStrings. A trace should be mergeable.
             if isinstance(lineframe.geometry.iloc[0], shapely.geometry.MultiLineString):
                 non_mergeable_idx = []
-                for idx, row in lineframe.iterrows():
+                for idx, srs in lineframe.iterrows():
                     try:
-                        lineframe.geometry.iloc[idx] = shapely.ops.linemerge(row.geometry)
+                        lineframe.geometry.iloc[idx] = shapely.ops.linemerge(srs.geometry)
                     except ValueError:
                         non_mergeable_idx.append(idx)
                     # Should be LineString if mergeable. If not:
@@ -134,6 +142,8 @@ class MultiTargetAreaQGIS:
             row['TargetAreaLines'].calc_attributes()
         self.df_lineframe_main_concat = pd.concat([srs.lineframe_main for srs in self.df.TargetAreaLines],
                                                   sort=True)
+        self.df_lineframe_main_cut_concat = pd.concat([srs.lineframe_main_cut for srs in self.df.TargetAreaLines],
+                                                  sort=True)
 
     def define_sets_for_all(self, set_df):
         """
@@ -156,6 +166,10 @@ class MultiTargetAreaQGIS:
     def unified(self):
         """
         Creates new datasets (TargetAreaLines + TargetAreaNodes for each group) based on groupings by user.
+
+        TODO: Invalidate inputs when there are groups without any target areas.
+
+        :raise ValueError: When there are groups without any target areas.
         """
         logger = logging.getLogger('logging_tool')
         uniframe = pd.DataFrame(columns=['TargetAreaLines', 'TargetAreaNodes', 'group', 'name', 'uni_ld_area', 'cut_off'])
@@ -182,17 +196,20 @@ class MultiTargetAreaQGIS:
                      'uni_ld_area': uni_ld_area, 'cut_off': cut_off},
                     ignore_index=True)
             else:
-                raise Exception('len(frame) == 0')
+                raise ValueError('There are groups without any target areas.'
+                                 f'Group name: {group}')
 
         # uniframe = tools.norm_unified(uniframe)
         self.uniframe = uniframe
         # AIDS FOR PLOTTING:
         self.uniframe_lineframe_main_concat = pd.concat([srs.lineframe_main for srs in self.uniframe.TargetAreaLines],
                                                         sort=True)
+        self.uniframe_lineframe_main_cut_concat = pd.concat([srs.lineframe_main_cut for srs in self.uniframe.TargetAreaLines],
+                                                        sort=True)
         self.uni_left, self.uni_right = tools.calc_xlims(self.uniframe_lineframe_main_concat)
         self.uni_top, self.uni_bottom = tools.calc_ylims(self.uniframe_lineframe_main_concat)
 
-    def plot_curviness_for_unified(self, violins=False, save=False, savefolder=None):
+    def plot_curviness_for_unified(self, violins=False, save=False, savefolder=''):
         if violins:
             for idx, row in self.uniframe.iterrows():
                 row['TargetAreaLines'].plot_curviness_violins()
@@ -210,9 +227,70 @@ class MultiTargetAreaQGIS:
         for idx, row in self.uniframe.iterrows():
             row['TargetAreaLines'].create_setframes()
 
-    def plot_lengths(self, unified: bool, save=False, savefolder=None, use_sets=False):
+    def plot_length_fit_cut_ax(self, ax, unified: bool):
         """
-        Plots length distributions
+        Plots the numerical power-law fit to a cut length distribution to a given ax.
+
+        :param ax: ax to plot to.
+        :type ax: matplotlib.axes.Axes
+        :param unified: Whether to plot for target area or grouped data.
+        :type unified: bool
+        raise: ValueError: When there are too many values from np.polyfit i.e. values != 2.
+        """
+
+        def create_text(lineframe_for_text, ax_for_text):
+            """
+            Sub-method to create Texts based on the length distribution DataFrame to a given ax.'
+
+            :param lineframe_for_text: Length distribution.
+            :type lineframe_for_text: pandas.DataFrame | geopandas.GeoDataFrame
+            :param ax_for_text: Ax to create texts to.
+            :type ax_for_text: matplotlib.axes.Axes
+            """
+            msle = sklm.mean_squared_log_error(lineframe_for_text.y.values, lineframe_for_text.y_fit.values)
+            r2score = sklm.r2_score(lineframe_for_text.y.values, lineframe_for_text.y_fit.values)
+
+            text = f'$Exponent = {str(np.round(m, 2))}$' \
+                   + f'\n$Constant = {str(np.round(c, 2))}$' \
+                   + f'\n$MSLE = {str(np.round(msle, 3))}$' \
+                   + f'\n$R^2 = {str(np.round(r2score, 5))}$'
+
+            props = dict(boxstyle='square', facecolor='linen', alpha=1, pad=0.4)
+
+            ax_for_text.text(1.3, 0.6, text, transform=ax_for_text.transAxes
+                             , bbox=props, style='italic', ha='center', va='top'
+                             , fontsize='large', fontfamily='Calibri', linespacing=1.4)
+            func_text = '$n (L) = {{{}}} * L^{{{}}}$'.format(np.round(c, 2), np.round(m, 2))
+            ax_for_text.text(0.5, 1.02, func_text, transform=ax_for_text.transAxes, ha='center', fontsize='x-large')
+
+        if unified:
+            frame_lineframe_main_cut_concat = self.uniframe_lineframe_main_cut_concat
+        else:
+            frame_lineframe_main_cut_concat = self.df_lineframe_main_cut_concat
+
+        lineframe = frame_lineframe_main_cut_concat
+        lineframe = pd.DataFrame(lineframe)
+        lineframe['logLen'] = lineframe.length.apply(np.log)
+        lineframe['logY'] = lineframe.y.apply(np.log)
+
+        # log(y) = m*log(x) + c fitted     y = c*x^m
+        vals = np.polyfit(lineframe['logLen'].values, lineframe['logY'].values, 1)
+        if len(vals) == 2:
+            m, c = vals[0], vals[1]
+        else:
+            QgsMessageLog.logMessage(message='Too many values (vals) from np.polyfit, 2 expected.\n'
+                             f'vals: {vals}', tag=__name__, level=Qgis.Critical)
+            raise ValueError('Too many values (vals) from np.polyfit, 2 expected.\n'
+                             f'vals: {vals}')
+        y_fit = np.exp(m * lineframe['logLen'].values + c)  # calculate the fitted values of y
+        lineframe['y_fit'] = y_fit
+        lineframe.plot(x='length', y='y_fit', c='k', ax=ax, label='Power Law Fit', linestyle='dashed', linewidth=2, alpha=.8)
+        create_text(lineframe, ax)
+
+    def plot_lengths(self, unified: bool, save=False, savefolder='', use_sets=False):
+        """
+        Plots length distributions.
+
         :param unified: Plot unified datasets or individual target areas
         :type unified: bool
         :param save: Whether to save
@@ -221,45 +299,43 @@ class MultiTargetAreaQGIS:
         :type savefolder: str
         :param use_sets: Whether to use sets
         :type use_sets: bool
-        :return:
-        :rtype:
         """
-        logger = logging.getLogger('logging_tool')
-        logger.info('Starting plot_lengths_unified')
 
         if unified:
             frame = self.uniframe
         else:
             frame = self.df
+        # Get color list
+        color_dict = config.get_color_dict(unified)
 
         for idx, srs in frame.iterrows():
-            srs['TargetAreaLines'].plot_length_distribution()
+            color_for_plot = color_dict[srs['TargetAreaLines'].name]
+            srs['TargetAreaLines'].plot_length_distribution(unified=unified, color_for_plot=color_for_plot)
         if use_sets:
             # TODO: reimplement
-            raise Exception('use_sets Not implemented')
-
-            # Prop template
-        props = dict(boxstyle='round', pad=1, facecolor='wheat',
-                     path_effects=[path_effects.SimplePatchShadow(), path_effects.Normal()])
+            raise NotImplementedError('use_sets Not implemented')
 
         # Figure setup for FULL LDs
-        figure_size = (16, 16)
+        figure_size = (7, 7)
         fig, ax = plt.subplots(figsize=figure_size)
         ax.set_xlim(self.uni_left, self.uni_right)
         ax.set_ylim(self.uni_bottom, self.uni_top)
 
         # Plot full lds
-        for idx, srs in frame.iterrows():
-            srs['TargetAreaLines'].plot_length_distribution_ax(ax=ax)
 
-        tools.setup_ax_for_ld(ax, self, font_multiplier=1, predictions=False)
+        for idx, srs in frame.iterrows():
+            color_for_plot = color_dict[srs['TargetAreaLines'].name]
+            srs['TargetAreaLines']: ta.TargetAreaLines
+            srs['TargetAreaLines'].plot_length_distribution_ax(ax=ax, cut=False, color_for_plot=color_for_plot)
+
+        tools.setup_ax_for_ld(ax, self.using_branches)
         # Save figure
         if save:
             if unified:
                 savename = Path(savefolder + '/UNIFIED_FULL_LD.png')
             else:
                 savename = Path(savefolder + '/ALL_FULL_LD.png')
-            plt.savefig(savename, dpi=150)
+            plt.savefig(savename, dpi=150, bbox_inches='tight')
 
         # Figure setup for CUT LDs
         fig, ax = plt.subplots(figsize=figure_size)
@@ -267,25 +343,40 @@ class MultiTargetAreaQGIS:
         ax.set_ylim(self.uni_bottom, self.uni_top)
 
         # Plot cut lds
+        length_text = ''
         for idx, srs in frame.iterrows():
-            srs['TargetAreaLines'].plot_length_distribution_ax(ax=ax, cut=True)
+            color_for_plot = color_dict[srs['TargetAreaLines'].name]
+            srs['TargetAreaLines'].plot_length_distribution_ax(ax=ax, cut=True, color_for_plot=color_for_plot)
             min_length = srs['TargetAreaLines'].lineframe_main_cut.length.min()
             name = srs['group']
-            length_text = f'{name} : {str(round(min_length, 2))}'
+            # Text for cut-off lengths
+            length_text += f'{name} Cut Off (m) = {str(round(min_length, 2))}'
+            if idx == len(frame) - 1:
+                # No new line
+                pass
+            else:
+                # Add new line
+                length_text += '\n'
 
         # Plot fit for cut lds
-        tools.plot_fit_for_uniframe(self, ax=ax, cut=True, use_sets=False, unified=unified)
+        self.plot_length_fit_cut_ax(ax, unified=unified)
+
         # Setup ax
         ax.set_xlim(self.uni_left, self.uni_right)
         ax.set_ylim(self.uni_bottom, self.uni_top)
-        tools.setup_ax_for_ld(ax, self, font_multiplier=1)
-        ax.text(0.1, 0.25, length_text, transform=ax.transAxes, fontsize=28, weight='roman',
-                verticalalignment='center',
-                bbox=props, fontfamily='Times New Roman')
+
+        # Add text with cut-off lengths to plot.
+        ax.text(1.3, 0.34, length_text, transform=ax.transAxes, fontsize='large', weight='roman',
+                bbox={'boxstyle': 'round', 'facecolor': 'whitesmoke', 'pad': 0.5},
+                verticalalignment='top', ha='center', fontfamily='Calibri', linespacing=1.5)
+        tools.setup_ax_for_ld(ax, self.using_branches)
         # Save figure
         if save:
-            savename = Path(savefolder + '/UNIFIED_CUT_LD_WITH_FIT.png')
-            plt.savefig(savename, dpi=150)
+            if unified:
+                savename = Path(savefolder + '/UNIFIED_CUT_LD_WITH_FIT.png')
+            else:
+                savename = Path(savefolder + '/ALL_CUT_LD_WITH_FIT.png')
+            plt.savefig(savename, dpi=150, bbox_inches='tight')
 
         if use_sets:
             raise NotImplementedError('Not implemented. Yet.')
@@ -324,7 +415,7 @@ class MultiTargetAreaQGIS:
             #         savename = Path(savefolder + '/CUT_LD_SET_{}.png'.format(curr_set))
             #         plt.savefig(savename, dpi=150)
 
-    # def plot_lengths_all(self, save=False, savefolder=None):
+    # def plot_lengths_all(self, save=False, savefolder=''):
     #     for idx, srs in self.df.iterrows():
     #         srs['TargetAreaLines'].plot_length_distribution(save=save, savefolder=savefolder)
     #     # Prop template
@@ -374,7 +465,7 @@ class MultiTargetAreaQGIS:
     #         savename = Path(savefolder + f'/INDIV_CUT_LD_WITH_FIT.png')
     #         plt.savefig(savename, dpi=150)
 
-    # def plot_lengths_unified(self, save=False, savefolder=None, use_sets=False):
+    # def plot_lengths_unified(self, save=False, savefolder='', use_sets=False):
     #     logger = logging.getLogger('logging_tool')
     #     logger.info('Starting plot_lengths_unified')
     #     for idx, srs in self.uniframe.iterrows():
@@ -478,7 +569,7 @@ class MultiTargetAreaQGIS:
     #                 savename = Path(savefolder + '/CUT_LD_SET_{}.png'.format(curr_set))
     #                 plt.savefig(savename, dpi=150)
 
-    # def plot_lengths_unified_combined(self, use_sets=False, save=False, savefolder=None):
+    # def plot_lengths_unified_combined(self, use_sets=False, save=False, savefolder=''):
     #     # Prop template
     #     props = dict(boxstyle='round', pad=1, facecolor='wheat',
     #                  path_effects=[path_effects.SimplePatchShadow(), path_effects.Normal()])
@@ -562,7 +653,7 @@ class MultiTargetAreaQGIS:
     #                 plt.savefig(savename, dpi=150)
 
     # TODO: Predictions.
-    # def plot_lengths_unified_combined_predictions(self, use_sets=False, save=False, savefolder=None, predict_with=None):
+    # def plot_lengths_unified_combined_predictions(self, use_sets=False, save=False, savefolder='', predict_with=None):
     #     figure_size = (16, 16)
     #
     #     props = dict(boxstyle='round', pad=1, facecolor='wheat',
@@ -626,7 +717,7 @@ class MultiTargetAreaQGIS:
     #                 savename = Path(savefolder + '/CUT_LD_SET_{}_predictions.png'.format(curr_set))
     #                 plt.savefig(savename, dpi=150)
 
-    def plot_azimuths(self, unified: bool, rose_type: str, save=False, savefolder=None):
+    def plot_azimuths(self, unified: bool, rose_type: str, save=False, savefolder=''):
         """
         Plots azimuths.
         :param unified: Plot unified datasets or individual target areas
@@ -689,7 +780,7 @@ class MultiTargetAreaQGIS:
             fig.savefig(savename, dpi=150)
             fig_w.savefig(savename_w, dpi=150)
 
-    def plot_azimuths_exp(self, unified: bool, rose_type: str, save=False, savefolder=None):
+    def plot_azimuths_exp(self, unified: bool, rose_type: str, save=False, savefolder=''):
         """
         Plots azimuths.
         :param unified: Plot unified datasets or individual target areas
@@ -783,7 +874,7 @@ class MultiTargetAreaQGIS:
 
                 plt.savefig(savename, dpi=150, bbox_inches='tight')
 
-    # def plot_all_azimuths(self, save=False, savefolder=None, big_plots=True, small_text=False):
+    # def plot_all_azimuths(self, save=False, savefolder='', big_plots=True, small_text=False):
     #     if big_plots:
     #         plot_count = len(self.df)
     #         if plot_count < 5:
@@ -840,7 +931,7 @@ class MultiTargetAreaQGIS:
     #             row['TargetAreaLines'].plot_azimuth(rose_type=rose_typesave=save, savefolder=savefolder, branches=self.using_branches
     #                                                 , small_text=small_text)
 
-    # def plot_unified_azimuths(self, save=False, savefolder=None, big_plots=False):
+    # def plot_unified_azimuths(self, save=False, savefolder='', big_plots=False):
     #     branches = self.using_branches
     #     if big_plots:
     #         plot_count = len(self.uniframe)
@@ -892,6 +983,7 @@ class MultiTargetAreaQGIS:
     #         for idx, row in self.uniframe.iterrows():
     #             row['TargetAreaLines'].plot_azimuth(rose_type=rose_typesave=save, savefolder=savefolder, branches=branches)
 
+    # noinspection PyArgumentList
     def determine_crosscut_abutting_relationships(self, unified: bool):
         """
         Determines cross-cutting and abutting relationships between all inputted sets by using spatial intersects
@@ -899,11 +991,15 @@ class MultiTargetAreaQGIS:
 
         :param unified: Calculate for unified datasets or individual target areas
         :type unified: bool
+        :raise AssertionError: When attempting to determine cross-cutting and abutting relationships from branch data
+        or if self.using_branches is True even though you are using trace data.
+        :raise ValueError: When there's only one set defined.
+        You cannot determine cross-cutting and abutting relationships from only one set.
         """
         # Determines xy relations and dynamically creates a dataframe as an aid for plotting the relations
         # TODO: No within set relations.....yet... Problem?
         if self.using_branches:
-            raise Exception('Age relations cannot be determined from BRANCH data.')
+            raise AssertionError('Cross-cutting and abutting relationships cannot be determined from BRANCH data.')
 
         # name: Contains target area name, Sets: (1, 2),
         # x: x nodes between the sets, y: 1 abuts to 2 y node count, y-reverse: 2 abuts to 1 y node count
@@ -929,8 +1025,8 @@ class MultiTargetAreaQGIS:
             sets = self.set_df.Set.tolist()
 
             if len(sets) < 2:
-                # TODO: Move higher
-                raise Exception('Only one set defined. Cannot determine XY relations')
+                # TODO: Move higher, to more abstract level
+                raise ValueError('Only one set defined. Cannot determine cross-cutting and abutting relationships')
             # COLOR CYCLE FOR BARS
 
             # START OF COMPARISONS
@@ -997,6 +1093,8 @@ class MultiTargetAreaQGIS:
         :type save: bool
         :param savefolder: Folder to save plots to
         :type savefolder: str
+        :raise AssertionError: When attempting to determine cross-cutting and abutting relationships from branch data
+        or if self.using_branches is True even though you are using trace data.
         """
         if unified:
             frame = self.uniframe
@@ -1006,7 +1104,7 @@ class MultiTargetAreaQGIS:
             rel_frame = self.relations_df
 
         if self.using_branches:
-            raise Exception('Age relations cannot be determined from BRANCH data.')
+            raise AssertionError('Cross-cutting and abutting relationships cannot be determined from BRANCH data.')
 
         style = config.styled_text_dict
         box_prop = config.styled_prop
@@ -1164,7 +1262,7 @@ class MultiTargetAreaQGIS:
     #
     #     self.xy_relations_frame, self.relations_set_counts = plotting_df, plotting_set_counts
 
-    # def plot_xy_age_relations_unified(self, save=False, savefolder=None):
+    # def plot_xy_age_relations_unified(self, save=False, savefolder=''):
     #     if self.using_branches:
     #         raise Exception('Age relations cannot be determined from BRANCH data.')
     #     rel_frame = self.xy_relations_frame
@@ -1339,7 +1437,7 @@ class MultiTargetAreaQGIS:
     #
     #     self.xy_relations_frame_indiv, self.relations_set_counts_indiv = plotting_df, plotting_set_counts
 
-    # def plot_xy_age_relations_all(self, save=False, savefolder=None):
+    # def plot_xy_age_relations_all(self, save=False, savefolder=''):
     #     if self.using_branches:
     #         raise Exception('Age relations cannot be determined from BRANCH data.')
     #     rel_frame = self.xy_relations_frame_indiv
@@ -1445,7 +1543,7 @@ class MultiTargetAreaQGIS:
     #         savename = Path(savefolder + '/xy_relations_indiv_all.png')
     #         plt.savefig(savename, dpi=200)
 
-    def plot_xyi_ternary(self, unified: bool, save=False, savefolder=None):
+    def plot_xyi_ternary(self, unified: bool, save=False, savefolder=''):
         """
         Plots XYI-ternary plots for target areas or grouped areas.
         :param unified: Plot unified datasets or individual target areas
@@ -1459,15 +1557,15 @@ class MultiTargetAreaQGIS:
             frame = self.uniframe
         else:
             frame = self.df
-
+        color_dict = config.get_color_dict(unified)
         fig, ax = plt.subplots(figsize=(6.5, 5.1))
         scale = 100
 
         fig, tax = ternary.figure(ax=ax, scale=scale)
         tools.initialize_ternary_points(ax, tax)
         for idx, row in frame.iterrows():
-            nd = row['TargetAreaNodes']
-            nd.plot_xyi_point(tax=tax)
+            color_for_plot = color_dict[row['TargetAreaNodes'].name]
+            row['TargetAreaNodes'].plot_xyi_point(tax=tax, color_for_plot=color_for_plot)
         tools.tern_plot_the_fing_lines(tax)
         tax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.15), title = 'XYI-Nodes', title_fontsize='xx-large',
                    prop={'family': 'Calibri', 'weight': 'heavy', 'size': 'x-large'}, edgecolor='black', ncol=2,
@@ -1481,16 +1579,17 @@ class MultiTargetAreaQGIS:
 
         # MAKE INDIVIDUAL XYI PLOTS
         for idx, row in frame.iterrows():
-            row['TargetAreaNodes'].plot_xyi_plot(unified=unified, save=save, savefolder=savefolder)
+            color_for_plot = color_dict[row['TargetAreaNodes'].name]
+            row['TargetAreaNodes'].plot_xyi_plot(unified=unified, color_for_plot=color_for_plot, save=save, savefolder=savefolder)
 
 
-    # def plot_all_xyi(self, save=False, savefolder=None):
+    # def plot_all_xyi(self, save=False, savefolder=''):
     #     # MAKE INDIVIDUAL PLOTS
     #     for idx, row in self.df.iterrows():
     #         nd = row['TargetAreaNodes']
     #         nd.plot_xyi(save=save, savefolder=savefolder)
 
-    # def plot_all_xyi_unified(self, save=False, savefolder=None):
+    # def plot_all_xyi_unified(self, save=False, savefolder=''):
     #     for idx, row in self.uniframe.iterrows():
     #         fig = plt.figure()
     #         nd = row['TargetAreaNodes']
@@ -1513,17 +1612,17 @@ class MultiTargetAreaQGIS:
     #         savename = Path(savefolder + '/all_xyi_points.png')
     #         plt.savefig(savename, dpi=150)
 
-    def plot_branch_ternary(self, unified: bool, save=False, savefolder=None):
+    def plot_branch_ternary(self, unified: bool, save=False, savefolder=''):
         """
         Plots Branch classification-ternary plots for target areas or grouped data.
+
         :param unified: Plot unified datasets or individual target areas
         :type unified: bool
         :param save: Whether to save
         :type save: bool
         :param savefolder: Folder to save to
         :type savefolder: str
-        :return:
-        :rtype:
+
         """
         if not self.using_branches:
             raise Exception('Branch classifications cannot be determined from traces.')
@@ -1535,9 +1634,10 @@ class MultiTargetAreaQGIS:
             frame = self.uniframe
         else:
             frame = self.df
-        for idx, row in frame.iterrows():
-            ld = row['TargetAreaLines']
-            ld.plot_branch_ternary_point(tax=tax)
+        color_dict = config.get_color_dict(unified)
+        for _, row in frame.iterrows():
+            color_for_plot = color_dict[row['TargetAreaLines'].name]
+            row['TargetAreaLines'].plot_branch_ternary_point(tax=tax, color_for_plot=color_for_plot)
         tools.tern_plot_branch_lines(tax)
         tax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.15), title='Branch Classes', title_fontsize='xx-large',
                    prop={'family': 'Calibri', 'weight': 'heavy', 'size': 'x-large'}, edgecolor='black', ncol=2,
@@ -1550,11 +1650,12 @@ class MultiTargetAreaQGIS:
                 savename = Path(savefolder + '/all_branch_points.png')
             plt.savefig(savename, dpi=150, bbox_inches='tight')
 
-        for idx, row in frame.iterrows():
-            row['TargetAreaLines'].plot_branch_ternary_plot(unified=unified, save=True, savefolder=savefolder)
+        for _, row in frame.iterrows():
+            color_for_plot = color_dict[row['TargetAreaLines'].name]
+            row['TargetAreaLines'].plot_branch_ternary_plot(unified=unified, color_for_plot=color_for_plot, save=True, savefolder=savefolder)
 
 
-    # def plot_all_branch_ternary_unified(self, save=False, savefolder=None):
+    # def plot_all_branch_ternary_unified(self, save=False, savefolder=''):
     #     if not self.using_branches:
     #         raise Exception('Branch classifications cannot be determined from traces.')
     #     fig, ax = plt.subplots(figsize=(8, 8))
@@ -1572,7 +1673,7 @@ class MultiTargetAreaQGIS:
     #         savename = Path(savefolder + '/all_branch_points.png')
     #         plt.savefig(savename, dpi=150)
 
-    # def plot_all_branch_ternary(self, save=False, savefolder=None):
+    # def plot_all_branch_ternary(self, save=False, savefolder=''):
     #     if not self.using_branches:
     #         raise Exception('Branch classifications cannot be determined from traces.')
     #
@@ -1779,7 +1880,7 @@ class MultiTargetAreaQGIS:
     #         self.uniframe.topology[idx] = topoframe
     #     self.uniframe_topology_concat = pd.concat(self.uniframe.topology.tolist(), ignore_index=True)
 
-    def plot_topology(self, unified: bool, save=False, savefolder=None):
+    def plot_topology(self, unified: bool, save=False, savefolder=''):
         """
         Plot topological parameters
         :param unified: Plot unified datasets or individual target areas
@@ -1794,16 +1895,16 @@ class MultiTargetAreaQGIS:
         branches = self.using_branches
         log_scale_columns = ['Mean Length', 'Areal Frequency B20',
                              'Fracture Intensity B21', 'Fracture Intensity P21', 'Areal Frequency P20']
-        prop = config.styled_prop
+        prop = config.prop
         units_for_columns = config.units_for_columns
+        color_dict = config.get_color_dict(unified)
         if unified:
             topology_concat = self.uniframe_topology_concat
         else:
             topology_concat = self.df_topology_concat
+        # Add color column to topology_concat DataFrame
+        topology_concat['color'] = topology_concat.name.apply(lambda n: color_dict[n])
 
-        # topology_concat['color'] = topology_concat.name.apply(tools.find_color_topology_plot)
-        # topology_concat['order'] = topology_concat.name.apply(tools.find_order_topology_plot)
-        # topology_concat = topology_concat.sort_values(by='order', axis=0)
         if branches:
             columns_to_plot = ['Mean Length', 'Connections per Branch',
                                'Areal Frequency B20', 'Fracture Intensity B21',
@@ -1814,32 +1915,42 @@ class MultiTargetAreaQGIS:
                                'Dimensionless Intensity P22']
 
         for column in columns_to_plot:
-            fig, ax = plt.subplots(figsize=(9, 9))
+            # Figure size setup
+            # TODO: width higher, MAYBE lower bar_width
+            if unified:
+                width = 6 + 1 * len(self.gnames_cutoffs_df) / 6
+                bar_width = 0.6 * len(self.gnames_cutoffs_df) / 6
+
+            else:
+                width = 6 + 1 * len(self.table_df) / 6
+                bar_width = 0.6 * len(self.table_df) / 6
+
+            fig, ax = plt.subplots(figsize=(width, 5.5))
             topology_concat.name = topology_concat.name.astype('category')
-            topology_concat.plot.bar(x='name', y=column,
-                                     zorder=5, alpha=0.9, width=0.6, ax=ax, label='error')
+            # Trying to have sensible widths for bars:
+            topology_concat.plot.bar(x='name', y=column, color=topology_concat.color.values,
+                                     zorder=5, alpha=0.9, width=bar_width, ax=ax)
             # PLOT STYLING
             ax.set_xlabel('')
-            ax.set_ylabel(column + ' ' + f'({units_for_columns[column]})', fontsize=28, fontfamily='Times New Roman'
+            ax.set_ylabel(column + ' ' + f'({units_for_columns[column]})', fontsize='xx-large', fontfamily='Calibri'
                           , style='italic')
-            ax.set_title(x=0.5, y=1.1, label=column, fontsize=29,
-                         bbox=prop, transform=ax.transAxes)
+            ax.set_title(x=0.5, y=1.09, label=column, fontsize='xx-large',
+                         bbox=prop, transform=ax.transAxes, zorder=-10)
             legend = ax.legend()
             legend.remove()
             if column in log_scale_columns:
                 ax.set_yscale('log')
-            fig.subplots_adjust(top=0.85, bottom=0.35, left=0.2, right=0.95, hspace=0.2, wspace=0.2)
+            fig.subplots_adjust(top=0.85, bottom=0.25, left=0.2)
             locs, labels = plt.xticks()
-            plt.yticks(fontsize=28, c='black')
-            for label in labels:
-                label._text = label._text.replace('_', '\n')
-            plt.xticks(locs, labels, fontsize=28, c='black')
+            labels = ['\n'.join(wrap(l.get_text(), 6)) for l in labels]
+            plt.yticks(fontsize='xx-large', c='black')
+            plt.xticks(locs, labels, fontsize='xx-large', c='black')
             # MOD xTICKS
-            # CHANGE LEGEND HANDLES WITHOUT CHANGEING PLOT
+            # CHANGE LEGEND HANDLES WITHOUT CHANGING PLOT
             # for t in xticks:
             #     lh._sizes = [30]
 
-            # VALUES IN BARS
+            # VALUES ABOVE BARS WITH TEXTS
             rects = ax.patches
             for value, rect in zip(topology_concat[column], rects):
                 height = rect.get_height()
@@ -1853,7 +1964,7 @@ class MultiTargetAreaQGIS:
                     max_height = max([r.get_height() for r in rects])
                     height = height + max_height / 100
                 ax.text(rect.get_x() + rect.get_width() / 2, height, value,
-                        ha='center', va='bottom', zorder=10, fontsize=25)
+                        ha='center', va='bottom', zorder=15, fontsize='x-large')
 
             if save:
                 if unified:
@@ -1862,7 +1973,7 @@ class MultiTargetAreaQGIS:
                     savename = Path(savefolder + '/{}_all.png'.format(str(column)))
                 plt.savefig(savename, dpi=150)
 
-    # def plot_topology_all(self, save=False, savefolder=None):
+    # def plot_topology_all(self, save=False, savefolder=''):
     #     branches = self.using_branches
     #     log_scale_columns = ['Mean Length', 'Areal Frequency B20',
     #                          'Fracture Intensity B21', 'Fracture Intensity P21', 'Areal Frequency P20']
@@ -1927,7 +2038,7 @@ class MultiTargetAreaQGIS:
     #             savename = Path(savefolder + '/{}_all.png'.format(str(column)))
     #             plt.savefig(savename, dpi=150)
 
-    # def plot_topology_unified(self, save=False, savefolder=None):
+    # def plot_topology_unified(self, save=False, savefolder=''):
     #     branches = self.using_branches
     #     log_scale_columns = ['Mean Length', 'Areal Frequency B20',
     #                          'Fracture Intensity B21', 'Fracture Intensity P21', 'Areal Frequency P20']
@@ -1992,7 +2103,7 @@ class MultiTargetAreaQGIS:
     #             savename = Path(savefolder + '/{}_all.png'.format(str(column)))
     #             plt.savefig(savename, dpi=150)
 
-    def plot_hexbin_plot(self, unified: bool, save=False, savefolder=None):
+    def plot_hexbin_plot(self, unified: bool, save=False, savefolder=''):
         """
         Plot a hexbinplot to estimate sample size differences.
        :param unified: Plot unified datasets or individual target areas
@@ -2058,7 +2169,7 @@ class MultiTargetAreaQGIS:
                     savename = Path(savefolder + '/all_hexbinplot_traces_with_histo.png')
             plt.savefig(savename, dpi=200)
 
-    def plot_anisotropy(self, unified: bool, save=False, savefolder=None):
+    def plot_anisotropy(self, unified: bool, save=False, savefolder=''):
         """
         Plot anisotropy of connectivity
         :param unified: Plot unified datasets or individual target areas
@@ -2092,7 +2203,7 @@ class MultiTargetAreaQGIS:
 
                 plt.savefig(savename, dpi=200)
 
-    # def plot_anisotropy_unified(self, ellipse_weights=False, save=False, savefolder=None):
+    # def plot_anisotropy_unified(self, ellipse_weights=False, save=False, savefolder=''):
     #     if not self.using_branches:
     #         raise Exception('Anisotropy cannot be determined from traces.')
     #     for idx, row in self.uniframe.iterrows():
@@ -2105,7 +2216,7 @@ class MultiTargetAreaQGIS:
     #             savename = Path(savefolder + '/{}_anisotropy_unified.png'.format(row.name))
     #             plt.savefig(savename, dpi=200)
 
-    # def plot_anisotropy_all(self, ellipse_weights=False, save=False, savefolder=None):
+    # def plot_anisotropy_all(self, ellipse_weights=False, save=False, savefolder=''):
     #     for idx, row in self.df.iterrows():
     #         row.TargetAreaLines.calc_anisotropy(ellipse_weights=ellipse_weights)
     #         row.TargetAreaLines.plot_anisotropy_styled()

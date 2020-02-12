@@ -8,112 +8,112 @@ from .kit_resources import target_area as ta
 from .. import config
 
 
-class TargetAreaAnalysis:
-    def __init__(
-            self, plotting_directory, name, trace_layer, branch_layer, node_layer, area_layer, debug_logger
-    ):
-        self.plotting_directory = plotting_directory
-        self.name = name
-        self.debug_logger = debug_logger
-
-        self.trace_layer = trace_layer
-        self.branch_layer = branch_layer
-        self.node_layer = node_layer
-        self.area_layer = area_layer
-
-        # Initialize frames
-        self.trace_frame = None
-        self.branch_frame = None
-        self.node_frame = None
-        self.area_frame = None
-        # Initialize target areas
-        self.trace_ta = None
-        self.branch_ta = None
-        self.node_ta = None
-        self.area_ta = None
-        # Populate frames and target areas
-        self.geopandafy()
-        self.initialize_tas()
-
-    def geopandafy(self):
-        self.trace_frame = qgis_tools.df_to_gdf(df=qgis_tools.layer_to_df(self.trace_layer)[0],
-                                                coord_system=qgis_tools.layer_to_df(self.trace_layer)[1])
-        self.branch_frame = qgis_tools.df_to_gdf(df=qgis_tools.layer_to_df(self.branch_layer)[0],
-                                                 coord_system=qgis_tools.layer_to_df(self.branch_layer)[1])
-        self.node_frame = qgis_tools.df_to_gdf(df=qgis_tools.layer_to_df(self.node_layer)[0],
-                                               coord_system=qgis_tools.layer_to_df(self.node_layer)[1])
-        self.area_frame = qgis_tools.df_to_gdf(df=qgis_tools.layer_to_df(self.area_layer)[0],
-                                               coord_system=qgis_tools.layer_to_df(self.area_layer)[1])
-
-    def initialize_tas(self):
-        self.trace_ta = ta.TargetAreaLines(
-            self.trace_frame,
-            self.area_frame,
-            name=self.name,
-            group=self.name,
-            cut_off=1.0,
-            using_branches=False,
-        )
-        self.branch_ta = ta.TargetAreaLines(
-            self.branch_frame,
-            self.area_frame,
-            name=self.name,
-            group=self.name,
-            cut_off=1.0,
-            using_branches=True,
-        )
-        self.node_ta = ta.TargetAreaNodes(
-            self.node_frame,
-            name=self.name,
-            group=self.name,
-        )
-
-        # Calculates important attributes
-        self.trace_ta.calc_attributes()
-        self.branch_ta.calc_attributes()
-
-        # Defines sets
-        self.trace_ta.define_sets()
-        self.branch_ta.define_sets()
-
-    # Create folder structure for plots
-
-
-    def plots(self):
-        self.trace_ta.plot_length_distribution(save=True, savefolder=self.plotting_directory)
-        self.branch_ta.calc_anisotropy()
-        self.branch_ta.plot_anisotropy_styled(for_ax=False, ax=None, save=True, save_folder=self.plotting_directory)
+# class TargetAreaAnalysis:
+#     def __init__(
+#             self, plotting_directory, name, trace_layer, branch_layer, node_layer, area_layer, debug_logger
+#     ):
+#         self.plotting_directory = plotting_directory
+#         self.name = name
+#         self.debug_logger = debug_logger
+#
+#         self.trace_layer = trace_layer
+#         self.branch_layer = branch_layer
+#         self.node_layer = node_layer
+#         self.area_layer = area_layer
+#
+#         # Initialize frames
+#         self.trace_frame = None
+#         self.branch_frame = None
+#         self.node_frame = None
+#         self.area_frame = None
+#         # Initialize target areas
+#         self.trace_ta = None
+#         self.branch_ta = None
+#         self.node_ta = None
+#         self.area_ta = None
+#         # Populate frames and target areas
+#         self.geopandafy()
+#         self.initialize_tas()
+#
+#     def geopandafy(self):
+#         self.trace_frame = qgis_tools.df_to_gdf(df=qgis_tools.layer_to_df(self.trace_layer)[0],
+#                                                 coord_system=qgis_tools.layer_to_df(self.trace_layer)[1])
+#         self.branch_frame = qgis_tools.df_to_gdf(df=qgis_tools.layer_to_df(self.branch_layer)[0],
+#                                                  coord_system=qgis_tools.layer_to_df(self.branch_layer)[1])
+#         self.node_frame = qgis_tools.df_to_gdf(df=qgis_tools.layer_to_df(self.node_layer)[0],
+#                                                coord_system=qgis_tools.layer_to_df(self.node_layer)[1])
+#         self.area_frame = qgis_tools.df_to_gdf(df=qgis_tools.layer_to_df(self.area_layer)[0],
+#                                                coord_system=qgis_tools.layer_to_df(self.area_layer)[1])
+#
+#     def initialize_tas(self):
+#         self.trace_ta = ta.TargetAreaLines(
+#             self.trace_frame,
+#             self.area_frame,
+#             name=self.name,
+#             group=self.name,
+#             cut_off=1.0,
+#             using_branches=False,
+#         )
+#         self.branch_ta = ta.TargetAreaLines(
+#             self.branch_frame,
+#             self.area_frame,
+#             name=self.name,
+#             group=self.name,
+#             cut_off=1.0,
+#             using_branches=True,
+#         )
+#         self.node_ta = ta.TargetAreaNodes(
+#             self.node_frame,
+#             name=self.name,
+#             group=self.name,
+#         )
+#
+#         # Calculates important attributes
+#         self.trace_ta.calc_attributes()
+#         self.branch_ta.calc_attributes()
+#
+#         # Defines sets
+#         self.trace_ta.define_sets()
+#         self.branch_ta.define_sets()
+#
+#     # Create folder structure for plots
+#
+#
+#     def plots(self):
+#         self.trace_ta.plot_length_distribution(save=True, savefolder=self.plotting_directory)
+#         self.branch_ta.calc_anisotropy()
+#         self.branch_ta.plot_anisotropy_styled(for_ax=False, ax=None, save=True, save_folder=self.plotting_directory)
 
 
 class MultiTargetAreaAnalysis:
 
     def __init__(
-            self, table_df, plotting_directory, analysis_name, gnames_cutoffs_df, set_df
+            self, layer_table_df, plotting_directory, analysis_name, group_names_cutoffs_df, set_df
     ):
         self.logger = logging.getLogger('logging_tool')
         self.set_df = set_df
-        self.gnames_cutoffs_df = gnames_cutoffs_df
-        self.table_df = table_df
+        self.group_names_cutoffs_df = group_names_cutoffs_df
+        self.layer_table_df = layer_table_df
         self.plotting_directory = plotting_directory
         self.analysis_name = analysis_name
         self.analysis_traces = None
         self.analysis_branches = None
 
         # Convert QGIS-layers to GeoDataFrames
-        self.table_df['Trace_frame'] = self.table_df['Trace'].apply(qgis_tools.layer_to_gdf)
-        self.table_df['Branch_frame'] = self.table_df['Branch'].apply(qgis_tools.layer_to_gdf)
-        self.table_df['Area_frame'] = self.table_df['Area'].apply(qgis_tools.layer_to_gdf)
-        self.table_df['Node_frame'] = self.table_df['Node'].apply(qgis_tools.layer_to_gdf)
+        self.layer_table_df['Trace_frame'] = self.layer_table_df['Trace'].apply(qgis_tools.layer_to_gdf)
+        self.layer_table_df['Branch_frame'] = self.layer_table_df['Branch'].apply(qgis_tools.layer_to_gdf)
+        self.layer_table_df['Area_frame'] = self.layer_table_df['Area'].apply(qgis_tools.layer_to_gdf)
+        self.layer_table_df['Node_frame'] = self.layer_table_df['Node'].apply(qgis_tools.layer_to_gdf)
 
     def analysis(self):
         # DEBUG
-        # self.table_df = self.table_df.drop(columns=['Trace', 'Branch', 'Area', 'Node'])
+        # self.layer_table_df = self.layer_table_df.drop(columns=['Trace', 'Branch', 'Area', 'Node'])
         self.logger.info('CREATING MultiTargetAreaQGIS FOR TRACES AND BRANCHES')
 
-        self.analysis_traces = mta.MultiTargetAreaQGIS(self.table_df, self.gnames_cutoffs_df, branches=False)
+        self.analysis_traces = mta.MultiTargetAreaQGIS(self.layer_table_df, self.group_names_cutoffs_df, branches=False)
         # Bar at 25
 
-        self.analysis_branches = mta.MultiTargetAreaQGIS(self.table_df, self.gnames_cutoffs_df, branches=True)
+        self.analysis_branches = mta.MultiTargetAreaQGIS(self.layer_table_df, self.group_names_cutoffs_df, branches=True)
         # Bar at 45
 
         # TRACE DATA SETUP
@@ -256,12 +256,12 @@ class MultiTargetAreaAnalysis:
         self.analysis_traces.plot_crosscut_abutting_relationships(unified=False, save=True, savefolder=self.plotting_directory + '/age_relations/indiv')
         self.analysis_traces.plot_crosscut_abutting_relationships(unified=True, save=True, savefolder=self.plotting_directory + '/age_relations')
         self.logger.info('Plotting crosscutting and abutting rels ENDED')
-        # logger.info(f'self.table_df:\n\n{self.table_df}')
+        # logger.info(f'self.layer_table_df:\n\n{self.layer_table_df}')
         #
-        # self.logger.info(f'Shape of self.table_df: {self.table_df.shape}')
-        # self.logger.info(f'Len of self.table_df: {len(self.table_df)}')
+        # self.logger.info(f'Shape of self.layer_table_df: {self.layer_table_df.shape}')
+        # self.logger.info(f'Len of self.layer_table_df: {len(self.layer_table_df)}')
         #
-        # if self.table_df.shape[0] > 1:
+        # if self.layer_table_df.shape[0] > 1:
         #     self.analysis_traces.plot_xy_age_relations_all(save=True, savefolder=self.plotting_directory + '/age_relations/indiv')
         #     self.analysis_traces.plot_xy_age_relations_unified(save=True, savefolder=self.plotting_directory + '/age_relations')
 

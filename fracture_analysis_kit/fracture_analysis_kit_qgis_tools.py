@@ -1,18 +1,30 @@
 import os
 import shutil
 from pathlib import Path
-
 import geopandas as gpd
 import pandas as pd
 
+from qgis.PyQt.QtWidgets import QMessageBox
+from qgis.core import QgsMessageLog, Qgis
 
 # Convert QGIS vectorlayer to pandas DataFrame
 def layer_to_df(layer):
-    fieldnames = [field.name() for field in layer.fields()]
+    """
+    Converts QGIS vector layer to a pandas DataFrame and extracts coordinate system from the layer.
 
+    :param layer: QGIS vector layer.
+    :type layer: TODO
+    :return: Converted pandas DataFrame and layer coord system.
+    :rtypes: pandas.DataFrame and crs
+    """
+    fieldnames = [field.name() for field in layer.fields()]
+    # DEBUG
+    QgsMessageLog.logMessage(message=f"Type() of QGIS vector layer: {str(type(layer))}", tag=__name__, level=Qgis.Info)
     fieldnames.append('geometry')
     features = layer.getFeatures()
     coord_system = layer.crs()
+    # DEBUG
+    QgsMessageLog.logMessage(message=f"Type() of QGIS crs: {str(type(coord_system))}", tag=__name__, level=Qgis.Info)
     df = pd.DataFrame(columns=fieldnames)
     for feature in features:
         row_add = {}
@@ -34,6 +46,16 @@ def layer_to_df(layer):
 
 
 def df_to_gdf(df, coord_system):
+    """
+    Converts pandas DataFrame to a GeoDataFrame along with setting the given coordinate system.
+
+    :param df: Pandas DataFrame with QGIS vector layer data.
+    :type df: pandas.DataFrame
+    :param coord_system: Given coordinate system.
+    :type coord_system:
+    :return: Converted GeoDataFrame
+    :rtype: geopandas.GeoDataFrame
+    """
     proj4_rep = coord_system.toProj4()
     gdf = gpd.GeoDataFrame(df)
     gdf.crs = proj4_rep
@@ -41,11 +63,29 @@ def df_to_gdf(df, coord_system):
 
 
 def layer_to_gdf(layer):
+    """
+    Converts QGIS vector layer to a GeoDataFrame.
+
+    :param layer: QGIS vector layer
+    :type layer: TODO
+    :return: Converted GeoDataFrame
+    :rtype: geopandas.GeoDataFrame
+    """
     df, coord_system = layer_to_df(layer)
     return df_to_gdf(df, coord_system)
 
 
 def plotting_directories(results_folder, name):
+    """
+    Creates plotting directories and handles FileExistsErrors when raised.
+
+    :param results_folder: Base folder to create plots_{name} folder to.
+    :type results_folder: str
+    :param name: Analysis name.
+    :type name: str
+    :return: Newly made path to plotting directory where all plots will be saved to.
+    :rtype: str
+    """
     plotting_directory = f"{results_folder}/plots_{name}"
     try:
         try:
@@ -95,10 +135,15 @@ def plotting_directories(results_folder, name):
         os.mkdir(Path(f"{plotting_directory}/xyi/indiv"))
         os.mkdir(Path(f"{plotting_directory}/hexbinplots"))
 
-    # Should not be needed. Will run if only SOME of the above folders are present.
+    # Should not be needed (shutil.rmtree(Path(f"{plotting_directory}"))).
+    # Would run if only SOME of the above folders are present.
+    # i.e. Folder creation has failed and same folder is used again or if some folders have been removed and same
+    # plotting directory is used again. Edge cases.
     except FileExistsError:
-
-        print("Earlier decrepit directories found. Deleting decrepit result-plots folder in plots and remaking.")
-        shutil.rmtree(Path(f"{plotting_directory}"))
+        QMessageBox.critical(title="Error", text=f'Given folder contains a plots_{name} -folder with incomplete folders.\n'
+                                                 f'Try again with new folder and analysis name.')
+        raise
+        # print("Earlier decrepit directories found. Deleting decrepit result-plots folder in plots and remaking.")
+        # shutil.rmtree(Path(f"{plotting_directory}"))
 
     return plotting_directory
