@@ -41,7 +41,6 @@ from .fracture_analysis_kit import main_target_analysis
 debug_logger = logging_tool.DebugLogger()
 
 
-
 class FractureAnalysis2D:
     """QGIS Plugin Implementation."""
 
@@ -81,7 +80,7 @@ class FractureAnalysis2D:
         self.polygon_layers = None
         self.point_layers = None
         self.layer_table_df = pd.DataFrame(columns=['Trace', 'Branch', 'Node', 'Area', 'Name', 'Group'])
-        self.group_names_cutoffs_df = pd.DataFrame(columns=['Group', 'CutOff'])
+        self.group_names_cutoffs_df = pd.DataFrame(columns=['Group', 'CutOffTraces', 'CutOffBranches'])
         self.set_df = pd.DataFrame(columns=['Set', 'SetLimits'])
         # Debug logger
         self.debug_logger = debug_logger
@@ -247,7 +246,7 @@ class FractureAnalysis2D:
         # Substitute for blank names
         if name == "":
             name = trace_layer.name()
-        # Verify addition
+        # Verify inputs.
 
         for layer in [trace_layer, branch_layer, node_layer, area_layer]:
             if not isinstance(layer, QgsVectorLayer):
@@ -258,6 +257,16 @@ class FractureAnalysis2D:
         if len(target_area_group) == 0:
             QMessageBox.critical(None, "Error"
                                  , f'No Group chosen')
+            return
+        if name in self.layer_table_df.Name.tolist():
+            QMessageBox.critical(None, "Error"
+                                 , f'Given Target Area Name ({name}) is already in the layer table.'
+                                   f'Duplicate names are not allowed.')
+            return
+        if name in self.group_names_cutoffs_df.Group.tolist():
+            QMessageBox.critical(None, "Error"
+                                 , f'Given Target Area Name ({name}) is already in the group names table.'
+                                   f'Duplicate names are not allowed between target areas and groups.')
             return
         # Current row count
         curr_row = self.dlg.tableWidget_tab2.rowCount()
@@ -270,9 +279,10 @@ class FractureAnalysis2D:
         self.dlg.tableWidget_tab2.setItem(curr_row, 2, QTableWidgetItem(node_layer.name()))
         self.dlg.tableWidget_tab2.setItem(curr_row, 3, QTableWidgetItem(area_layer.name()))
         self.dlg.tableWidget_tab2.setItem(curr_row, 5, QTableWidgetItem(target_area_group))
-        self.layer_table_df = self.layer_table_df.append({'Trace': trace_layer, 'Branch': branch_layer, 'Node': node_layer
-                                                 , 'Area': area_layer, 'Name': name, 'Group': target_area_group}
-                                                         , ignore_index=True)
+        self.layer_table_df = self.layer_table_df.append(
+            {'Trace': trace_layer, 'Branch': branch_layer, 'Node': node_layer
+                , 'Area': area_layer, 'Name': name, 'Group': target_area_group}
+            , ignore_index=True)
         # Switch list item with a dummy
         # TODO: Further testing required
         self.line_layers[self.dlg.comboBox_trace_2.currentIndex()] = DummyLayer()
@@ -325,27 +335,54 @@ class FractureAnalysis2D:
 
     def add_row_group_name_cutoff(self):
         group_name = self.dlg.lineEdit_gname.text()
-        cut_off = self.dlg.lineEdit_tab2_cutoff.text()
+        cut_off_traces = self.dlg.lineEdit_tab2_cutoff_traces.text()
+        cut_off_branches = self.dlg.lineEdit_tab2_cutoff_branches.text()
         # Validate inputs
         try:
-            cut_off_float = float(cut_off)
+            cut_off_traces_float = float(cut_off_traces)
         except ValueError:
             QMessageBox.critical(None, "Error"
-                                 , f'Invalid Cut-off given: {cut_off}\n'
-                                   f'Give as a decimal between 0 and 1 (e.g. 0.95)')
+                                 , f'Invalid trace Cut-off given: {cut_off_traces}\n'
+                                   f'Give as meters  (e.g. 1.5)')
+            return
+        try:
+            cut_off_branches_float = float(cut_off_branches)
+        except ValueError:
+            QMessageBox.critical(None, "Error"
+                                 , f'Invalid branch Cut-off given: {cut_off_branches}\n'
+                                   f'Give as meters  (e.g. 0.5)')
             return
         if len(group_name) == 0:
             QMessageBox.critical(None, "Error"
                                  , f'No Group name given')
             return
-        if cut_off == '':
+        if cut_off_traces == '':
             QMessageBox.critical(None, "Error"
-                                 , f'No Cut-off value given')
+                                 , f'No trace Cut-off value given')
             return
-        if not 1 >= cut_off_float > 0:
+        if cut_off_branches == '':
             QMessageBox.critical(None, "Error"
-                                 , f'Invalid Cut-off value given: {cut_off}\n'
-                                   f'Give as a decimal between 0 and 1 (e.g. 0.95)')
+                                 , f'No branch Cut-off value given')
+            return
+        if 0 > cut_off_traces_float:
+            QMessageBox.critical(None, "Error"
+                                 , f'Negative trace Cut-off value given: {cut_off_traces_float}\n'
+                                   f'Give as meters (e.g. 0.95)')
+            return
+        if 0 > cut_off_branches_float:
+            QMessageBox.critical(None, "Error"
+                                 , f'Negative branch Cut-off value given: {cut_off_branches_float}\n'
+                                   f'Give as meters (e.g. 0.95)')
+            return
+        if group_name in self.group_names_cutoffs_df.Group.tolist():
+            QMessageBox.critical(None, "Error"
+                                 , f'Given Group Name ({group_name}) is already in the group names table.'
+                                   f'Duplicate names are not allowed.')
+            return
+        if group_name in self.layer_table_df.Name.tolist():
+            QMessageBox.critical(None, "Error"
+                                 , f'Given Group Name ({group_name}) is already in the layer table.'
+                                   f'Duplicate names for target areas and groups are not allowed.')
             return
         # Current row count
         curr_row = self.dlg.tableWidget_tab2_gnames.rowCount()
@@ -353,15 +390,19 @@ class FractureAnalysis2D:
         self.dlg.tableWidget_tab2_gnames.insertRow(curr_row)
         # Add data
         self.dlg.tableWidget_tab2_gnames.setItem(curr_row, 0, QTableWidgetItem(group_name))
-        self.dlg.tableWidget_tab2_gnames.setItem(curr_row, 1, QTableWidgetItem(cut_off))
+        self.dlg.tableWidget_tab2_gnames.setItem(curr_row, 1, QTableWidgetItem(cut_off_traces))
+        self.dlg.tableWidget_tab2_gnames.setItem(curr_row, 2, QTableWidgetItem(cut_off_branches))
         # Append to DataFrame as float
-        self.group_names_cutoffs_df = self.group_names_cutoffs_df.append({'Group': group_name, 'CutOff': cut_off_float},
-                                                                         ignore_index=True)
+        self.group_names_cutoffs_df = self.group_names_cutoffs_df.append({'Group': group_name
+                                                                             , 'CutOffTraces': cut_off_traces_float
+                                                                             , 'CutOffBranches': cut_off_branches_float}
+                                                                         , ignore_index=True)
         # Populate names to target area group button
         self.populate_groups()
         # Clear name and cut_off text boxes
         self.dlg.lineEdit_gname.clear()
-        self.dlg.lineEdit_tab2_cutoff.clear()
+        self.dlg.lineEdit_tab2_cutoff_traces.clear()
+        self.dlg.lineEdit_tab2_cutoff_branches.clear()
 
     def add_row_set(self):
         set_start = self.dlg.lineEdit_tab2_set_start.text()
@@ -485,7 +526,6 @@ class FractureAnalysis2D:
         result = self.dlg.exec_()
         # See if OK was pressed
         if result:
-
             QMessageBox.critical(None, "Error"
                                  , f'Single Target Area Analysis Not Implemented')
             return
@@ -564,7 +604,7 @@ class FractureAnalysis2D:
 
         # Push finish message
         QMessageBox.information(None, "Success!"
-                             , f'Plots of {analysis_name} were made into {results_folder}.')
+                                , f'Plots of {analysis_name} were made into {results_folder}.')
         # self.iface.messageBar().pushMessage(
         #     "Success",
         #     f"Plots were of {analysis_name} made into {results_folder}",

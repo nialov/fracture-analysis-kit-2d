@@ -25,10 +25,22 @@ from ... import config
 # Classes
 
 class TargetAreaLines:
+    """
+    Class for a target area or a group of target areas that consists of lines (traces or branches) and interpretation
+    areas for these lines. Additionally contains cut offs and calculates parameters for analysis and plotting,
+    information whether the lines are traces or branches and the name for the target area.
+
+    The name parameter acts as the unique indicator to differentiate these objects. Duplicate target area or group names
+    are therefore not allowed.
+    """
+
     # TODO: Add using_branches to ld as well?
-    def __init__(self, lineframe, areaframe, name, group, using_branches: bool, cut_off=1.0):
+    def __init__(self, lineframe, areaframe, name, group, using_branches: bool, cut_off_length=1.0):
         """
-        Init of TargetAreaLines
+        Init of TargetAreaLines.
+
+        TODO: Default cut-off.
+
         :param lineframe: GeoDataFrame containing line data
         :type lineframe: gpd.GeoDataFrame
         :param areaframe: GeoDataFrame containing area data
@@ -39,15 +51,15 @@ class TargetAreaLines:
         :type group: str
         :param using_branches: Branches or traces
         :type using_branches: bool
-        :param cut_off: Cut-off value. Default 1.0 i.e. no cut-off applied.
-        :type cut_off: float
+        :param cut_off_length: Cut-off value in meters. Default 1.0 meters.
+        :type cut_off_length: float
         """
 
         self.lineframe = lineframe
         self.areaframe = areaframe
         self.group = group
         self.name = name
-        self.cut_off = cut_off
+        self.cut_off_length = cut_off_length
 
         # Get area using geopandas
         if isinstance(lineframe, gpd.GeoDataFrame):
@@ -73,7 +85,6 @@ class TargetAreaLines:
         # TODO: TEST PROPERLY
         # TODO: lineframe_main initialized as none.... here..... is it a problem?
         self.lineframe_main = None
-        self.cut_off_length = None
         self.two_halves = None
         self.left, self.right, self.bottom, self.top = None, None, None, None
         self.lineframe_main_cut = None
@@ -100,8 +111,6 @@ class TargetAreaLines:
         # TODO: TEST AND UNDERSTAND WHY THERE ARE nan in AZIMU CALC
         self.lineframe_main = self.lineframe_main.dropna(subset=['azimu'])
         self.lineframe_main['halved'] = self.lineframe_main.azimu.apply(tools.azimu_half)
-
-        self.cut_off_length = tools.calc_cut_off_length(self.lineframe_main, self.cut_off)
 
         # Allows plotting of azimuth
         self.two_halves_non_weighted = tools.azimuth_plot_attributes(self.lineframe_main, weights=False)
@@ -177,7 +186,7 @@ class TargetAreaLines:
             lineframe_cut = self.lineframe_main_cut
             lineframe_cut = pd.DataFrame(lineframe_cut)
             lineframe_cut.plot.scatter(x='length', y='y', s=50
-                                       , logx=True, logy=True, label=self.name + '_cut', ax=ax, color=color_for_plot)
+                                       , logx=True, logy=True, label=self.name, ax=ax, color=color_for_plot)
 
         # Full length distribution
         else:

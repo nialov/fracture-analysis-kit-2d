@@ -89,7 +89,7 @@ def main_multi_target_area(layer_table_df, results_folder, analysis_name, group_
     :type results_folder: str
     :param analysis_name: Name for the analysis. Will be used in the plots_ folder name.
     :type analysis_name: str
-    :param group_names_cutoffs_df: DataFrame with group name and cut-off data.
+    :param group_names_cutoffs_df: DataFrame with group name and cut-off data for both traces and branches.
     :type group_names_cutoffs_df: pandas.DataFrame
     :param set_df: DataFrame with set names and ranges.
     :type set_df: pandas.DataFrame

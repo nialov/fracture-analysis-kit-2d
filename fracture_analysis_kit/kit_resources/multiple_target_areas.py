@@ -47,7 +47,7 @@ class MultiTargetAreaQGIS:
         :type branches: bool
         """
         logger = logging.getLogger('logging_tool')
-        self.gnames_cutoffs_df = gnames_cutoffs_df
+        self.group_names_cutoffs_df = gnames_cutoffs_df
         self.groups = gnames_cutoffs_df.Group.tolist()
         # self.codes = group_names_cutoffs_df
         self.table_df = table_df
@@ -55,7 +55,7 @@ class MultiTargetAreaQGIS:
         self.using_branches = branches
 
         # TODO: Remove filename when isn't used
-        self.df = pd.DataFrame(columns=['name', 'lineframe', 'areaframe', 'nodeframe', 'group', 'cut_off'])
+        self.df = pd.DataFrame(columns=['name', 'lineframe', 'areaframe', 'nodeframe', 'group', 'cut_off_length'])
         # Assign None to later initialized attributes
         # TODO: TEST PROPERLY
         self.set_ranges_list = None
@@ -88,13 +88,16 @@ class MultiTargetAreaQGIS:
             group = row.Group
 
             # Cut-off for group
-            cut_off = self.gnames_cutoffs_df.loc[self.gnames_cutoffs_df.Group == group].CutOff.iloc[0]
+            cut_offs = self.group_names_cutoffs_df.loc[self.group_names_cutoffs_df.Group == group]
+            assert len(cut_offs.CutOffBranches) == 1
+            cut_off_length = cut_offs.CutOffBranches.iloc[0] if self.using_branches else cut_offs.CutOffTraces.iloc[0]
+
             try:
-                cut_off = float(cut_off)
+                cut_off_length = float(cut_off_length)
             except TypeError:
                 QgsMessageLog.logMessage(message=
-                                         f'Cut-off value was an iterable or not convertible to float. CutOff value: {cut_off}'
-                                         f'Type: {str(type(cut_off))}', tag=__name__, level=Qgis.Critical)
+                                         f'Cut-off value was an iterable or not convertible to float. CutOff value: {cut_off_length}'
+                                         f'Type: {str(type(cut_off_length))}', tag=__name__, level=Qgis.Critical)
                 raise
 
             # Initialize DataFrames with additional columns
@@ -122,14 +125,14 @@ class MultiTargetAreaQGIS:
 
             # Append to DataFrame
             self.df = self.df.append({'name': name, 'lineframe': lineframe, 'areaframe': areaframe
-                                         , 'nodeframe': nodeframe, 'group': group, 'cut_off': cut_off},
+                                         , 'nodeframe': nodeframe, 'group': group, 'cut_off_length': cut_off_length},
                                      ignore_index=True)
 
 
 
         self.df['TargetAreaLines'] = self.df.apply(
             lambda x: tools.construct_length_distribution_base(x['lineframe'], x['areaframe'], x['name'], x['group'],
-                                                               x['cut_off'], self.using_branches),
+                                                               x['cut_off_length'], self.using_branches),
             axis=1)
         self.df['TargetAreaNodes'] = self.df.apply(
             lambda x: tools.construct_node_data_base(x['nodeframe'], x['name'], x['group']), axis=1)
@@ -172,18 +175,25 @@ class MultiTargetAreaQGIS:
         :raise ValueError: When there are groups without any target areas.
         """
         logger = logging.getLogger('logging_tool')
-        uniframe = pd.DataFrame(columns=['TargetAreaLines', 'TargetAreaNodes', 'group', 'name', 'uni_ld_area', 'cut_off'])
+        uniframe = pd.DataFrame(columns=['TargetAreaLines', 'TargetAreaNodes', 'group', 'name', 'uni_ld_area', 'cut_off_length'])
         for idx, group in enumerate(self.groups):
             frame = self.df.loc[self.df['group'] == group]
 
             if len(frame) > 0:
-                # Cut-off is same for all group target areas
-                cut_off = frame.cut_off.iloc[0]
-                # Hunting possible bugs:
-                if frame.shape[0] > 1:
-                    assert frame.cut_off.iloc[0] == frame.cut_off.iloc[1]
+                # Cut-off from user input table.
+                if self.using_branches:
+                    cut_off_length = \
+                        self.group_names_cutoffs_df.loc[self.group_names_cutoffs_df.Group == group].CutOffBranches.iloc[0]
+                else:
+                    cut_off_length = \
+                        self.group_names_cutoffs_df.loc[self.group_names_cutoffs_df.Group == group].CutOffTraces.iloc[0]
+                # cut_off = frame.cut_off.iloc[0]
 
-                unif_ld_main = tools.unify_lds(frame.TargetAreaLines.tolist(), group, cut_off)
+                # Hunting possible bugs:
+                assert len(self.group_names_cutoffs_df.loc[self.group_names_cutoffs_df.Group == group].CutOffTraces) == 1
+                assert len(self.group_names_cutoffs_df.loc[self.group_names_cutoffs_df.Group == group].CutOffBranches) == 1
+
+                unif_ld_main = tools.unify_lds(frame.TargetAreaLines.tolist(), group, cut_off_length)
                 logger.info('Calcing attributes for unified')
                 unif_ld_main.calc_attributes()
                 logger.info('Creating geodataframe from areas')
@@ -193,7 +203,7 @@ class MultiTargetAreaQGIS:
                 logger.info('Appending uniframe')
                 uniframe = uniframe.append(
                     {'TargetAreaLines': unif_ld_main, 'TargetAreaNodes': unif_nd_main, 'group': group, 'name': group,
-                     'uni_ld_area': uni_ld_area, 'cut_off': cut_off},
+                     'uni_ld_area': uni_ld_area, 'cut_off_length': cut_off_length},
                     ignore_index=True)
             else:
                 raise ValueError('There are groups without any target areas.'
@@ -1087,6 +1097,7 @@ class MultiTargetAreaQGIS:
     def plot_crosscut_abutting_relationships(self, unified: bool, save=False, savefolder=''):
         """
         Plots cross-cutting and abutting relationships for individual target areas or for grouped data.
+
         :param unified: Calculate for unified datasets or individual target areas
         :type unified: bool
         :param save: Save plots or not
@@ -1106,9 +1117,6 @@ class MultiTargetAreaQGIS:
         if self.using_branches:
             raise AssertionError('Cross-cutting and abutting relationships cannot be determined from BRANCH data.')
 
-        style = config.styled_text_dict
-        box_prop = config.styled_prop
-        colors_cycle = config.colors_for_xy_relations
         # SUBPLOTS, FIGURE SETUP
         cols = len(self.set_df)
         width = 12
@@ -1127,8 +1135,6 @@ class MultiTargetAreaQGIS:
                 for set_name in set_names:
                     set_counts.append(len(lineframe.loc[lineframe.set == set_name]))
 
-
-
                 fig, axes = plt.subplots(ncols=cols, nrows=1, figsize=(width, height))
 
                 prop_title = dict(boxstyle='square', facecolor='linen', alpha=1, linewidth=2)
@@ -1139,6 +1145,7 @@ class MultiTargetAreaQGIS:
 
                 for ax, idx_row in zip(axes, rel_frame_with_name.iterrows()):
                     row = idx_row[1]
+                    # TODO: More colors? change brightness or some other parameter?
                     bars = ax.bar(x=[0.3, 0.55, 0.65]
                                   , height=[row['x'], row['y'], row['y-reverse']]
                                   , width=0.1
@@ -1918,8 +1925,8 @@ class MultiTargetAreaQGIS:
             # Figure size setup
             # TODO: width higher, MAYBE lower bar_width
             if unified:
-                width = 6 + 1 * len(self.gnames_cutoffs_df) / 6
-                bar_width = 0.6 * len(self.gnames_cutoffs_df) / 6
+                width = 6 + 1 * len(self.group_names_cutoffs_df) / 6
+                bar_width = 0.6 * len(self.group_names_cutoffs_df) / 6
 
             else:
                 width = 6 + 1 * len(self.table_df) / 6

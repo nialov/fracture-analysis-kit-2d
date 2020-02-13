@@ -286,7 +286,7 @@
       </rect>
      </property>
      <property name="toolTip">
-      <string>Clear Group and Cut Off table</string>
+      <string>Clear Group and Cut Offs table</string>
      </property>
      <property name="statusTip">
       <string/>
@@ -337,11 +337,20 @@
       </rect>
      </property>
      <property name="toolTip">
-      <string>Group and Cut Off table</string>
+      <string>Group and Cut Offs table</string>
      </property>
      <property name="whatsThis">
       <string/>
      </property>
+     <attribute name="horizontalHeaderMinimumSectionSize">
+      <number>32</number>
+     </attribute>
+     <attribute name="horizontalHeaderDefaultSectionSize">
+      <number>75</number>
+     </attribute>
+     <attribute name="horizontalHeaderHighlightSections">
+      <bool>true</bool>
+     </attribute>
      <column>
       <property name="text">
        <string>Group</string>
@@ -354,12 +363,17 @@
      </column>
      <column>
       <property name="text">
-       <string>Cut Off</string>
+       <string>Cut Off Traces</string>
       </property>
       <property name="font">
        <font>
         <pointsize>12</pointsize>
        </font>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Cut Off Branches</string>
       </property>
      </column>
     </widget>
@@ -369,10 +383,17 @@
        <x>20</x>
        <y>30</y>
        <width>276</width>
-       <height>51</height>
+       <height>67</height>
       </rect>
      </property>
      <layout class="QGridLayout" name="gridLayout">
+      <item row="1" column="1">
+       <widget class="QLineEdit" name="lineEdit_tab2_folder">
+        <property name="text">
+         <string>D:\QGIS_Files\test_plots</string>
+        </property>
+       </widget>
+      </item>
       <item row="0" column="0">
        <widget class="QLabel" name="label_26">
         <property name="font">
@@ -413,13 +434,6 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="1">
-       <widget class="QLineEdit" name="lineEdit_tab2_folder">
-        <property name="text">
-         <string>D:\QGIS_Files\test_plots</string>
-        </property>
-       </widget>
-      </item>
       <item row="1" column="2">
        <widget class="QPushButton" name="pushButton_tab2_folder">
         <property name="font">
@@ -442,10 +456,10 @@
     <widget class="QWidget" name="layoutWidget">
      <property name="geometry">
       <rect>
-       <x>530</x>
+       <x>480</x>
        <y>60</y>
-       <width>185</width>
-       <height>85</height>
+       <width>237</width>
+       <height>117</height>
       </rect>
      </property>
      <layout class="QFormLayout" name="formLayout">
@@ -457,7 +471,7 @@
          </font>
         </property>
         <property name="toolTip">
-         <string>Input name for group</string>
+         <string>Input name for group. Short names preferred.</string>
         </property>
         <property name="whatsThis">
          <string/>
@@ -476,7 +490,7 @@
          <string/>
         </property>
         <property name="text">
-         <string>KB</string>
+         <string>KB_20m</string>
         </property>
        </widget>
       </item>
@@ -488,30 +502,61 @@
          </font>
         </property>
         <property name="toolTip">
-         <string>Input cut off in range 0 - 1 for group</string>
+         <string>Input cut off length for traces in meters.</string>
         </property>
         <property name="whatsThis">
          <string/>
         </property>
         <property name="text">
-         <string>Cut Off 0 - 1</string>
+         <string>Cut Off Traces (m)</string>
         </property>
        </widget>
       </item>
       <item row="1" column="1">
-       <widget class="QLineEdit" name="lineEdit_tab2_cutoff">
+       <widget class="QLineEdit" name="lineEdit_tab2_cutoff_traces">
         <property name="toolTip">
-         <string>E.g. 0.95</string>
+         <string>E.g. 1.8</string>
         </property>
         <property name="whatsThis">
          <string/>
         </property>
         <property name="text">
-         <string>0.95</string>
+         <string>1.8</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="label_28">
+        <property name="font">
+         <font>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
+        <property name="toolTip">
+         <string>Input cut off length for branches in meters.</string>
+        </property>
+        <property name="whatsThis">
+         <string/>
+        </property>
+        <property name="text">
+         <string>Cut Off Branches (m)</string>
         </property>
        </widget>
       </item>
       <item row="2" column="1">
+       <widget class="QLineEdit" name="lineEdit_tab2_cutoff_branches">
+        <property name="toolTip">
+         <string>E.g. 1.6</string>
+        </property>
+        <property name="whatsThis">
+         <string/>
+        </property>
+        <property name="text">
+         <string>1.6</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
        <widget class="QPushButton" name="pushButton_gname_add">
         <property name="font">
          <font>
@@ -640,7 +685,7 @@
          </font>
         </property>
         <property name="toolTip">
-         <string>Name the target area</string>
+         <string>Name the target area. Short names preferred. Duplicates are not allowed.</string>
         </property>
         <property name="text">
          <string>Name target area</string>
@@ -650,7 +695,7 @@
       <item row="4" column="1">
        <widget class="QLineEdit" name="lineEdit_tab2_tan">
         <property name="toolTip">
-         <string>E.g. KB11</string>
+         <string>E.g. KB11.</string>
         </property>
         <property name="text">
          <string>KB10</string>

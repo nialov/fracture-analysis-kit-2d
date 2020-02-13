@@ -35,8 +35,6 @@ styled_prop = dict(boxstyle='round', pad=0.6, facecolor='wheat',
 props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
 prop = dict(boxstyle='square', facecolor='linen', alpha=1, pad=0.45)
 
-colors_for_xy_relations = ['blue', 'red', 'lightblue', 'green', 'orangered', 'greenyellow']
-
 # Number of target areas. Should be changed before analysis.
 n_ta = -1
 # Number of groups. Should be changed before analysis.
@@ -68,15 +66,15 @@ g_list = []
 
 def get_color_dict(unified: bool) -> dict:
     """
-    Returns the default color dict, which was setup for the correct number of target areas and groups.
-    Assertations will fail if setup hasn't been done. => AssertationError
+    Returns the default color dict, which was setup for the correct number of target areas and groups
+    (sns.color_palette('dark', n_colors)). Assertations will fail if setup hasn't been done.
 
     :param unified: Whether the cycle for target areas or grouped data is wanted.
     :type unified: bool
     :return: Default dictionary with either target area names or group names as keys
     and colors as values.
     :rtype: dict
-    :raise AssertationError: Assertations will fail if setup hasn't been done.
+    :raise AssertationError: Assertations will fail if setup of target area and group counts hasn't been done.
 
     """
     assert n_ta != -1
@@ -95,7 +93,7 @@ def get_color_dict(unified: bool) -> dict:
 # Used for styling plots
 def styling_plots(style):
     """
-    Styles matplotlib plots by changing default matplotlib parameters. (plt.rc)
+    Styles matplotlib plots by changing default matplotlib parameters (plt.rc).
 
     :param style: String to determine how to stylize. Options: 'traces', 'branches', 'gray'
     :type style: str

@@ -1046,6 +1046,7 @@ def calc_cut_off_length(lineframe_main, cut_off: float):
     return cut_off_length
 
 
+
 def calc_xlims(lineframe):
     """Calculates xlimits for plot axes
 
@@ -1127,9 +1128,9 @@ def define_set(azimuth, set_df):  # Uses HALVED azimuth: 0-180
 
 
 def construct_length_distribution_base(lineframe: gpd.GeoDataFrame, areaframe: gpd.GeoDataFrame, name: str, group: str,
-                                       cut_off=1,
+                                       cut_off_length=1,
                                        using_branches=False):
-    ld = ta.TargetAreaLines(lineframe, areaframe, name, group, using_branches, cut_off)
+    ld = ta.TargetAreaLines(lineframe, areaframe, name, group, using_branches, cut_off_length)
     return ld
 
 
@@ -1138,7 +1139,7 @@ def construct_node_data_base(nodeframe, name, group):
     return node_data_base
 
 
-def unify_lds(list_of_lds: list, group: str, cut_off: float):
+def unify_lds(list_of_lds: list, group: str, cut_off_length: float):
     """Unifies/adds multiple length distribution objects together
 
     """
@@ -1152,10 +1153,9 @@ def unify_lds(list_of_lds: list, group: str, cut_off: float):
     areaframe = pd.concat(df.areaframe.tolist(), ignore_index=True)
 
     unif_ld_main = ta.TargetAreaLines(lineframe_main, areaframe, group, group=group,
-                                      using_branches=list_of_lds[0].using_branches, cut_off=cut_off)
+                                      using_branches=list_of_lds[0].using_branches, cut_off_length=cut_off_length)
     unif_ld_main.lineframe_main = lineframe_main
     unif_ld_main.lineframe_main_cut = lineframe_main_cut
-    unif_ld_main.cut_off = list_of_lds[0].cut_off
 
     try:  # Only succeeds if sets have been defined, otherwise passed
         unif_ld_main.set_list = list_of_lds[0].set_list
@@ -1886,7 +1886,7 @@ def setup_ax_for_ld(ax_for_setup, using_branches):
     # LEGEND
     handles, labels = ax.get_legend_handles_labels()
     labels = ['\n'.join(wrap(l, 13)) for l in labels]
-    lgnd = plt.legend(handles, labels, loc='upper center', bbox_to_anchor=(1.34, 1.02), ncol=2, columnspacing=0.5
+    lgnd = plt.legend(handles, labels, loc='upper center', bbox_to_anchor=(1.37, 1.02), ncol=2, columnspacing=0.3
                       , shadow=True
                       , prop={'family': 'Calibri', 'weight': 'heavy', 'size': 'large'})
     for lh in lgnd.legendHandles:
