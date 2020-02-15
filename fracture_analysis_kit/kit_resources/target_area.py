@@ -18,8 +18,11 @@ from scipy.interpolate import make_interp_spline
 from qgis.core import QgsMessageLog, Qgis
 
 # Own code imports
-from . import tools
-from ... import config
+from fracture_analysis_kit.kit_resources import tools
+import config
+
+# from . import tools
+# from ... import config
 
 
 # Classes
@@ -29,16 +32,13 @@ class TargetAreaLines:
     Class for a target area or a group of target areas that consists of lines (traces or branches) and interpretation
     areas for these lines. Additionally contains cut offs and calculates parameters for analysis and plotting,
     information whether the lines are traces or branches and the name for the target area.
-
     The name parameter acts as the unique indicator to differentiate these objects. Duplicate target area or group names
     are therefore not allowed.
     """
 
-    # TODO: Add using_branches to ld as well?
     def __init__(self, lineframe, areaframe, name, group, using_branches: bool, cut_off_length=1.0):
         """
         Init of TargetAreaLines.
-
         TODO: Default cut-off.
 
         :param lineframe: GeoDataFrame containing line data
@@ -82,8 +82,7 @@ class TargetAreaLines:
                 self.lineframe['length'] = lineframe['SHAPE_Leng'].astype(str).astype(float)
 
         # Assign None to later initialized attributes
-        # TODO: TEST PROPERLY
-        # TODO: lineframe_main initialized as none.... here..... is it a problem?
+        # TODO: Add DF columns here?
         self.lineframe_main = None
         self.two_halves = None
         self.left, self.right, self.bottom, self.top = None, None, None, None
@@ -249,6 +248,7 @@ class TargetAreaLines:
         """
         Plot azimuth to either ax or to its own figure,
         in which case both non-weighted and weighted versions area made.
+
         :param rose_type: Whether to plot equal-radius or equal-area rose plot e.g. 'equal-radius' or 'equal-area'
         :type rose_type: str
         :param save: Whether to save
@@ -406,6 +406,7 @@ class TargetAreaLines:
     def plot_azimuth_ax_exp(self, ax, name, weights, rose_type, font_multiplier=1.0):
         """
         EXPERIMENTAL
+
         :param ax: Polar axis to plot to.
         :type ax: matplotlib.projections.polar.PolarAxes
         :param name: Name used
@@ -470,7 +471,6 @@ class TargetAreaLines:
 
         text_x = 0.55
         text_y = 1.42
-        # TODO: Reimplement
         text = 'n = ' + str(len(self.lineframe_main)) + '\n'
         text = text + tools.create_azimuth_set_text(self.lineframe_main)
         ax.text(text_x, text_y, text, transform=ax.transAxes, fontsize=font_multiplier * 9, weight='roman'
@@ -577,7 +577,7 @@ class TargetAreaLines:
         :param branches: Branches or traces
         :type branches: bool
         :raise AttributeError: When given vector layer doesn't contain valid column names.
-        e.g. (Connection: ['C - C', 'C - I', ...]
+            e.g. (Connection: ['C - C', 'C - I', ...]
         """
         # SAME METHOD FOR BOTH TRACES AND BRANCHES.
         # MAKE SURE YOU KNOW WHICH YOU ARE USING.
@@ -682,8 +682,7 @@ class TargetAreaLines:
     def calc_anisotropy(self):
         """
         Calculates annisotropy of connectivity for branch DataFrame
-        :return:
-        :rtype:
+
         """
         branchframe = self.lineframe_main
 
@@ -698,6 +697,7 @@ class TargetAreaLines:
     def plot_anisotropy_styled(self, for_ax=False, ax=None, save=False, save_folder=None):
         """
         Plots a styled anisotropy of connectivity figure
+
         :param for_ax: Whether plotting to a ready-made ax or not
         :type for_ax: bool
         :param ax: ax to plot to (optional)
@@ -706,8 +706,6 @@ class TargetAreaLines:
         :type save: bool
         :param save_folder: Folder to save to
         :type save_folder: str
-        :return:
-        :rtype:
         """
         double_anisotropy = list(self.anisotropy) + list(self.anisotropy)
         angles_of_study = config.angles_for_examination
@@ -843,8 +841,7 @@ class TargetAreaNodes:
     def topology_parameters_2d_nodes(self):
         """
         Gathers topology parameters of nodes
-        :return:
-        :rtype:
+
         """
         nodeframe = self.nodeframe
         node_dict = nodeframe.c.value_counts().to_dict()

@@ -2,8 +2,10 @@
 /fracture_analysis_kit/mathias_plots/
 /fracture_analysis_kit/plots/
 /fracture_analysis_kit/calc_data/
+/test/
 
 /dev/
+/help/build
 
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio and WebStorm
 # Reference: https://intellij-support.jetbrains.com/hc/en-us/articles/206544839
@@ -71,3 +73,5 @@ atlassian-ide-plugin.xml
 
 # Android studio 3.1+ serialized cache file
 .idea/caches/build_file_checksums.ser
+/fracture_analysis_kit/kit_resources/azimuth_testing.py
+/compile.bat

@@ -1,20 +1,20 @@
-import logging
+from fracture_analysis_kit import fracture_analysis_kit_qgis_tools as qgis_tools
+from fracture_analysis_kit.kit_resources import multiple_target_areas as mta
+import config
 
-
-from . import fracture_analysis_kit_qgis_tools as qgis_tools
-from .kit_resources import multiple_target_areas as mta
-# from .kit_resources import layers_to_pandas as lap
-from .kit_resources import target_area as ta
-from .. import config
+# from . import fracture_analysis_kit_qgis_tools as qgis_tools
+# from .kit_resources import multiple_target_areas as mta
+# # from .kit_resources import layers_to_pandas as lap
+# from .kit_resources import target_area as ta
+# from .. import config
 
 
 # class TargetAreaAnalysis:
 #     def __init__(
-#             self, plotting_directory, name, trace_layer, branch_layer, node_layer, area_layer, debug_logger
+#             self, plotting_directory, name, trace_layer, branch_layer, node_layer, area_layer
 #     ):
 #         self.plotting_directory = plotting_directory
 #         self.name = name
-#         self.debug_logger = debug_logger
 #
 #         self.trace_layer = trace_layer
 #         self.branch_layer = branch_layer
@@ -90,7 +90,6 @@ class MultiTargetAreaAnalysis:
     def __init__(
             self, layer_table_df, plotting_directory, analysis_name, group_names_cutoffs_df, set_df
     ):
-        self.logger = logging.getLogger('logging_tool')
         self.set_df = set_df
         self.group_names_cutoffs_df = group_names_cutoffs_df
         self.layer_table_df = layer_table_df
@@ -108,7 +107,6 @@ class MultiTargetAreaAnalysis:
     def analysis(self):
         # DEBUG
         # self.layer_table_df = self.layer_table_df.drop(columns=['Trace', 'Branch', 'Area', 'Node'])
-        self.logger.info('CREATING MultiTargetAreaQGIS FOR TRACES AND BRANCHES')
 
         self.analysis_traces = mta.MultiTargetAreaQGIS(self.layer_table_df, self.group_names_cutoffs_df, branches=False)
         # Bar at 25
@@ -117,16 +115,13 @@ class MultiTargetAreaAnalysis:
         # Bar at 45
 
         # TRACE DATA SETUP
-        self.logger.info('CALC ATTRIBUTES TRACES')
         self.analysis_traces.calc_attributes_for_all()
 
         self.analysis_traces.define_sets_for_all(self.set_df)
 
         # self.analysis_traces.calc_curviness_for_all()
-        self.logger.info('UNIFIED TRACES')
         self.analysis_traces.unified()
 
-        # self.logger.info('UNIFIED SETFRAMES')
         # TODO: Check setframes
         # self.analysis_traces.create_setframes_for_all_unified()
 
@@ -147,12 +142,9 @@ class MultiTargetAreaAnalysis:
         self.analysis_branches.gather_topology_parameters(unified=False)
         self.analysis_branches.gather_topology_parameters(unified=True)
 
-        self.logger.info('END ANALYSIS in analysis()')
         # Bar at 85
 
     def plot_results(self):
-        self.logger.info('START OF PLOTTING RESULTS')
-        self.logger.info('__________________BRANCH DATA PLOTTING START______________________')
 
         # ___________________BRANCH DATA_______________________
         config.styling_plots("branches")
@@ -208,8 +200,6 @@ class MultiTargetAreaAnalysis:
         self.analysis_branches.plot_anisotropy(unified=True, save=True,
                                                savefolder=self.plotting_directory + '/anisotropy')
 
-        self.logger.info('__________________TRACE DATA PLOTTING START______________________')
-
         # __________________TRACE DATA______________________
         config.styling_plots('traces')
 
@@ -252,14 +242,8 @@ class MultiTargetAreaAnalysis:
         # TODO: Fix whole age analysis
 
         # Cross-cutting and abutting relationships
-        self.logger.info('Plotting crosscutting and abutting rels')
         self.analysis_traces.plot_crosscut_abutting_relationships(unified=False, save=True, savefolder=self.plotting_directory + '/age_relations/indiv')
         self.analysis_traces.plot_crosscut_abutting_relationships(unified=True, save=True, savefolder=self.plotting_directory + '/age_relations')
-        self.logger.info('Plotting crosscutting and abutting rels ENDED')
-        # logger.info(f'self.layer_table_df:\n\n{self.layer_table_df}')
-        #
-        # self.logger.info(f'Shape of self.layer_table_df: {self.layer_table_df.shape}')
-        # self.logger.info(f'Len of self.layer_table_df: {len(self.layer_table_df)}')
         #
         # if self.layer_table_df.shape[0] > 1:
         #     self.analysis_traces.plot_xy_age_relations_all(save=True, savefolder=self.plotting_directory + '/age_relations/indiv')
@@ -268,4 +252,3 @@ class MultiTargetAreaAnalysis:
         # TODO: big plot for violins + legend?
         # self.analysis_traces.plot_curviness_for_unified(violins=True, save=True, savefolder=self.plotting_directory + '/curviness/traces')
 
-        self.logger.info('Plotting end!')

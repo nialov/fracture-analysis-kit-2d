@@ -1,5 +1,0 @@
-KB4_orto
-KB8_orto
-KL3_orto
-KL4_orto
-# OG2_Orthomosaic_jpegcompression70

@@ -1,5 +1,4 @@
 # Python Windows co-operation imports
-import logging
 import math
 from pathlib import Path
 
@@ -22,9 +21,12 @@ from pandas import Series
 from qgis.core import QgsMessageLog, Qgis
 
 # Own code imports
-from . import target_area as ta
-from . import tools
-from ... import config
+from fracture_analysis_kit.kit_resources import tools
+import config
+from fracture_analysis_kit.kit_resources import target_area as ta
+# from . import target_area as ta
+# from . import tools
+# from ... import config
 
 
 # import kit_resources.templates as templates  # Contains plotting templates
@@ -34,8 +36,8 @@ from ... import config
 
 
 class MultiTargetAreaQGIS:
-    # TODO: Implement cut-offs into input: list => table
-    # TODO: Implement sets
+    """TODO: DOC"""
+
     def __init__(self, table_df, gnames_cutoffs_df, branches):
         """
 
@@ -46,7 +48,6 @@ class MultiTargetAreaQGIS:
         :param branches: Branches or traces
         :type branches: bool
         """
-        logger = logging.getLogger('logging_tool')
         self.group_names_cutoffs_df = gnames_cutoffs_df
         self.groups = gnames_cutoffs_df.Group.tolist()
         # self.codes = group_names_cutoffs_df
@@ -54,10 +55,9 @@ class MultiTargetAreaQGIS:
 
         self.using_branches = branches
 
-        # TODO: Remove filename when isn't used
         self.df = pd.DataFrame(columns=['name', 'lineframe', 'areaframe', 'nodeframe', 'group', 'cut_off_length'])
         # Assign None to later initialized attributes
-        # TODO: TEST PROPERLY
+        # TODO: Add DF columns here?
         self.set_ranges_list = None
         self.set_df = None
         self.uniframe = None
@@ -151,6 +151,7 @@ class MultiTargetAreaQGIS:
     def define_sets_for_all(self, set_df):
         """
         Categorizes data based on azimuth to sets.
+
         :param set_df: DataFrame with sets. Columns: "Set", "SetLimits"
         :type set_df: DataFrame
         """
@@ -169,12 +170,10 @@ class MultiTargetAreaQGIS:
     def unified(self):
         """
         Creates new datasets (TargetAreaLines + TargetAreaNodes for each group) based on groupings by user.
-
         TODO: Invalidate inputs when there are groups without any target areas.
 
         :raise ValueError: When there are groups without any target areas.
         """
-        logger = logging.getLogger('logging_tool')
         uniframe = pd.DataFrame(columns=['TargetAreaLines', 'TargetAreaNodes', 'group', 'name', 'uni_ld_area', 'cut_off_length'])
         for idx, group in enumerate(self.groups):
             frame = self.df.loc[self.df['group'] == group]
@@ -194,13 +193,9 @@ class MultiTargetAreaQGIS:
                 assert len(self.group_names_cutoffs_df.loc[self.group_names_cutoffs_df.Group == group].CutOffBranches) == 1
 
                 unif_ld_main = tools.unify_lds(frame.TargetAreaLines.tolist(), group, cut_off_length)
-                logger.info('Calcing attributes for unified')
                 unif_ld_main.calc_attributes()
-                logger.info('Creating geodataframe from areas')
                 uni_ld_area = gpd.GeoDataFrame(pd.concat(frame.areaframe.tolist(), ignore_index=True))
-                logger.info('Unifying nds')
                 unif_nd_main = tools.unify_nds(frame.TargetAreaNodes.tolist(), group)
-                logger.info('Appending uniframe')
                 uniframe = uniframe.append(
                     {'TargetAreaLines': unif_ld_main, 'TargetAreaNodes': unif_nd_main, 'group': group, 'name': group,
                      'uni_ld_area': uni_ld_area, 'cut_off_length': cut_off_length},
@@ -245,7 +240,7 @@ class MultiTargetAreaQGIS:
         :type ax: matplotlib.axes.Axes
         :param unified: Whether to plot for target area or grouped data.
         :type unified: bool
-        raise: ValueError: When there are too many values from np.polyfit i.e. values != 2.
+        :raise ValueError: When there are too many values from np.polyfit i.e. values != 2.
         """
 
         def create_text(lineframe_for_text, ax_for_text):
@@ -425,311 +420,11 @@ class MultiTargetAreaQGIS:
             #         savename = Path(savefolder + '/CUT_LD_SET_{}.png'.format(curr_set))
             #         plt.savefig(savename, dpi=150)
 
-    # def plot_lengths_all(self, save=False, savefolder=''):
-    #     for idx, srs in self.df.iterrows():
-    #         srs['TargetAreaLines'].plot_length_distribution(save=save, savefolder=savefolder)
-    #     # Prop template
-    #     props = dict(boxstyle='round', pad=1, facecolor='wheat',
-    #                  path_effects=[path_effects.SimplePatchShadow(), path_effects.Normal()])
-    #
-    #     # Figure setup for FULL LDs
-    #     figure_size = (16, 16)
-    #     fig, ax = plt.subplots(figsize=figure_size)
-    #     ax.set_xlim(self.uni_left, self.uni_right)
-    #     ax.set_ylim(self.uni_bottom, self.uni_top)
-    #
-    #     # Plot full lds
-    #     for idx, srs in self.df.iterrows():
-    #         srs['TargetAreaLines'].plot_length_distribution_ax(ax=ax)
-    #
-    #     tools.setup_ax_for_ld(ax, self, font_multiplier=1, predictions=False)
-    #
-    #     # Save figure
-    #     if save:
-    #         savename = Path(savefolder + f'/INDIV_FULL_LD.png')
-    #         plt.savefig(savename, dpi=150)
-    #
-    #     # Figure setup for CUT LDs
-    #     fig, ax = plt.subplots(figsize=figure_size)
-    #     ax.set_xlim(self.uni_left, self.uni_right)
-    #     ax.set_ylim(self.uni_bottom, self.uni_top)
-    #
-    #     length_text = 'CUT' + '\nCut Off Lengths (m)\n\n'
-    #     # Plot cut lds
-    #     for idx, srs in self.df.iterrows():
-    #         srs['TargetAreaLines'].plot_length_distribution_ax(ax=ax, cut=True)
-    #         min_length = srs['TargetAreaLines'].lineframe_main_cut.length.min()
-    #         name = srs['name']
-    #         length_text = length_text + name + ' : ' + str(round(min_length, 2)) + '\n'
-    #
-    #     # Plot fit for cut lds
-    #     tools.plot_fit_for_uniframe(self, ax=ax, cut=True, use_sets=False)
-    #
-    #     # Setup ax
-    #     tools.setup_ax_for_ld(ax, self, font_multiplier=1)
-    #     ax.text(0.1, 0.25, length_text, transform=ax.transAxes, fontsize=28, weight='roman',
-    #             verticalalignment='center',
-    #             bbox=props, fontfamily='Times New Roman')
-    #     # Save figure
-    #     if save:
-    #         savename = Path(savefolder + f'/INDIV_CUT_LD_WITH_FIT.png')
-    #         plt.savefig(savename, dpi=150)
-
-    # def plot_lengths_unified(self, save=False, savefolder='', use_sets=False):
-    #     logger = logging.getLogger('logging_tool')
-    #     logger.info('Starting plot_lengths_unified')
-    #     for idx, srs in self.uniframe.iterrows():
-    #         srs['TargetAreaLines'].plot_length_distribution()
-    #     if use_sets:
-    #         # TODO: reimplement
-    #         raise Exception('use_sets Not implemented')
-    #         # for idx, srs in self.uniframe.iterrows():
-    #         #     srs['TargetAreaLines'].plot_length_distribution(use_sets=True)
-    #         # Prop template
-    #     props = dict(boxstyle='round', pad=1, facecolor='wheat',
-    #                  path_effects=[path_effects.SimplePatchShadow(), path_effects.Normal()])
-    #
-    #     # Figure setup for FULL LDs
-    #     figure_size = (16, 16)
-    #     fig, ax = plt.subplots(figsize=figure_size)
-    #     ax.set_xlim(self.uni_left, self.uni_right)
-    #     ax.set_ylim(self.uni_bottom, self.uni_top)
-    #
-    #     # Plot full lds
-    #     for idx, srs in self.uniframe.iterrows():
-    #         srs['TargetAreaLines'].plot_length_distribution_ax(ax=ax)
-    #
-    #     tools.setup_ax_for_ld(ax, self, font_multiplier=1, predictions=False)
-    #
-    #     # Save figure
-    #     if save:
-    #         savename = Path(savefolder + '/UNIFIED_FULL_LD.png')
-    #         plt.savefig(savename, dpi=150)
-    #     logger.info('Plotted cut lds')
-    #
-    #     # Figure setup for CUT LDs
-    #     fig, ax = plt.subplots(figsize=figure_size)
-    #     ax.set_xlim(self.uni_left, self.uni_right)
-    #     ax.set_ylim(self.uni_bottom, self.uni_top)
-    #
-    #
-    #     logger.info('Starting to plot cut lds')
-    #     # Plot cut lds
-    #     logger.info('Uniframe:\n\n{}'.format(self.uniframe))
-    #     logger.info('Uniframe d types:\n\n{}'.format(self.uniframe.dtypes))
-    #     for idx, srs in self.uniframe.iterrows():
-    #         srs['TargetAreaLines'].plot_length_distribution_ax(ax=ax, cut=True)
-    #         logger.info(f'plotted {idx}')
-    #         min_length = srs['TargetAreaLines'].lineframe_main_cut.length.min()
-    #         logger.info(f'min_length {min_length}')
-    #         name = srs['group']
-    #         logger.info(f'name {name}')
-    #         length_text = f'{name} : {str(round(min_length, 2))}'
-    #         logger.info(f'l_text {length_text}')
-    #
-    #     logger.info('Plotted cut lds')
-    #     # Plot fit for cut lds
-    #     tools.plot_fit_for_uniframe(self, ax=ax, cut=True, use_sets=False)
-    #     logger.info('Fit done')
-    #     # Setup ax
-    #     ax.set_xlim(self.uni_left, self.uni_right)
-    #     ax.set_ylim(self.uni_bottom, self.uni_top)
-    #     tools.setup_ax_for_ld(ax, self, font_multiplier=1)
-    #     ax.text(0.1, 0.25, length_text, transform=ax.transAxes, fontsize=28, weight='roman',
-    #             verticalalignment='center',
-    #             bbox=props, fontfamily='Times New Roman')
-    #     # Save figure
-    #     logger.info('saving')
-    #     if save:
-    #         savename = Path(savefolder + '/UNIFIED_CUT_LD_WITH_FIT.png')
-    #         plt.savefig(savename, dpi=150)
-    #
-    #     if use_sets:
-    #         for curr_set, s in enumerate(self.set_ranges_list):
-    #
-    #             fig, ax = plt.subplots(figsize=figure_size)  # Figure for full LDs, for each set
-    #             #                length_text = 'FULL, SET '+str(idx)+'\nCut Off Lengths (m)\n\n'
-    #             for idx, srs in self.uniframe.iterrows():
-    #                 srs['TargetAreaLines'].plot_length_distribution_ax(ax=ax, use_sets=True, curr_set=curr_set)
-    #             #                    min_length = srs['TargetAreaLines'].setframes[curr_set].length.min()
-    #             #                    name = srs['name']
-    #             #                    length_text = length_text+name+' : '+str(round(min_length, 2))+'\n'
-    #             ax.set_xlim(self.uni_left, self.uni_right)
-    #             ax.set_ylim(self.uni_bottom, self.uni_top)
-    #             tools.setup_ax_for_ld(ax, self)
-    #             if save:
-    #                 savename = Path(savefolder + '/FULL_LD_SET_{}.png'.format(curr_set))
-    #                 plt.savefig(savename, dpi=150)
-    #             fig, ax = plt.subplots(figsize=figure_size)  # Figure for cut LDs, for each set
-    #             length_text = 'CUT, SET ' + str(curr_set) + '\nCut Off Lengths (m)\n\n'
-    #             for idx, srs in self.uniframe.iterrows():
-    #                 srs['TargetAreaLines'].plot_length_distribution_ax(ax=ax, cut=True, use_sets=True, curr_set=curr_set)
-    #                 min_length = srs['TargetAreaLines'].setframes_cut[curr_set].length.min()
-    #                 name = srs['name']
-    #                 length_text = length_text + name + ' : ' + str(round(min_length, 2)) + '\n'
-    #
-    #             tools.plot_fit_for_uniframe(self, ax=ax, cut=True, use_sets=True, curr_set=curr_set,
-    #                                         font_multiplier=1)
-    #             ax.set_xlim(self.uni_left, self.uni_right)
-    #             ax.set_ylim(self.uni_bottom, self.uni_top)
-    #             tools.setup_ax_for_ld(ax, self)
-    #             ax.text(0.1, 0.3, length_text, transform=ax.transAxes, fontsize=18, weight='roman',
-    #                     verticalalignment='top', bbox=props, fontfamily='Times New Roman')
-    #             if save:
-    #                 savename = Path(savefolder + '/CUT_LD_SET_{}.png'.format(curr_set))
-    #                 plt.savefig(savename, dpi=150)
-
-    # def plot_lengths_unified_combined(self, use_sets=False, save=False, savefolder=''):
-    #     # Prop template
-    #     props = dict(boxstyle='round', pad=1, facecolor='wheat',
-    #                  path_effects=[path_effects.SimplePatchShadow(), path_effects.Normal()])
-    #
-    #     # Figure setup for FULL LDs
-    #     figure_size = (16, 16)
-    #     fig, ax = plt.subplots(figsize=figure_size)
-    #     ax.set_xlim(self.uni_left, self.uni_right)
-    #     ax.set_ylim(self.uni_bottom, self.uni_top)
-    #
-    #     # Plot full lds
-    #     for idx, srs in self.uniframe.iterrows():
-    #         srs['TargetAreaLines'].plot_length_distribution_ax(ax=ax)
-    #
-    #     tools.setup_ax_for_ld(ax, self, font_multiplier=1, predictions=False)
-    #
-    #     # Save figure
-    #     if save:
-    #         savename = Path(savefolder + '/FULL_LD.png')
-    #         plt.savefig(savename, dpi=150)
-    #
-    #     # Figure setup for CUT LDs
-    #     fig, ax = plt.subplots(figsize=figure_size)
-    #     ax.set_xlim(self.uni_left, self.uni_right)
-    #     ax.set_ylim(self.uni_bottom, self.uni_top)
-    #
-    #     length_text = 'CUT' + '\nCut Off Lengths (m)\n\n'
-    #     # Plot cut lds
-    #     for idx, srs in self.uniframe.iterrows():
-    #         srs['TargetAreaLines'].plot_length_distribution_ax(ax=ax, cut=True)
-    #         min_length = srs['TargetAreaLines'].lineframe_main_cut.length.min()
-    #         name = srs['name']
-    #         length_text = length_text + name + ' : ' + str(round(min_length, 2)) + '\n'
-    #
-    #     # Plot fit for cut lds
-    #     tools.plot_fit_for_uniframe(self, ax=ax, cut=True, use_sets=False)
-    #
-    #     # Setup ax
-    #     ax.set_xlim(self.uni_left, self.uni_right)
-    #     ax.set_ylim(self.uni_bottom, self.uni_top)
-    #     tools.setup_ax_for_ld(ax, self, font_multiplier=1)
-    #     ax.text(0.1, 0.25, length_text, transform=ax.transAxes, fontsize=28, weight='roman', verticalalignment='center',
-    #             bbox=props, fontfamily='Times New Roman')
-    #     # Save figure
-    #     if save:
-    #         savename = Path(savefolder + '/CUT_LD_WITH_FIT.png')
-    #         plt.savefig(savename, dpi=150)
-    #
-    #     if use_sets:
-    #         for curr_set, s in enumerate(self.set_ranges_list):
-    #
-    #             fig, ax = plt.subplots(figsize=figure_size)  # Figure for full LDs, for each set
-    #             #                length_text = 'FULL, SET '+str(idx)+'\nCut Off Lengths (m)\n\n'
-    #             for idx, srs in self.uniframe.iterrows():
-    #                 srs['TargetAreaLines'].plot_length_distribution_ax(ax=ax, use_sets=True, curr_set=curr_set)
-    #             #                    min_length = srs['TargetAreaLines'].setframes[curr_set].length.min()
-    #             #                    name = srs['name']
-    #             #                    length_text = length_text+name+' : '+str(round(min_length, 2))+'\n'
-    #             ax.set_xlim(self.uni_left, self.uni_right)
-    #             ax.set_ylim(self.uni_bottom, self.uni_top)
-    #             tools.setup_ax_for_ld(ax, self)
-    #             if save:
-    #                 savename = Path(savefolder + '/FULL_LD_SET_{}.png'.format(curr_set))
-    #                 plt.savefig(savename, dpi=150)
-    #             fig, ax = plt.subplots(figsize=figure_size)  # Figure for cut LDs, for each set
-    #             length_text = 'CUT, SET ' + str(curr_set) + '\nCut Off Lengths (m)\n\n'
-    #             for idx, srs in self.uniframe.iterrows():
-    #                 srs['TargetAreaLines'].plot_length_distribution_ax(ax=ax, cut=True, use_sets=True, curr_set=curr_set)
-    #                 min_length = srs['TargetAreaLines'].setframes_cut[curr_set].length.min()
-    #                 name = srs['name']
-    #                 length_text = length_text + name + ' : ' + str(round(min_length, 2)) + '\n'
-    #
-    #             tools.plot_fit_for_uniframe(self, ax=ax, cut=True, use_sets=True, curr_set=curr_set, font_multiplier=1)
-    #             ax.set_xlim(self.uni_left, self.uni_right)
-    #             ax.set_ylim(self.uni_bottom, self.uni_top)
-    #             tools.setup_ax_for_ld(ax, self)
-    #             ax.text(0.1, 0.3, length_text, transform=ax.transAxes, fontsize=18, weight='roman',
-    #                     verticalalignment='top', bbox=props, fontfamily='Times New Roman')
-    #             if save:
-    #                 savename = Path(savefolder + '/CUT_LD_SET_{}.png'.format(curr_set))
-    #                 plt.savefig(savename, dpi=150)
-
-    # TODO: Predictions.
-    # def plot_lengths_unified_combined_predictions(self, use_sets=False, save=False, savefolder='', predict_with=None):
-    #     figure_size = (16, 16)
-    #
-    #     props = dict(boxstyle='round', pad=1, facecolor='wheat',
-    #                  path_effects=[path_effects.SimplePatchShadow(), path_effects.Normal()])
-    #
-    #     fig, ax = plt.subplots(figsize=figure_size)  # Figure for CUT LDs
-    #     length_text = 'Cut Off Lengths (m)\n\n'
-    #     for idx, srs in self.uniframe.iterrows():
-    #         srs['TargetAreaLines'].plot_length_distribution_ax(ax=ax, cut=True)
-    #         min_length = srs['TargetAreaLines'].lineframe_main_cut.length.min()
-    #         name = srs['name']
-    #         length_text = length_text + name + ' : ' + str(round(min_length, 2)) + '\n'
-    #
-    #     tools.plot_fit_for_uniframe(self, ax=ax, cut=True, use_sets=False, predicting_mode=True,
-    #                                 predict_with=predict_with)
-    #     ax.set_xlim(self.uni_left, self.uni_right)
-    #     ax.set_ylim(self.uni_bottom, self.uni_top)
-    #     tools.setup_ax_for_ld(ax, self, font_multiplier=1)
-    #
-    #     ax.text(0.1, 0.25, length_text, transform=ax.transAxes, fontsize=20, weight='roman', verticalalignment='center',
-    #             bbox=props, fontfamily='Times New Roman')
-    #
-    #     if save:
-    #         savename = savefolder + '/CUT_LD_WITH_FIT_predictions'
-    #         for pw in predict_with:
-    #             savename = savename + '_' + pw
-    #         savename = Path(savename + '.png')
-    #         plt.savefig(savename, dpi=150)
-    #
-    #     if use_sets:
-    #         for curr_set, s in enumerate(self.set_ranges_list):
-    #
-    #             fig, ax = plt.subplots(figsize=figure_size)  # Figure for full LDs, for each set
-    #             #                length_text = 'FULL, SET '+str(idx)+'\nCut Off Lengths (m)\n\n'
-    #             for idx, srs in self.uniframe.iterrows():
-    #                 srs['TargetAreaLines'].plot_length_distribution_ax(ax=ax, use_sets=True, curr_set=curr_set)
-    #             #                    min_length = srs['TargetAreaLines'].setframes[curr_set].length.min()
-    #             #                    name = srs['name']
-    #             #                    length_text = length_text+name+' : '+str(round(min_length, 2))+'\n'
-    #             ax.set_xlim(self.uni_left, self.uni_right)
-    #             ax.set_ylim(self.uni_bottom, self.uni_top)
-    #             tools.setup_ax_for_ld(ax, self)
-    #             if save:
-    #                 savename = Path(savefolder + '/FULL_LD_SET_{}_predictions.png'.format(curr_set))
-    #                 plt.savefig(savename, dpi=150)
-    #             fig, ax = plt.subplots(figsize=figure_size)  # Figure for cut LDs, for each set
-    #             length_text = 'CUT, SET ' + str(curr_set) + '\nCut Off Lengths (m)\n\n'
-    #             for idx, srs in self.uniframe.iterrows():
-    #                 srs['TargetAreaLines'].plot_length_distribution_ax(ax=ax, cut=True, use_sets=True, curr_set=curr_set)
-    #                 min_length = srs['TargetAreaLines'].setframes_cut[curr_set].length.min()
-    #                 name = srs['name']
-    #                 length_text = length_text + name + ' : ' + str(round(min_length, 2)) + '\n'
-    #
-    #             tools.plot_fit_for_uniframe(self, ax=ax, cut=True, use_sets=True, curr_set=curr_set, font_multiplier=1)
-    #             ax.set_xlim(self.uni_left, self.uni_right)
-    #             ax.set_ylim(self.uni_bottom, self.uni_top)
-    #             tools.setup_ax_for_ld(ax, self)
-    #             ax.text(0.1, 0.3, length_text, transform=ax.transAxes, fontsize=18, weight='roman',
-    #                     verticalalignment='top', bbox=props, fontfamily='Times New Roman')
-    #             if save:
-    #                 savename = Path(savefolder + '/CUT_LD_SET_{}_predictions.png'.format(curr_set))
-    #                 plt.savefig(savename, dpi=150)
 
     def plot_azimuths(self, unified: bool, rose_type: str, save=False, savefolder=''):
         """
         Plots azimuths.
+
         :param unified: Plot unified datasets or individual target areas
         :type unified: bool
         :param rose_type: Whether to plot equal-radius or equal-area rose plot e.g. 'equal-radius' or 'equal-area'
@@ -738,8 +433,6 @@ class MultiTargetAreaQGIS:
         :type save: bool
         :param savefolder: Folder to save to
         :type savefolder: str
-        :return:
-        :rtype:
         """
         branches = self.using_branches
 
@@ -793,6 +486,7 @@ class MultiTargetAreaQGIS:
     def plot_azimuths_exp(self, unified: bool, rose_type: str, save=False, savefolder=''):
         """
         Plots azimuths.
+
         :param unified: Plot unified datasets or individual target areas
         :type unified: bool
         :param rose_type: Whether to plot equal-radius or equal-area rose plot e.g. 'equal-radius' or 'equal-area'
@@ -801,8 +495,6 @@ class MultiTargetAreaQGIS:
         :type save: bool
         :param savefolder: Folder to save to
         :type savefolder: str
-        :return:
-        :rtype:
         """
         branches = self.using_branches
 
@@ -1002,9 +694,9 @@ class MultiTargetAreaQGIS:
         :param unified: Calculate for unified datasets or individual target areas
         :type unified: bool
         :raise AssertionError: When attempting to determine cross-cutting and abutting relationships from branch data
-        or if self.using_branches is True even though you are using trace data.
+            or if self.using_branches is True even though you are using trace data.
         :raise ValueError: When there's only one set defined.
-        You cannot determine cross-cutting and abutting relationships from only one set.
+            You cannot determine cross-cutting and abutting relationships from only one set.
         """
         # Determines xy relations and dynamically creates a dataframe as an aid for plotting the relations
         # TODO: No within set relations.....yet... Problem?
@@ -1105,7 +797,7 @@ class MultiTargetAreaQGIS:
         :param savefolder: Folder to save plots to
         :type savefolder: str
         :raise AssertionError: When attempting to determine cross-cutting and abutting relationships from branch data
-        or if self.using_branches is True even though you are using trace data.
+            or if self.using_branches is True even though you are using trace data.
         """
         if unified:
             frame = self.uniframe
@@ -1201,358 +893,10 @@ class MultiTargetAreaQGIS:
                     plt.savefig(savename, dpi=200, bbox_inches='tight')
 
 
-    # def determine_xy_relations_unified(self, big_plot=True):
-    #     # Determines xy relations and dynamically creates a dataframe as an aid for plotting the relations
-    #     # TODO: No within set relations.....yet... Problem?
-    #     if self.using_branches:
-    #         raise Exception('Age relations cannot be determined from BRANCH data.')
-    #     if self.uniframe is None:
-    #         print(f'Multiple_distribution fields: {dir(self)}')
-    #         raise Exception('Multiple distribution object doesnt contain unified frame.')
-    #     else:
-    #         uniframe = self.uniframe
-    #
-    #     if big_plot:
-    #
-    #         plot_loc_counter = 0
-    #         plotting_df = pd.DataFrame(columns=['name', 'r', 'c', 'ax', 'intersectframe', 'col_start'
-    #             , 'col_end'])
-    #         plotting_set_counts = {}
-    #         for _, row in uniframe.iterrows():
-    #
-    #             name = row.TargetAreaNodes.name
-    #             nodeframe = row.TargetAreaNodes.nodeframe
-    #             traceframe = row.TargetAreaLines.lineframe_main
-    #             # Initializing
-    #             traceframe['startpoint'] = traceframe.geometry.apply(tools.line_start_point)
-    #             traceframe['endpoint'] = traceframe.geometry.apply(tools.line_end_point)
-    #             traceframe = traceframe.reset_index(drop=True)
-    #             nodeframe = nodeframe.loc[(nodeframe.c == 'X') | (nodeframe.c == 'Y')]
-    #             xypointsframe = nodeframe.reset_index(drop=True)
-    #
-    #             sets = traceframe.set.loc[traceframe['set'] > -1].unique().tolist()
-    #             sets.sort()
-    #             set_counts = traceframe.groupby('set').count()
-    #             plotting_set_counts[name] = set_counts
-    #             if len(sets) < 2:
-    #                 raise Exception('Only one set defined. Cannot determine XY relations')
-    #             # COLOR CYCLE FOR BARS
-    #             start = 0
-    #             end = 2
-    #             # START OF COMPARISONS
-    #             for idx, s in enumerate(sets):
-    #                 # If final set: Skip the final set, comparison already done.
-    #                 if idx == len(sets) - 1:
-    #                     break
-    #                 compare_sets = sets[idx + 1:]
-    #
-    #                 for jdx, c_s in enumerate(compare_sets):
-    #                     bf = traceframe.loc[(traceframe['set'] == s) | (traceframe['set'] == c_s)]
-    #                     # TODO: More stats in age_relations?
-    #                     # bfs_count = len(traceframe.loc[(traceframe['set'] == s)])
-    #                     # bfcs_count = len(traceframe.loc[(traceframe['set'] == c_s)])
-    #
-    #                     mpf = tools.get_nodes_intersecting_sets(xypointsframe, bf)
-    #
-    #                     intersectframe = tools.get_intersect_frame(mpf, bf, (s, c_s))
-    #                     intersectframe = intersectframe.groupby(['pointclass', 'setpair']).size()
-    #                     intersectframe = intersectframe.unstack()
-    #
-    #                     addition = {'name': name, 'plot_loc_counter': plot_loc_counter,
-    #                                 'intersectframe': intersectframe, 'col_start': start, 'col_end': end}
-    #                     plotting_df = plotting_df.append(addition, ignore_index=True)
-    #                     # MOVE COLORS CYCLE
-    #                     start += 2
-    #                     end += 2
-    #                     # MOVE PLOT LOC COUNTER
-    #                     plot_loc_counter += 1
-    #
-    #     self.xy_relations_frame, self.relations_set_counts = plotting_df, plotting_set_counts
-
-    # def plot_xy_age_relations_unified(self, save=False, savefolder=''):
-    #     if self.using_branches:
-    #         raise Exception('Age relations cannot be determined from BRANCH data.')
-    #     rel_frame = self.xy_relations_frame
-    #     style = templates.styled_text_dict
-    #     box_prop = templates.styled_prop
-    #     colors_cycle = templates.colors_for_xy_relations
-    #     # SUBPLOTS, FIGURE SETUP
-    #     plot_count = len(self.uniframe) * len(self.set_ranges_list)
-    #     cols = len(self.set_ranges_list)
-    #     if plot_count == cols:
-    #         rows = 1
-    #     if plot_count % cols == 0:
-    #         rows = plot_count // cols
-    #     else:
-    #         rows = plot_count // cols + 1
-    #     width = 18
-    #     height = (width / cols) * (rows * 0.75)
-    #
-    #     fig, axes = plt.subplots(ncols=cols, nrows=rows, figsize=(width, height))
-    #     rel_frame['axe'] = None
-    #     for idx, row in rel_frame.iterrows():
-    #         intersectframe = row.intersectframe
-    #         colors = colors_cycle[row.col_start:row.col_end]
-    #         plot_loc_counter = row.plot_loc_counter
-    #         name = row.name
-    #         r = plot_loc_counter // cols
-    #         c = plot_loc_counter % cols
-    #         if rows == 1:
-    #             ax = axes[int(c)]
-    #         else:
-    #             ax = axes[int(r)][int(c)]
-    #         rel_frame.axe.iloc[idx] = ax
-    #         try:
-    #             ipb = intersectframe.plot.bar(title=None, ax=ax, legend=None
-    #                                           , colors=colors, linewidth=1, edgecolor='k', zorder=5)
-    #             ipb.patches = ipb.patches[1:]
-    #             ipb.patches[1].xy = (-0.125, 0)
-    #             ipb.patches[1].width = 2
-    #             ipb.patches[1].linewidth = 5
-    #         except TypeError:
-    #             logger = logging.getLogger('logging_tool')
-    #             logger.exception('type error in age relations')
-    #             continue
-    #         # TICK FORMATS
-    #         ax.yaxis.set_major_formatter(FormatStrFormatter('%.0f'))
-    #         labels = ax.get_yticklabels()
-    #         for label in labels:
-    #             label.set_fontsize(20)
-    #             label.set_rotation(0)
-    #         # plt.yticks(ax.get_yticks(), l, fontsize=20)
-    #         # TITLES ON THE LEFT SIDE
-    #         if c == 0:
-    #             name = name
-    #             ax.text(s=name, x=-0.55, y=0.5, transform=ax.transAxes
-    #                     , fontdict=style, bbox=box_prop
-    #                     , ha='center', va='center'
-    #                     , multialignment='center', fontsize=27)
-    #
-    #         if c == cols - 1:
-    #             count_text = 'SET\nTRACE COUNTS'
-    #             set_counts = self.relations_set_counts[name]
-    #             for idx_, row_ in set_counts.iterrows():
-    #                 if idx_ == -1:
-    #                     continue
-    #                 count_text = count_text + '\nSET {}: {}'.format(idx_, row_.geometry)
-    #             ax.text(s=count_text, x=1.45, y=0.5, transform=ax.transAxes
-    #                     , bbox=box_prop
-    #                     , ha='center', va='center'
-    #                     , multialignment='center', fontsize=20)
-    #         # TICK LABELS
-    #         ax.set_xlabel('')
-    #         plt.xticks()
-    #         labels = ax.get_xticklabels()
-    #         # l = []
-    #         for label in labels:
-    #             label.set_fontsize(22)
-    #             label.set_fontweight('semibold')
-    #             label.set_rotation(0)
-    #             # l.append(label)
-    #         # plt.xticks(ax.get_xticks(), l, fontsize=22)
-    #         # XLABEL AT BOTTOM ONLY
-    #         if r == len(axes) - 1:
-    #             ax.set_xlabel('NODE CLASS', fontsize='28', style='italic')
-    #
-    #     df = pd.DataFrame(columns=['handle', 'label'])
-    #     for axe in axes:
-    #         for ax in axe:
-    #             handles, labels = ax.get_legend_handles_labels()
-    #             for handle, label in zip(handles, labels):
-    #                 df = df.append({'handle': handle, 'label': label}, ignore_index=True)
-    #
-    #     df = df.drop_duplicates(subset='label')
-    #     handles = df.handle.tolist()
-    #     labels = df.label.tolist()
-    #     # MULTIPLE LEGENDS
-    #     leg_frame = rel_frame.loc[rel_frame.plot_loc_counter < cols]
-    #     hl = []
-    #     for idx, s in enumerate(self.set_ranges_list):
-    #         hand = handles[idx * 2:idx * 2 + 2]
-    #         lab = labels[idx * 2:idx * 2 + 2]
-    #         hl.append([hand, lab])
-    #     legs = []
-    #     for idx, row in leg_frame.iterrows():
-    #         leg = row.axe.legend(hl[idx][0], hl[idx][1], loc=(0.3, 1.2), fontsize=20)
-    #         legs.append(leg)
-    #     for legenda in legs:
-    #         fig.add_artist(legenda)
-    #     # fig.legend(handles, labels, loc='center right', fontsize=20, borderaxespad=1)
-    #     plt.subplots_adjust(right=0.8, left=0.2)
-    #     if save:
-    #         savename = Path(savefolder + '/xy_relations_all.png')
-    #         plt.savefig(savename, dpi=200)
-
-    # def determine_xy_relations_all(self):
-    #     # Determines xy relations and dynamically creates a dataframe as an aid for plotting the relations
-    #     # TODO: No within set relations.....yet... Problem?
-    #     if self.using_branches:
-    #         raise Exception('Age relations cannot be determined from BRANCH data.')
-    #
-    #     plot_loc_counter = 0
-    #     plotting_df = pd.DataFrame(columns=['name', 'r', 'c', 'ax', 'intersectframe', 'col_start'
-    #         , 'col_end'])
-    #     plotting_set_counts = {}
-    #     for _, row in self.df.iterrows():
-    #         name = row.TargetAreaLines.name
-    #         nodeframe = row.TargetAreaNodes.nodeframe
-    #         traceframe = row.TargetAreaLines.lineframe_main
-    #         traceframe['startpoint'] = traceframe.geometry.apply(tools.line_start_point)
-    #         traceframe['endpoint'] = traceframe.geometry.apply(tools.line_end_point)
-    #         traceframe = traceframe.reset_index(drop=True)
-    #         xypointsframe = tools.get_xy_points_frame_from_frame(nodeframe)
-    #         sets = traceframe.set.loc[traceframe['set'] > -1].unique().tolist()
-    #         sets.sort()
-    #         set_counts = traceframe.groupby('set').count()
-    #         plotting_set_counts[name] = set_counts
-    #         if len(sets) < 2:
-    #             raise Exception('Only one set defined. Cannot determine XY relations')
-    #         # COLOR CYCLE FOR BARS
-    #         start = 0
-    #         end = 2
-    #         # START OF COMPARISONS
-    #         for idx, s in enumerate(sets):
-    #             # If final set: Skip the final set, comparison already done.
-    #             if idx == len(sets) - 1:
-    #                 break
-    #             compare_sets = sets[idx + 1:]
-    #
-    #             for jdx, c_s in enumerate(compare_sets):
-    #                 bf = traceframe.loc[(traceframe['set'] == s) | (traceframe['set'] == c_s)]
-    #                 # TODO: More stats in age_relations?
-    #                 # bfs_count = len(traceframe.loc[(traceframe['set'] == s)])
-    #                 # bfcs_count = len(traceframe.loc[(traceframe['set'] == c_s)])
-    #
-    #                 mpf = tools.get_nodes_intersecting_sets(xypointsframe, bf)
-    #
-    #                 intersectframe = tools.get_intersect_frame(mpf, bf, (s, c_s))
-    #                 intersectframe = intersectframe.groupby(['pointclass', 'setpair']).size()
-    #                 intersectframe = intersectframe.unstack()
-    #
-    #                 addition = {'name': name, 'plot_loc_counter': plot_loc_counter,
-    #                             'intersectframe': intersectframe, 'col_start': start, 'col_end': end}
-    #                 plotting_df = plotting_df.append(addition, ignore_index=True)
-    #                 # MOVE COLORS CYCLE
-    #                 start += 2
-    #                 end += 2
-    #                 # MOVE PLOT LOC COUNTER
-    #                 plot_loc_counter += 1
-    #
-    #     logger = logging.getLogger('logging_tool')
-    #     logger.info(f'self.xy_relations_frame_indiv: \n\n {self.xy_relations_frame_indiv}\n\n')
-    #     logger.info(f'self.relations_set_counts_indiv: \n\n {self.relations_set_counts_indiv}')
-    #
-    #     self.xy_relations_frame_indiv, self.relations_set_counts_indiv = plotting_df, plotting_set_counts
-
-    # def plot_xy_age_relations_all(self, save=False, savefolder=''):
-    #     if self.using_branches:
-    #         raise Exception('Age relations cannot be determined from BRANCH data.')
-    #     rel_frame = self.xy_relations_frame_indiv
-    #     style = templates.styled_text_dict
-    #     box_prop = templates.styled_prop
-    #     colors_cycle = templates.colors_for_xy_relations
-    #     # SUBPLOTS, FIGURE SETUP
-    #     plot_count = len(self.df) * len(self.set_ranges_list)
-    #     cols = len(self.set_ranges_list)
-    #     if plot_count == cols:
-    #         rows = 1
-    #     elif plot_count % cols == 0:
-    #         rows = plot_count // cols
-    #     else:
-    #         rows = plot_count // cols + 1
-    #     width = 16
-    #     height = (width / cols) * (rows * 0.75)
-    #
-    #     # BIG PLOT
-    #     fig, axes = plt.subplots(ncols=cols, nrows=rows, figsize=(width, height), sharex='col')
-    #     rel_frame['axe'] = None
-    #     # START PLOTTING AXES
-    #     for idx, row in rel_frame.iterrows():
-    #         intersectframe = row.intersectframe
-    #         colors = colors_cycle[row.col_start:row.col_end]
-    #         plot_loc_counter = row.plot_loc_counter
-    #         name = row.name
-    #         r = plot_loc_counter // cols
-    #         c = plot_loc_counter % cols
-    #         if rows == 1:
-    #             ax = axes[int(c)]
-    #         else:
-    #             ax = axes[int(r)][int(c)]
-    #         rel_frame.axe.iloc[idx] = ax
-    #         try:
-    #             ipb = intersectframe.plot.bar(title=None, ax=ax, legend=None
-    #                                           , colors=colors, linewidth=1, edgecolor='k', zorder=5)
-    #         except TypeError:
-    #             continue
-    #         # TICK FORMATS
-    #         ax.yaxis.set_major_formatter(FormatStrFormatter('%.0f'))
-    #         # TITLES ON THE LEFT SIDE
-    #         if c == 0:
-    #             ax.text(s=name, x=-0.36, y=0.5, transform=ax.transAxes
-    #                     , fontdict=style, bbox=box_prop
-    #                     , ha='center', va='center'
-    #                     , multialignment='center', fontsize=18)
-    #
-    #         if c == cols - 1:
-    #             count_text = 'SET\nTRACE COUNTS'
-    #
-    #             logger = logging.getLogger('logging_tool')
-    #             logger.info(f'self.relations_set_counts_indiv: \n\n {self.relations_set_counts_indiv}\n\n')
-    #             logger.info(f'rel_frame: \n\n {rel_frame}')
-    #
-    #             set_counts = self.relations_set_counts_indiv[name]
-    #             for idx_, row_ in set_counts.iterrows():
-    #                 if idx_ == -1:
-    #                     continue
-    #                 count_text = count_text + '\nSET {}: {}'.format(idx, row_.geometry)
-    #             ax.text(s=count_text, x=1.28, y=0.5, transform=ax.transAxes
-    #                     , bbox=box_prop
-    #                     , ha='center', va='center'
-    #                     , multialignment='center', fontsize=13)
-    #         # TICK LABELS AT BOTTOM
-    #         if r == rows - 1:
-    #             labels = ax.get_xticklabels()
-    #             labs = []
-    #             for label in labels:
-    #                 label.set_fontsize(19)
-    #                 label.set_fontweight('semibold')
-    #                 label.set_rotation(0)
-    #                 labs.append(label)
-    #             plt.xticks(ax.get_xticks(), labs)
-    #
-    #             ax.set_xlabel('NODE CLASS', fontsize='22', style='italic')
-    #
-    #     df = pd.DataFrame(columns=['handle', 'label'])
-    #     for axe in axes:
-    #         for ax in axe:
-    #             handles, labels = ax.get_legend_handles_labels()
-    #             for handle, label in zip(handles, labels):
-    #                 df = df.append({'handle': handle, 'label': label}, ignore_index=True)
-    #     df = df.drop_duplicates(subset='label')
-    #     handles = df.handle.tolist()
-    #     labels = df.label.tolist()
-    #     # MULTIPLE LEGENDS
-    #     leg_frame = rel_frame.loc[rel_frame.plot_loc_counter < cols]
-    #     hl = []
-    #     for idx, s in enumerate(self.set_ranges_list):
-    #         hand = handles[idx * 2:idx * 2 + 2]
-    #         labs = labels[idx * 2:idx * 2 + 2]
-    #         hl.append([hand, labs])
-    #     legs = []
-    #     for idx, row in leg_frame.iterrows():
-    #         leg = row.axe.legend(hl[idx][0], hl[idx][1], loc=(0.3, 1.2), fontsize=20)
-    #         legs.append(leg)
-    #     for legenda in legs:
-    #         fig.add_artist(legenda)
-    #     # fig.legend(handles, labels, loc='center right', fontsize=20, borderaxespad=1)
-    #     plt.subplots_adjust(right=0.85, left=0.15)
-    #     if save:
-    #         savename = Path(savefolder + '/xy_relations_indiv_all.png')
-    #         plt.savefig(savename, dpi=200)
-
     def plot_xyi_ternary(self, unified: bool, save=False, savefolder=''):
         """
         Plots XYI-ternary plots for target areas or grouped areas.
+
         :param unified: Plot unified datasets or individual target areas
         :type unified: bool
         :param save: Whether to save
@@ -1710,6 +1054,7 @@ class MultiTargetAreaQGIS:
     def gather_topology_parameters(self, unified: bool):
         """
         Gathers topological parameters of both traces and branches
+
         :param unified: Use unified datasets or individual target areas
         :type unified: bool
         :return:
@@ -1890,14 +1235,13 @@ class MultiTargetAreaQGIS:
     def plot_topology(self, unified: bool, save=False, savefolder=''):
         """
         Plot topological parameters
+
         :param unified: Plot unified datasets or individual target areas
         :type unified: bool
         :param save: Whether to save
         :type save: bool
         :param savefolder: Folder to save to
         :type savefolder: str
-        :return:
-        :rtype:
         """
         branches = self.using_branches
         log_scale_columns = ['Mean Length', 'Areal Frequency B20',
@@ -2113,6 +1457,7 @@ class MultiTargetAreaQGIS:
     def plot_hexbin_plot(self, unified: bool, save=False, savefolder=''):
         """
         Plot a hexbinplot to estimate sample size differences.
+
        :param unified: Plot unified datasets or individual target areas
         :type unified: bool
         :param save: Whether to save
@@ -2179,6 +1524,7 @@ class MultiTargetAreaQGIS:
     def plot_anisotropy(self, unified: bool, save=False, savefolder=''):
         """
         Plot anisotropy of connectivity
+
         :param unified: Plot unified datasets or individual target areas
         :type unified: bool
         :param save: Whether to save
@@ -2209,153 +1555,3 @@ class MultiTargetAreaQGIS:
                     savename = Path(savefolder + '/{}_anisotropy.png'.format(row.TargetAreaLines.name))
 
                 plt.savefig(savename, dpi=200)
-
-    # def plot_anisotropy_unified(self, ellipse_weights=False, save=False, savefolder=''):
-    #     if not self.using_branches:
-    #         raise Exception('Anisotropy cannot be determined from traces.')
-    #     for idx, row in self.uniframe.iterrows():
-    #         row.TargetAreaLines.calc_anisotropy(ellipse_weights=ellipse_weights)
-    #         row.TargetAreaLines.plot_anisotropy_styled()
-    #         style = templates.styled_text_dict
-    #         prop = templates.styled_prop
-    #         plt.title(row.name, loc='left', fontdict=style, fontsize=25, bbox=prop)
-    #         if save:
-    #             savename = Path(savefolder + '/{}_anisotropy_unified.png'.format(row.name))
-    #             plt.savefig(savename, dpi=200)
-
-    # def plot_anisotropy_all(self, ellipse_weights=False, save=False, savefolder=''):
-    #     for idx, row in self.df.iterrows():
-    #         row.TargetAreaLines.calc_anisotropy(ellipse_weights=ellipse_weights)
-    #         row.TargetAreaLines.plot_anisotropy_styled()
-    #         plt.title(row.TargetAreaLines.name, loc='left')
-    #         if save:
-    #             savename = Path(savefolder + '/{}_anisotropy.png'.format(row.TargetAreaLines.name))
-    #             plt.savefig(savename, dpi=200)
-
-# class MultiTargetArea:
-#
-#     def __init__(self, linedirs, areadirs, nodedirs, codes, cut_offs, branches):
-#         # length distribution setup
-#         pass
-#         # self.linedirs = linedirs
-#         # self.areadirs = areadirs
-#         # self.codes = codes
-#         # self.cut_offs = cut_offs  # cut_offs structure [[m20,det], [m20, det], [lidar], [lidar]]
-#         # # node data setup
-#         # self.nodedirs = nodedirs
-#         # self.using_branches = branches
-#         # self.df = pd.DataFrame(columns=['filename', 'lineframe', 'areaframe', 'nodeframe', 'code', 'cut_off'])
-#         #
-#         # # Assign None to later initialized attributes
-#         # # TODO: TEST PROPERLY
-#         # self.set_ranges_list = None
-#         # self.uniframe = None
-#         # self.uniframe_lineframe_main_concat = None
-#         # self.uni_left, self.uni_right, self.uni_top, self.uni_bottom = None, None, None, None
-#         # self.relations_set_counts = None
-#         # self.xy_relations_frame = None
-#         # self.xy_relations_frame_indiv = None
-#         # self.relations_set_counts = None
-#         # self.uniframe_topology_concat = None
-#         # self.relations_set_counts_indiv = None
-#         #
-#         # for code, cut_off_l in zip(self.codes, self.cut_offs):
-#         #     lfs, afs, nfs = [], [], []
-#         #     for linedir, areadir, nodedir in zip(self.linedirs, self.areadirs, self.nodedirs):
-#         #         # TODO: Big assumption is made here: All files can be ordered alphabetically...
-#         #         linefiles, areafiles = tools.get_filenames_branches_traces_and_areas_coded(linedir, areadir, code)
-#         #         nodefiles = tools.get_filenames_nodes_coded_excp(nodedir, code)
-#         #         # print(linefiles, areafiles, nodefiles)  # DEBUGGING
-#         #
-#         #         lfs.extend(linefiles)
-#         #         afs.extend(areafiles)
-#         #         nfs.extend(nodefiles)
-#         #
-#         #     for linefile, areafile, nodefile in zip(lfs, afs, nfs):
-#         #
-#         #         if 'Detailed' in linefile:
-#         #             if len(cut_off_l) > 1:
-#         #                 cut_off = cut_off_l[1]
-#         #             else:
-#         #                 cut_off = cut_off_l[0]
-#         #             code_temp = code + '_det'
-#         #         elif '20m' in linefile:
-#         #             cut_off = cut_off_l[0]
-#         #             code_temp = code + '_20m'
-#         #         elif 'LiDAR_' in linefile:
-#         #             cut_off = cut_off_l[0]
-#         #             code_temp = code + '_LiDAR'
-#         #
-#         #         else:
-#         #             cut_off = cut_off_l[0]
-#         #             code_temp = code + '_UNKNOWN_ERROR'
-#         #
-#         #         filename = linefile
-#         #         lineframe = tools.initialize_trace_frame(linefile)
-#         #         areaframe = tools.initialize_area_frame(areafile)
-#         #         nodeframe = tools.initialize_node_frame(nodefile)
-#         #
-#         #         appendage = {'filename': filename, 'lineframe': lineframe,
-#         #                      'areaframe': areaframe,
-#         #                      'nodeframe': nodeframe,
-#         #                      'code': code_temp,
-#         #                      'cut_off': cut_off}
-#         #         self.df = self.df.append(appendage, ignore_index=True)
-#         #
-#         # self.norm_list = tools.get_area_normalisations_frames(self.df.areaframe.tolist())
-#         # norm_array = np.asarray(self.norm_list)
-#         # self.df['norm'] = norm_array
-#         # self.df['TargetAreaLines'] = self.df.apply(
-#         #     lambda x: tools.construct_length_distribution_base(x['lineframe'], x['areaframe'], x['code'], x['cut_off'],
-#         #                                                        x['norm'], x['filename'], self.using_branches), axis=1)
-#         # self.df['TargetAreaNodes'] = self.df.apply(
-#         #     lambda x: tools.construct_node_data_base(x['nodeframe'], x['code'], x['group']), axis=1)
-#
-#     def unified(self):
-#         uniframe = pd.DataFrame(columns=['uni_ld', 'TargetAreaNodes', 'code', 'uni_ld_area', 'uni_rep_circles_area'])
-#         for idx, code in enumerate(self.codes):
-#             # TODO: This code shit should be (fixed), now to implement!
-#             # frame_debug = self.df.loc[self.df['code'].str.contains(code)]
-#             # # Code should represent part before a '_' symbol
-#             frame = self.df.loc[self.df['code'].str.contains(code)]
-#
-#             # if not frame.equals(frame_debug):  # DEBUGGING
-#             #     print(code, frame.head(), frame_debug.head())  # DEBUGGING
-#             #     raise Exception('Given code doesnt represent the part before a "_" symbol. CHECK GIVEN CODES!')
-#             det_frame = frame.loc[frame['code'].str.contains('_det')]
-#             m20_frame = frame.loc[frame['code'].str.contains('_20m')]
-#             lidar_frame = frame.loc[frame['code'].str.contains('_LiDAR')]
-#             if len(det_frame) > 0:
-#                 temp_code = code + '_det'
-#                 unif_ld_main = tools.unify_lds(det_frame.TargetAreaLines.tolist())
-#                 unif_ld_main.calc_attributes()
-#                 uni_ld_area = gpd.GeoDataFrame(pd.concat(det_frame.areaframe.tolist(), ignore_index=True))
-#                 unif_nd_main = tools.unify_nds(det_frame.TargetAreaNodes.tolist())
-#                 uniframe = uniframe.append(
-#                     {'uni_ld': unif_ld_main, 'TargetAreaNodes': unif_nd_main, 'code': temp_code, 'uni_ld_area': uni_ld_area},
-#                     ignore_index=True)
-#             if len(m20_frame) > 0:
-#                 temp_code = code + '_20m'
-#                 unif_ld_main = tools.unify_lds(m20_frame.TargetAreaLines.tolist())
-#                 unif_ld_main.calc_attributes()
-#                 uni_ld_area = gpd.GeoDataFrame(pd.concat(m20_frame.areaframe.tolist(), ignore_index=True))
-#                 unif_nd_main = tools.unify_nds(m20_frame.TargetAreaNodes.tolist())
-#                 uniframe = uniframe.append(
-#                     {'uni_ld': unif_ld_main, 'TargetAreaNodes': unif_nd_main, 'code': temp_code, 'uni_ld_area': uni_ld_area},
-#                     ignore_index=True)
-#             if len(lidar_frame) > 0:
-#                 temp_code = code + '_LiDAR'
-#                 unif_ld_main = tools.unify_lds(lidar_frame.TargetAreaLines.tolist())
-#                 unif_ld_main.calc_attributes()
-#                 uni_ld_area = gpd.GeoDataFrame(pd.concat(lidar_frame.areaframe.tolist(), ignore_index=True))
-#                 unif_nd_main = tools.unify_nds(lidar_frame.TargetAreaNodes.tolist())
-#                 uniframe = uniframe.append(
-#                     {'uni_ld': unif_ld_main, 'TargetAreaNodes': unif_nd_main, 'code': temp_code, 'uni_ld_area': uni_ld_area},
-#                     ignore_index=True)
-#
-#         uniframe = tools.norm_unified(uniframe)
-#         self.uniframe = uniframe
-#         # AIDS FOR PLOTTING:
-#         self.uniframe_lineframe_main_concat = pd.concat([srs.lineframe_main for srs in self.uniframe.uni_ld], sort=True)
-#         self.uni_left, self.uni_right = tools.calc_xlims(self.uniframe_lineframe_main_concat)
-#         self.uni_top, self.uni_bottom = tools.calc_ylims(self.uniframe_lineframe_main_concat)

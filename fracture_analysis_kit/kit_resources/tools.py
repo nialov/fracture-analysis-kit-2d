@@ -1,4 +1,3 @@
-import logging
 import math
 import os
 from textwrap import wrap
@@ -18,10 +17,11 @@ from shapely import strtree
 
 # import multiple_target_areas as mta
 
-from . import target_area as ta
-from ... import config
+from fracture_analysis_kit.kit_resources import target_area as ta
+import config
 
-
+# from . import target_area as ta
+# from ... import config
 
 style = config.styled_text_dict
 prop = config.styled_prop
@@ -134,20 +134,22 @@ def calc_azimu(line):
     Calculates azimuth of given line.
 
     e.g.:
-
     Accepts LineString
+
     >>> calc_azimu(shapely.geometry.LineString([(0, 0), (1, 1)]))
     45.0
 
     Accepts MultiLineString
+
     >>> calc_azimu(shapely.geometry.MultiLineString([((0, 0), (1, 1)), ((1, 1), (2, 2))]))
     45.0
 
     Returns np.nan when the line cannot be merged into one continuous line.
+
     >>> calc_azimu(shapely.geometry.MultiLineString([((0, 0), (1, 1)), ((1.5, 1), (2, 2))]))
     nan
 
-    :param line: (Continous) line feature (trace, branch, etc.)
+    :param line: Continous line feature (trace, branch, etc.)
     :type line: shapely.geometry.LineString | shapely.geometry.MultiLineString
     :return: Azimuth of line.
     :rtype: float | np.nan
@@ -174,6 +176,7 @@ def calc_azimu(line):
 def azimu_half(degrees):
     """
     Transforms azimuths from 180-360 range to range 0-180
+
     :param degrees: Degrees in range 0 - 360
     :type degrees: float
     :return: Degrees in range 0 - 180
@@ -312,7 +315,7 @@ def azimu_half(degrees):
 # def get_area_normalisations_frames(areaframes):  # returns list with normalisations
 #     area_list = []  # order important!
 #     for frame in areaframes:
-#         # TODO: Test area sum
+
 #         if isinstance(frame, gpd.GeoDataFrame):
 #             area = sum([polygon.area for polygon in frame.geometry])
 #         else:
@@ -391,24 +394,26 @@ def azimuth_plot_attributes(lineframe, weights=False):
     """
     Calculates azimuth bins for plotting azimuth rose plots.
 
-    Example:
+    Examples:
 
     Non-weighted
+
     >>> azimuth_plot_attributes(pd.DataFrame({'azimu': np.array([0, 45, 90]), 'length': np.array([1, 2, 1])}))
     array([33.33333333,  0.        ,  0.        ,  0.        ,  0.        ,
-           33.33333333,  0.        ,  0.        ,  0.        , 33.33333333,
-            0.        ,  0.        ,  0.        ,  0.        ,  0.        ,
-            0.        ,  0.        ,  0.        , 33.33333333,  0.        ,
-            0.        ,  0.        ,  0.        , 33.33333333,  0.        ,
-            0.        ,  0.        , 33.33333333,  0.        ,  0.        ,
-            0.        ,  0.        ,  0.        ,  0.        ,  0.        ,
-            0.        ])
+    33.33333333,  0.        ,  0.        ,  0.        , 33.33333333,
+    0.        ,  0.        ,  0.        ,  0.        ,  0.        ,
+    0.        ,  0.        ,  0.        , 33.33333333,  0.        ,
+    0.        ,  0.        ,  0.        , 33.33333333,  0.        ,
+    0.        ,  0.        , 33.33333333,  0.        ,  0.        ,
+    0.        ,  0.        ,  0.        ,  0.        ,  0.        ,
+    0.        ])
 
     Weighted
+
     >>> azimuth_plot_attributes(pd.DataFrame({'azimu': np.array([0, 45, 90]), 'length': np.array([1, 2, 1])}), weights=True)
     array([25.,  0.,  0.,  0.,  0., 50.,  0.,  0.,  0., 25.,  0.,  0.,  0.,
-            0.,  0.,  0.,  0.,  0., 25.,  0.,  0.,  0.,  0., 50.,  0.,  0.,
-            0., 25.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.])
+    0.,  0.,  0.,  0.,  0., 25.,  0.,  0.,  0.,  0., 50.,  0.,  0.,
+    0., 25.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.])
 
 
     :param lineframe: DataFrame containing lines with azimu (and length columns)
@@ -485,9 +490,11 @@ def azimuth_plot_attributes_experimental(lineframe, weights=False):
             Sanderson, D.J., Peacock, D.C.P., 2020.
             Making rose diagrams fit-for-purpose. Earth-Science Reviews. doi:10.1016/j.earscirev.2019.103055
 
-        e.g.
+        E.g.
+
         >>> calc_ideal_bin_width(30)
         28.964681538168897
+
         >>>calc_ideal_bin_width(90)
         20.08298850246509
 
@@ -695,7 +702,6 @@ def sd_calc(data):
     >>> sd_calc(np.array([2, 5, 8]))
     3.0
 
-
     :param data: Array of degrees
     :type data: np.ndarray
     :return: Standard deviation
@@ -756,17 +762,6 @@ def get_azimu_statistics(lineframe):
     max_az = azimu_half(round(stats[7], 2))
 
     return {'count': count, 'mean': mean, 'std': std, 'minAz': min_az, 'maxAz': max_az, 'median': median}
-
-
-def find_color_topology_plot(name):
-    # TODO: Fix colors
-    return 'black'
-    # color_dict_code = templates.color_dict_code
-    # color_keys = [key for key in color_dict_code.keys()]
-    # for key in color_keys:
-    #     if key in name:
-    #         color = color_dict_code[key]
-    # return color
 
 
 # def transform_to_ellipse(halved, phi):
@@ -944,14 +939,14 @@ def aniso_calc_anisotropy(halved, c, length):
     E.g.
 
     Anisotropy for a C-C classified branch:
+
     >>> aniso_calc_anisotropy(90, 'C - C', 10)
-    array([6.12323400e-16, 5.00000000e+00, 8.66025404e+00, 1.00000000e+01,
-           8.66025404e+00, 5.00000000e+00])
+    array([6.12323400e-16, 5.00000000e+00, 8.66025404e+00, 1.00000000e+01, 8.66025404e+00, 5.00000000e+00])
 
     Other classification for branch:
+
     >>> aniso_calc_anisotropy(90, 'C - I', 10)
     array([0, 0, 0, 0, 0, 0])
-
 
     :param halved: Azimuth of branch in range 0 - 180
     :type halved: float
@@ -959,7 +954,7 @@ def aniso_calc_anisotropy(halved, c, length):
     :type c: str
     :param length: Branch length
     :type length: float
-    :return: Result is given for every angle of study (angles_of_study array)
+    :return: Result is given for every angle of study (angles_of_study array from config.py-file)
     :rtype: np.ndarray
     """
     angles_of_study = np.arange(0, 179, 30)
@@ -1025,6 +1020,7 @@ def calc_cut_off_length(lineframe_main, cut_off: float):
 
     >>> calc_cut_off_length(pd.DataFrame({'length': np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])}), 0.55)
     4.5
+
     >>> calc_cut_off_length(pd.DataFrame({'length': np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])}), 0.5)
     5.0
 
@@ -1048,40 +1044,12 @@ def calc_cut_off_length(lineframe_main, cut_off: float):
 
 
 def calc_xlims(lineframe):
-    """Calculates xlimits for plot axes
-
-    Parameters
-    ----------
-    lineframe : initialized dataframe
-         initialized lineframe with proper columns
-
-    Returns
-    -------
-    left, right
-        left xlimit and right xlimit for axes
-
-
-    """
     left = lineframe.length.min() / 50
     right = lineframe.length.max() * 50
     return left, right
 
 
 def calc_ylims(lineframe):
-    """Calculates ylimits for plot axes
-
-    Parameters
-    ----------
-    lineframe : initialized dataframe
-         initialized lineframe with proper columns
-
-    Returns
-    -------
-    top, bottom
-        top ylimit and bottom ylimit for axes
-
-
-    """
     top = lineframe.y.max() * 50
     bottom = lineframe.y.min() / 50
     return top, bottom
@@ -1091,11 +1059,13 @@ def define_set(azimuth, set_df):  # Uses HALVED azimuth: 0-180
     """
     Defines set based on azimuth value in degrees. Uses halved azimuth values i.e. azimuth must be: 0 < azimuth < 180.
 
-    E.g. when azimuth is in set 1
+    E.g. when azimuth is in set 1:
+
     >>> define_set(50, pd.DataFrame({'Set': [1, 2], 'SetLimits': [(10, 90), (100, 170)]}))
     '1'
 
-    E.g. when azimuth isn't within ranges
+    When azimuth isn't within ranges:
+
     >>> define_set(99, pd.DataFrame({'Set': [1, 2], 'SetLimits': [(10, 90), (100, 170)]}))
     '-1'
 
@@ -1140,8 +1110,8 @@ def construct_node_data_base(nodeframe, name, group):
 
 
 def unify_lds(list_of_lds: list, group: str, cut_off_length: float):
-    """Unifies/adds multiple length distribution objects together
-
+    """
+    Unifies/adds multiple length distribution objects together
     """
     df = pd.DataFrame(columns=['lineframe_main', 'lineframe_main_cut', 'areaframe', 'name'])
     for ld in list_of_lds:
@@ -1175,267 +1145,15 @@ def unify_nds(list_of_nds: list, group: str):
     return unif_nd
 
 
-def calc_curviness_dataframe(lineframe, idx):
-    """Calculates curviness for a lineframe
-
-
-    Parameters
-    ----------
-    lineframe : initialized dataframe
-         initialized lineframe with proper columns
-
-    idx : int
-         saves the index given to method
-
-
-    Returns
-    -------
-    lineframe
-        lineframe with curviness calculated
-    idx
-        passes idx int on
-
-
-    """
-    lineframe['curviness'] = lineframe.geometry.apply(curviness)
-    return lineframe, idx
-
-
-# def norm_unified(uniframe):
-#     """Normalises an unified frame
-#
-#
-#     Parameters
-#     ----------
-#     uniframe : DataFrame
-#          DataFrame with ld objects and attributes used for uniting target areas
-#
-#
-#     Returns
-#     -------
-#     uniframe
-#         uniframe with new normalised DataFrames
-#
-#
-#     """
-#     uniframe['area'] = np.nan
-#     areas = []
-#     for idx, row in uniframe.iterrows():
-#         frame = row.TargetAreaLines_area
-#         # TODO: Test area sum
-#         if isinstance(frame, gpd.GeoDataFrame):
-#             area = sum([polygon.area for polygon in frame.geometry])
-#         else:
-#             try:
-#                 area = frame['Shape_Area'].sum()
-#             except KeyError:
-#                 area = frame['SHAPE_Area'].sum()
-#         # try:
-#         #     area = row.TargetAreaLines_area['Shape_Area'].sum()
-#         # except KeyError:
-#         #     area = row.TargetAreaLines_area['SHAPE_Area'].sum()
-#         uniframe['area'].iloc[idx] = area
-#         areas.append(area)
-#     area_max = max(areas)
-#
-#     uniframe['norm'] = uniframe.area / area_max
-#     # Normalises unified full and cut lineframes. Old normalisation doesn't
-#     # respect the combined status.
-#     for idx, row in uniframe.iterrows():
-#         ld = row['TargetAreaLines']
-#         norm = row['norm']
-#         cut_off = ld.cut_off
-#         uniframe.TargetAreaLines.iloc[idx].norm = norm
-#         lineframe_main = calc_y_distribution(ld.lineframe_main, norm)
-#         uniframe.TargetAreaLines.iloc[idx].lineframe_main = lineframe_main
-#         cut_off_length = calc_cut_off_length(lineframe_main, cut_off)
-#         uniframe.TargetAreaLines.iloc[idx].lineframe_main_cut = lineframe_main.loc[lineframe_main['length'] >= cut_off_length]
-#
-#     return uniframe
+# def calc_curviness_dataframe(lineframe, idx):
+#     lineframe['curviness'] = lineframe.geometry.apply(curviness)
+#     return lineframe, idx
 
 
 def unite_areaframes(list_of_areaframes):
     loa = list_of_areaframes
     united = pd.concat(loa, ignore_index=True)
     return united
-
-
-# def plot_fit_for_uniframe(mult_distrib, ax, cut, use_sets, unified: bool, curr_set=-1, font_multiplier=1,
-#                           predicting_mode=False,
-#                           predict_with=None):
-#     def create_text(lineframe_for_text, ax_for_text, font_multiplier=font_multiplier, multi=False):
-#         msle = sklm.mean_squared_log_error(lineframe_for_text.y.values, lineframe_for_text.y_fit.values)
-#         r2score = sklm.r2_score(lineframe_for_text.y.values, lineframe_for_text.y_fit.values)
-#
-#         text = 'Exponent: ' + str(np.round(m, 2)) \
-#                + '\nConstant: ' + str(np.round(c, 2)) \
-#                + '\nMSLE: ' + str(np.round(msle, 2)) \
-#                + '\nR^2: ' + str(np.round(r2score, 5))
-#
-#         props = dict(boxstyle='round', pad=1, facecolor='wheat',
-#                      path_effects=[path_effects.SimplePatchShadow(), path_effects.Normal()])
-#         if multi:
-#             x_loc = lineframe_for_text.length.mean()
-#             y_loc = lineframe_for_text.y.mean()
-#             text = 'E: ' + str(np.round(m, 2)) \
-#                    + '\nC: ' + str(np.round(c, 2))
-#             ax_for_text.text(x_loc, y_loc, text, bbox=props
-#                              , fontsize='10', fontfamily='Times New Roman', ha='center', alpha=0.5)
-#         else:
-#             ax_for_text.text(0.86, 0.48, text, transform=ax_for_text.transAxes
-#                              , bbox=props, style='italic'
-#                              , fontsize='28', fontfamily='Times New Roman', ha='center', linespacing=2)
-#             func_text = '$n (L) = {{{}}} * L^{{{}}}$'.format(np.round(c, 2), np.round(m, 2))
-#             ax_for_text.text(0.85, 0.16, func_text, transform=ax_for_text.transAxes, ha='center', fontsize='28'
-#                              , rotation=-50)
-#
-#     if unified:
-#         frame = mult_distrib.uniframe
-#         frame_lineframe_main_concat = mult_distrib.uniframe_lineframe_main_concat
-#     else:
-#         frame = mult_distrib.df
-#         # TODO: mult_distrib.df_lineframe_main_concat
-#         frame_lineframe_main_concat = mult_distrib.df_lineframe_main_concat
-#
-#     if cut and use_sets:
-#         lineframe = pd.concat([srs.setframes_cut[curr_set] for srs in frame.TargetAreaLines])
-#         lineframe = pd.DataFrame(lineframe)
-#         lineframe['logLen'] = lineframe.length.apply(np.log)
-#         lineframe['logY'] = lineframe.y.apply(np.log)
-#
-#         # log(y) = m*log(x) + c fitted     y = c*x^m
-#         vals = np.polyfit(lineframe['logLen'].values, lineframe['logY'].values, 1)
-#         if len(vals) == 2:
-#             m, c = vals[0], vals[1]
-#         else:
-#             raise Exception('Too many values from np.polyfit, 2 expected')
-#
-#         y_fit = np.exp(m * lineframe['logLen'].values + c)  # calculate the fitted values of y
-#         lineframe['y_fit'] = y_fit
-#         lineframe.plot(x='length', y='y_fit', c='k', ax=ax, label='FIT', linestyle='dotted', linewidth=7, alpha=.8)
-#         create_text(lineframe, ax)
-#
-#     elif cut and predicting_mode and (predict_with is not None):
-#         # FIND RIGHT PREDICTION FRAMES
-#         idx_to_keep = []
-#         for idx, row in frame.iterrows():
-#             print(predict_with)
-#             print(row.name)
-#             if row.name in predict_with:
-#                 idx_to_keep.append(idx)
-#                 print(idx, row.name)
-#         frame_pred = frame.iloc[idx_to_keep]
-#
-#         lineframe = pd.concat([srs.lineframe_main_cut for srs in frame_pred.TargetAreaLines], sort=True)
-#         names = [srs.name for srs in frame_pred.TargetAreaLines]
-#
-#         lineframe = pd.DataFrame(lineframe)
-#
-#         # lineframe['fit_length'] = np.linspace(mult_distrib.uni_left, mult_distrib.uni_right, num=len(lineframe))
-#         lineframe['logLen'] = lineframe.length.apply(np.log)
-#         lineframe['logY'] = lineframe.y.apply(np.log)
-#
-#         # log(y) = m*log(x) + c fitted     y = c*x^m
-#         vals = np.polyfit(lineframe['logLen'].values, lineframe['logY'].values, 1)
-#         if len(vals) == 2:
-#             m, c = vals[0], vals[1]
-#         else:
-#             raise Exception('Too many values from np.polyfit, 2 expected')
-#
-#         plotframe = pd.DataFrame({'x': np.linspace(mult_distrib.uni_left, mult_distrib.uni_right, num=200)})
-#         plotframe['log_x'] = plotframe.x.apply(np.log)
-#         y_fit = np.exp(m * plotframe.log_x.values + c)  # calculate the fitted values of y for plotframe
-#         y_fit_2 = np.exp(m * lineframe.logLen.values + c)  # calculate the fitted values of y for statistics
-#         lineframe['y_fit'] = y_fit_2
-#         plotframe['y_fit'] = y_fit
-#         plotframe.plot(x='x', y='y_fit', c='k', ax=ax, label='FIT', linestyle='dotted', linewidth=7, alpha=.8)
-#         # FIT STATISTICS
-#         msle = sklm.mean_squared_log_error(lineframe.y.values, lineframe.y_fit.values)
-#         r2score = sklm.r2_score(lineframe.y.values, lineframe.y_fit.values)
-#         # TEXT WITH INFO
-#         text_1 = 'Fitted with:\n{}'.format(str(names).replace('[', '').replace(']', '')).replace(',', '\n')
-#         text_2 = 'Exponent: {} \nConstant: {} \nMSLE: {} \nR^2: {}' \
-#             .format(str(np.round(m, 2))
-#                     , str(np.round(c, 2))
-#                     , str(np.round(msle, 2))
-#                     , str(np.round(r2score, 2)))
-#
-#         props = dict(boxstyle='round', pad=1, facecolor='wheat')
-#         x_loc = 0.22
-#         y_loc = 0.5
-#         ax.text(x_loc, y_loc, text_1, transform=ax.transAxes, bbox=props
-#                 , fontsize='26', fontfamily='Times New Roman', ha='center')
-#         x_loc = 0.84
-#         y_loc = 0.48
-#         ax.text(x_loc, y_loc, text_2, transform=ax.transAxes, bbox=props
-#                 , fontsize='28', fontfamily='Times New Roman'
-#                 , style='italic', ha='center', linespacing=2)
-#
-#     elif cut and predicting_mode:
-#         lineframes = [srs.lineframe_main_cut for srs in frame.TargetAreaLines]
-#         names = [srs.name for srs in frame.TargetAreaLines]
-#         texts = []
-#         for lineframe, name in zip(lineframes, names):
-#             lineframe = pd.DataFrame(lineframe)
-#             lineframe['logLen'] = lineframe.length.apply(np.log)
-#             lineframe['logY'] = lineframe.y.apply(np.log)
-#             # log(y) = m*log(x) + c fitted     y = c*x^m
-#             vals = np.polyfit(lineframe['logLen'].values, lineframe['logY'].values, 1)
-#             if len(vals) == 2:
-#                 m, c = vals[0], vals[1]
-#             else:
-#                 raise Exception('Too many values from np.polyfit, 2 expected')
-#
-#             y_fit = np.exp(m * lineframe['logLen'].values + c)  # calculate the fitted values of y
-#             lineframe['y_fit'] = y_fit
-#             lineframe.plot(x='length', y='y_fit', c='k', ax=ax, label='FIT')
-#             text = '{} E:{} C:{}'.format(name, str(np.round(m, 2)), str(np.round(c, 2)))
-#             texts.append(text)
-#         props = dict(boxstyle='round', pad=1, facecolor='wheat')
-#         x_loc = 0.86
-#         y_loc = 0.9
-#         for t in texts:
-#             ax.text(x_loc, y_loc, t, transform=ax.transAxes, bbox=props
-#                     , fontsize='12', fontfamily='Times New Roman', ha='center')
-#             y_loc -= 0.12
-#
-#     elif cut:
-#
-#         lineframe = pd.concat([srs.lineframe_main_cut for srs in frame.TargetAreaLines])
-#         lineframe = pd.DataFrame(lineframe)
-#         lineframe['logLen'] = lineframe.length.apply(np.log)
-#         lineframe['logY'] = lineframe.y.apply(np.log)
-#
-#         # log(y) = m*log(x) + c fitted     y = c*x^m
-#         vals = np.polyfit(lineframe['logLen'].values, lineframe['logY'].values, 1)
-#         if len(vals) == 2:
-#             m, c = vals[0], vals[1]
-#         else:
-#             raise Exception('Too many values from np.polyfit, 2 expected')
-#
-#         y_fit = np.exp(m * lineframe['logLen'].values + c)  # calculate the fitted values of y
-#         lineframe['y_fit'] = y_fit
-#         lineframe.plot(x='length', y='y_fit', c='k', ax=ax, label='FIT', linestyle='dotted', linewidth=7, alpha=.8)
-#         create_text(lineframe, ax)
-#
-#     else:
-#         lineframe = frame_lineframe_main_concat
-#         lineframe = pd.DataFrame(lineframe)
-#         lineframe['logLen'] = lineframe.length.apply(np.log)
-#         lineframe['logY'] = lineframe.y.apply(np.log)
-#
-#         # log(y) = m*log(x) + c fitted     y = c*x^m
-#         vals = np.polyfit(lineframe['logLen'].values, lineframe['logY'].values, 1)
-#         if len(vals) == 2:
-#             m, c = vals[0], vals[1]
-#         else:
-#             raise Exception('Too many values from np.polyfit, 2 expected')
-#
-#         y_fit = np.exp(m * lineframe['logLen'].values + c)  # calculate the fitted values of y
-#         lineframe['y_fit'] = y_fit
-#         lineframe.plot(x='length', y='y_fit', c='k', ax=ax, label='FIT', linestyle='dotted', linewidth=7, alpha=.8)
-#         create_text(lineframe, ax)
-
 
 
 def curviness(linestring):
@@ -1669,10 +1387,13 @@ def get_nodes_intersecting_sets(xypointsframe, traceframe):
     the trace GeoDataFrame with only two sets. Returns only nodes that intersect traces from BOTH sets.
 
     E.g.
+
     >>> p = gpd.GeoDataFrame(data={'geometry': [Point(0, 0), Point(1, 1), Point(3, 3)]})
+
     >>> l = gpd.GeoDataFrame(data={'geometry': [LineString([(0, 0), (2, 2)]), LineString([(0, 0), (0.5, 0.5)])], 'set': [1, 2]})
+
     >>> get_nodes_intersecting_sets(p, l)
-                    geometry
+    geometry
     0  POINT (0.00000 0.00000)
 
     :param xypointsframe: GeoDataFrame with only X- and Y-nodes
@@ -1725,19 +1446,18 @@ def get_intersect_frame(intersecting_nodes_frame, traceframe, set_tuple):
 
 
     :param intersecting_nodes_frame: GeoDataFrame with X- and Y-nodes that intersect both sets.
-    Contains columns: "c", "geometry"
+        Contains columns: "c", "geometry"
     :type intersecting_nodes_frame: GeoDataFrame
     :param traceframe: GeoDataFrame of traces.  Contains columns: "set", "geometry", "startpoint", "endpoint"
     :type traceframe: GeoDataFrame
     :param set_tuple: Sets used in the comparison
     :type set_tuple: tuple
     :return: DataFrame with intersect results. Contains columns: 'node', 'nodeclass', 'sets', 'error':
-    (node = node as shapely.geometry.Point, nodeclass = classification, i.e. X or Y, sets = tuple (set 1, set 2),
-    error = possible error results)
+        (node = node as shapely.geometry.Point, nodeclass = classification, i.e. X or Y, sets = tuple (set 1, set 2),
+        error = possible error results)
     :rtype: DataFrame
     """
 
-    logger = logging.getLogger('logging_tool')
     intersectframe = pd.DataFrame(columns=['node', 'nodeclass', 'sets', 'error'])
 
     set1, set2 = set_tuple[0], set_tuple[1]  # sets for comparison
@@ -1759,7 +1479,6 @@ def get_intersect_frame(intersecting_nodes_frame, traceframe, set_tuple):
         l2 = set2_prep.intersects(node.buffer(buffer_value))  # Checks if node intersects set 2 traces.
 
         if (l1 is False) and (l2 is False):  # DEBUGGING
-            logger.error(f'Node {node} does not intersect both sets {set1} and {set2}\n l1 is {l1} and l2 is {l2}')
             raise Exception(f'Node {node} does not intersect both sets {set1} and {set2}\n l1 is {l1} and l2 is {l2}')
 
         # NO RELATIONS FOR NODE IS GIVEN AS ERROR == TRUE (ERROR).
@@ -1773,13 +1492,11 @@ def get_intersect_frame(intersecting_nodes_frame, traceframe, set_tuple):
                 addition = {'node': node, 'nodeclass': c, 'sets': sets, 'error': False}
 
             if (l1 is True) and (l2 is False):  # It's an x-node inside set 1
-                logger.error(f'Point {node} does not intersect both sets {set1} and {set2}\n l1 is {l1} and l2 is {l2}')
                 raise Exception(f'Node {node} does not intersect both sets {set1} and {set2}\n l1 is {l1} and l2 is {l2}')
                 # sets = (set1, set1)
                 # addition = {'node': node, 'nodeclass': c, 'sets': sets}
 
             if (l1 is False) and (l2 is True):  # It's an x-node inside set 2
-                logger.error(f'Point {node} does not intersect both sets {set1} and {set2}\n l1 is {l1} and l2 is {l2}')
                 raise Exception(
                     f'Node {node} does not intersect both sets {set1} and {set2}\n l1 is {l1} and l2 is {l2}')
                 # sets = (set2, set2)
@@ -1797,14 +1514,12 @@ def get_intersect_frame(intersecting_nodes_frame, traceframe, set_tuple):
                 addition = {'node': node, 'nodeclass': c, 'sets': sets, 'error': False}
 
             if (l1 is True) and (l2 is False):  # It's a y-node inside set 1
-                logger.error(f'Point {node} does not intersect both sets {set1} and {set2}\n l1 is {l1} and l2 is {l2}')
                 raise Exception(
                     f'Node {node} does not intersect both sets {set1} and {set2}\n l1 is {l1} and l2 is {l2}')
                 # sets = (set1, set1)
                 # addition = {'node': node, 'nodeclass': c, 'sets': sets}
 
             if (l1 is False) and (l2 is True):  # It's a y-node inside set 2
-                logger.error(f'Point {node} does not intersect both sets {set1} and {set2}\n l1 is {l1} and l2 is {l2}')
                 raise Exception(
                     f'Node {node} does not intersect both sets {set1} and {set2}\n l1 is {l1} and l2 is {l2}')
                 # sets = (set2, set2)

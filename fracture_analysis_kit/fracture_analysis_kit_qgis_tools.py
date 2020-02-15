@@ -13,7 +13,7 @@ def layer_to_df(layer):
     Converts QGIS vector layer to a pandas DataFrame and extracts coordinate system from the layer.
 
     :param layer: QGIS vector layer.
-    :type layer: TODO
+    :type layer: TODO: Why doesnt type() work?
     :return: Converted pandas DataFrame and layer coord system.
     :rtypes: pandas.DataFrame and crs
     """
@@ -67,7 +67,7 @@ def layer_to_gdf(layer):
     Converts QGIS vector layer to a GeoDataFrame.
 
     :param layer: QGIS vector layer
-    :type layer: TODO
+    :type layer: TODO: Check scripts in qgis?
     :return: Converted GeoDataFrame
     :rtype: geopandas.GeoDataFrame
     """
