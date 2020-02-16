@@ -1,14 +1,12 @@
-import pandas as pd
+"""
+Main module for the control of analysis and plotting.
+"""
 from qgis.core import QgsMessageLog, Qgis
 from qgis.core import QgsTask, QgsTaskManager, QgsApplication
 
-from fracture_analysis_kit import fracture_analysis_kit_qgis_tools as qgis_tools
-from fracture_analysis_kit import target_area_analysis_qgis as taaq
+from fracture_analysis_kit import qgis_tools as qgis_tools
+from fracture_analysis_kit import analysis_and_plotting as taaq
 import config
-
-# from . import fracture_analysis_kit_qgis_tools as qgis_tools
-# from . import target_area_analysis_qgis as taaq
-# from .. import config
 
 
 def main_single_target_area(results_folder, name, trace_layer, branch_layer, node_layer, area_layer):
@@ -76,9 +74,9 @@ def main_multi_target_area(layer_table_df, results_folder, analysis_name, group_
     :param layer_table_df: DataFrame with trace, branch, node, etc. vector layer data.
     :type layer_table_df: pandas.DataFrame
     :param results_folder: Path to folder in which plots_{analysis_name} folder will be built to
-    and where plots will be saved to.
+        and where plots will be saved to.
     :type results_folder: str
-    :param analysis_name: Name for the analysis. Will be used in the plots_ folder name.
+    :param analysis_name: Name for the analysis. Will be used in the plots_{analysis_name} folder name.
     :type analysis_name: str
     :param group_names_cutoffs_df: DataFrame with group name and cut-off data for both traces and branches.
     :type group_names_cutoffs_df: pandas.DataFrame
@@ -97,7 +95,7 @@ def main_multi_target_area(layer_table_df, results_folder, analysis_name, group_
     config.ta_list = layer_table_df.Name.tolist()
     config.g_list = group_names_cutoffs_df.Group.tolist()
 
-    # START __init__ FOR MULTI TARGET AREA
+    # START __init__
     mta_analysis = taaq.MultiTargetAreaAnalysis(layer_table_df, plotting_directory, analysis_name, group_names_cutoffs_df, set_df)
 
     # Start analysis

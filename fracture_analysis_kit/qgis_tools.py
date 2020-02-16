@@ -1,3 +1,7 @@
+"""
+Contains tools relevant to QGIS layer transformations and plugin functionality.
+"""
+
 import os
 import shutil
 from pathlib import Path

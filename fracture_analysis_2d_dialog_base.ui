@@ -6,30 +6,792 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1012</width>
-    <height>676</height>
+    <width>959</width>
+    <height>665</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>2D Fracture Analysis Kit</string>
   </property>
-  <widget class="QTabWidget" name="tabWidget">
-   <property name="enabled">
-    <bool>true</bool>
-   </property>
+  <widget class="QPushButton" name="pushButton_tab2_table_clear">
    <property name="geometry">
     <rect>
-     <x>30</x>
-     <y>20</y>
-     <width>961</width>
-     <height>641</height>
+     <x>860</x>
+     <y>350</y>
+     <width>75</width>
+     <height>23</height>
     </rect>
    </property>
    <property name="toolTip">
+    <string>Clear Layer table</string>
+   </property>
+   <property name="text">
+    <string>Clear Table</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="pushButton_tab2_set_clear">
+   <property name="geometry">
+    <rect>
+     <x>330</x>
+     <y>100</y>
+     <width>75</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>Clear Set and Set limits table</string>
+   </property>
+   <property name="text">
+    <string>Clear Table</string>
+   </property>
+  </widget>
+  <widget class="QWidget" name="layoutWidget">
+   <property name="geometry">
+    <rect>
+     <x>7</x>
+     <y>127</y>
+     <width>401</width>
+     <height>171</height>
+    </rect>
+   </property>
+   <layout class="QHBoxLayout" name="horizontalLayout">
+    <item>
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <widget class="QLabel" name="label_tab2_set_start">
+        <property name="font">
+         <font>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
+        <property name="toolTip">
+         <string>Ranges extending from below 180 to over 0 are allowed. E.g. Set start = 170, Set end = 15</string>
+        </property>
+        <property name="layoutDirection">
+         <enum>Qt::LeftToRight</enum>
+        </property>
+        <property name="text">
+         <string>Input set limits
+in range
+[0, 180]</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <layout class="QGridLayout" name="gridLayout_4">
+        <item row="0" column="0">
+         <widget class="QLabel" name="label_tab2_set_start_4">
+          <property name="font">
+           <font>
+            <pointsize>12</pointsize>
+           </font>
+          </property>
+          <property name="toolTip">
+           <string>Start of set</string>
+          </property>
+          <property name="text">
+           <string>Set start</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="label_tab2_set_end">
+          <property name="font">
+           <font>
+            <pointsize>12</pointsize>
+           </font>
+          </property>
+          <property name="toolTip">
+           <string>End of set</string>
+          </property>
+          <property name="text">
+           <string>Set end</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QLineEdit" name="lineEdit_tab2_set_end">
+          <property name="toolTip">
+           <string>E.g. 45</string>
+          </property>
+          <property name="text">
+           <string>90</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QLineEdit" name="lineEdit_tab2_set_start">
+          <property name="toolTip">
+           <string>E.g. 15</string>
+          </property>
+          <property name="text">
+           <string>45</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pushButton_tab2_set_add">
+        <property name="font">
+         <font>
+          <pointsize>14</pointsize>
+         </font>
+        </property>
+        <property name="toolTip">
+         <string>Add set to Set and Set limits table</string>
+        </property>
+        <property name="text">
+         <string>Add set</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="QTableWidget" name="tableWidget_tab2_sets">
+      <property name="toolTip">
+       <string>Set and Set limits table</string>
+      </property>
+      <property name="lineWidth">
+       <number>1</number>
+      </property>
+      <column>
+       <property name="text">
+        <string>Set</string>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Set limits</string>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+      </column>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QTableWidget" name="tableWidget_tab2">
+   <property name="geometry">
+    <rect>
+     <x>390</x>
+     <y>380</y>
+     <width>551</width>
+     <height>221</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>10</pointsize>
+    </font>
+   </property>
+   <property name="toolTip">
+    <string>Layer table</string>
+   </property>
+   <attribute name="horizontalHeaderDefaultSectionSize">
+    <number>90</number>
+   </attribute>
+   <column>
+    <property name="text">
+     <string>Trace</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>Branch</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>Node</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>Area</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>Name</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>Group</string>
+    </property>
+   </column>
+  </widget>
+  <widget class="QWidget" name="layoutWidget_2">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>10</y>
+     <width>276</width>
+     <height>67</height>
+    </rect>
+   </property>
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="1" column="1">
+     <widget class="QLineEdit" name="lineEdit_tab2_folder">
+      <property name="text">
+       <string>D:\QGIS_Files\test_plots</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="0">
+     <widget class="QLabel" name="label_29">
+      <property name="font">
+       <font>
+        <pointsize>12</pointsize>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Give name to analysis</string>
+      </property>
+      <property name="text">
+       <string>Analysis Name</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="1">
+     <widget class="QLineEdit" name="lineEdit_tab2_analysis_name">
+      <property name="toolTip">
+       <string>E.g. Loviisa_analysis</string>
+      </property>
+      <property name="text">
+       <string>test_</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0">
+     <widget class="QLabel" name="label_13">
+      <property name="font">
+       <font>
+        <pointsize>12</pointsize>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Use button (...) to point to a folder where a new folder for results will be created.</string>
+      </property>
+      <property name="text">
+       <string>Output folder</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="2">
+     <widget class="QPushButton" name="pushButton_tab2_folder">
+      <property name="font">
+       <font>
+        <weight>75</weight>
+        <bold>true</bold>
+        <underline>false</underline>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Choose folder</string>
+      </property>
+      <property name="text">
+       <string>...</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QPushButton" name="pushButton_tab2_run">
+   <property name="geometry">
+    <rect>
+     <x>870</x>
+     <y>610</y>
+     <width>75</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Run</string>
+   </property>
+  </widget>
+  <widget class="QWidget" name="layoutWidget_3">
+   <property name="geometry">
+    <rect>
+     <x>430</x>
+     <y>130</y>
+     <width>237</width>
+     <height>117</height>
+    </rect>
+   </property>
+   <layout class="QFormLayout" name="formLayout_3">
+    <item row="0" column="0">
+     <widget class="QLabel" name="label_30">
+      <property name="font">
+       <font>
+        <pointsize>12</pointsize>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Input name for group. Short names preferred.</string>
+      </property>
+      <property name="whatsThis">
+       <string/>
+      </property>
+      <property name="text">
+       <string>Group Name</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="1">
+     <widget class="QLineEdit" name="lineEdit_gname">
+      <property name="toolTip">
+       <string>E.g. KB_20m</string>
+      </property>
+      <property name="whatsThis">
+       <string/>
+      </property>
+      <property name="text">
+       <string>KB_20m</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0">
+     <widget class="QLabel" name="label_31">
+      <property name="font">
+       <font>
+        <pointsize>12</pointsize>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Input cut off length for traces in meters.</string>
+      </property>
+      <property name="whatsThis">
+       <string/>
+      </property>
+      <property name="text">
+       <string>Cut Off Traces (m)</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="1">
+     <widget class="QLineEdit" name="lineEdit_tab2_cutoff_traces">
+      <property name="toolTip">
+       <string>E.g. 1.8</string>
+      </property>
+      <property name="whatsThis">
+       <string/>
+      </property>
+      <property name="text">
+       <string>1.8</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="0">
+     <widget class="QLabel" name="label_32">
+      <property name="font">
+       <font>
+        <pointsize>12</pointsize>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Input cut off length for branches in meters.</string>
+      </property>
+      <property name="whatsThis">
+       <string/>
+      </property>
+      <property name="text">
+       <string>Cut Off Branches (m)</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="1">
+     <widget class="QLineEdit" name="lineEdit_tab2_cutoff_branches">
+      <property name="toolTip">
+       <string>E.g. 1.6</string>
+      </property>
+      <property name="whatsThis">
+       <string/>
+      </property>
+      <property name="text">
+       <string>1.6</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="1">
+     <widget class="QPushButton" name="pushButton_gname_add">
+      <property name="font">
+       <font>
+        <pointsize>14</pointsize>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Add row to Group and Cut Off table</string>
+      </property>
+      <property name="whatsThis">
+       <string>Add row to Name and Cut Off table</string>
+      </property>
+      <property name="text">
+       <string>Add row</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QWidget" name="layoutWidget_4">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>380</y>
+     <width>361</width>
+     <height>281</height>
+    </rect>
+   </property>
+   <layout class="QFormLayout" name="formLayout">
+    <item row="0" column="0">
+     <widget class="QLabel" name="label_14">
+      <property name="font">
+       <font>
+        <pointsize>12</pointsize>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Select layer with digitized traces</string>
+      </property>
+      <property name="text">
+       <string>Select trace layer</string>
+      </property>
+      <property name="scaledContents">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="1">
+     <widget class="QComboBox" name="comboBox_trace">
+      <property name="maxVisibleItems">
+       <number>20</number>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0">
+     <widget class="QLabel" name="label_15">
+      <property name="font">
+       <font>
+        <pointsize>12</pointsize>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Select layer with branches (from NetworkGT)</string>
+      </property>
+      <property name="text">
+       <string>Select branch layer</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="1">
+     <widget class="QComboBox" name="comboBox_branch">
+      <property name="maxVisibleItems">
+       <number>20</number>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="0">
+     <widget class="QLabel" name="label_16">
+      <property name="font">
+       <font>
+        <pointsize>12</pointsize>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Select layer with nodes (from NetworkGT)</string>
+      </property>
+      <property name="text">
+       <string>Select node layer</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="1">
+     <widget class="QComboBox" name="comboBox_node">
+      <property name="maxVisibleItems">
+       <number>20</number>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="0">
+     <widget class="QLabel" name="label_17">
+      <property name="font">
+       <font>
+        <pointsize>12</pointsize>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Select layer with interpretation boundary polygon</string>
+      </property>
+      <property name="text">
+       <string>Select area layer</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="1">
+     <widget class="QComboBox" name="comboBox_area">
+      <property name="maxVisibleItems">
+       <number>20</number>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="0">
+     <widget class="QLabel" name="label_22">
+      <property name="font">
+       <font>
+        <pointsize>12</pointsize>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Name the target area. Short names preferred. Duplicates are not allowed.</string>
+      </property>
+      <property name="text">
+       <string>Name target area</string>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="1">
+     <widget class="QLineEdit" name="lineEdit_tab2_tan">
+      <property name="toolTip">
+       <string>E.g. KB11.</string>
+      </property>
+      <property name="text">
+       <string>KB10</string>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="0">
+     <widget class="QLabel" name="label_18">
+      <property name="font">
+       <font>
+        <pointsize>12</pointsize>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Select Group based on rows in Name and Cut Off table</string>
+      </property>
+      <property name="text">
+       <string>Select group</string>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="1">
+     <widget class="QComboBox" name="comboBox_tab2_gnames"/>
+    </item>
+    <item row="6" column="1">
+     <widget class="QPushButton" name="pushButton_tab2_add_row_layers">
+      <property name="font">
+       <font>
+        <pointsize>15</pointsize>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Add row to Layer table</string>
+      </property>
+      <property name="text">
+       <string>Add row</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QLabel" name="label_33">
+   <property name="geometry">
+    <rect>
+     <x>560</x>
+     <y>10</y>
+     <width>251</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Calibri</family>
+     <pointsize>20</pointsize>
+     <weight>75</weight>
+     <bold>true</bold>
+     <underline>true</underline>
+    </font>
+   </property>
+   <property name="toolTip">
+    <string>Input cut off length for branches in meters.</string>
+   </property>
+   <property name="whatsThis">
     <string/>
    </property>
-   <property name="toolTipDuration">
-    <number>-1</number>
+   <property name="frameShape">
+    <enum>QFrame::NoFrame</enum>
+   </property>
+   <property name="frameShadow">
+    <enum>QFrame::Plain</enum>
+   </property>
+   <property name="text">
+    <string>Fracture Analysis 2D</string>
+   </property>
+  </widget>
+  <widget class="Line" name="line_horizontal">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>320</y>
+     <width>931</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="frameShadow">
+    <enum>QFrame::Plain</enum>
+   </property>
+   <property name="lineWidth">
+    <number>2</number>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Horizontal</enum>
+   </property>
+  </widget>
+  <widget class="Line" name="line_vertical">
+   <property name="geometry">
+    <rect>
+     <x>410</x>
+     <y>0</y>
+     <width>20</width>
+     <height>341</height>
+    </rect>
+   </property>
+   <property name="frameShadow">
+    <enum>QFrame::Plain</enum>
+   </property>
+   <property name="lineWidth">
+    <number>2</number>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Vertical</enum>
+   </property>
+  </widget>
+  <widget class="Line" name="line_horizontal_2">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>60</y>
+     <width>931</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="frameShadow">
+    <enum>QFrame::Plain</enum>
+   </property>
+   <property name="lineWidth">
+    <number>2</number>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Horizontal</enum>
+   </property>
+  </widget>
+  <widget class="QWidget" name="layoutWidget">
+   <property name="geometry">
+    <rect>
+     <x>680</x>
+     <y>100</y>
+     <width>264</width>
+     <height>223</height>
+    </rect>
+   </property>
+   <layout class="QFormLayout" name="formLayout_5">
+    <property name="labelAlignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+    <item row="0" column="0">
+     <widget class="QPushButton" name="pushButton_gname_clear">
+      <property name="toolTip">
+       <string>Clear Group and Cut Offs table</string>
+      </property>
+      <property name="statusTip">
+       <string/>
+      </property>
+      <property name="whatsThis">
+       <string/>
+      </property>
+      <property name="text">
+       <string>Clear Table</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0">
+     <widget class="QTableWidget" name="tableWidget_tab2_gnames">
+      <property name="toolTip">
+       <string>Group and Cut Offs table</string>
+      </property>
+      <property name="whatsThis">
+       <string/>
+      </property>
+      <attribute name="horizontalHeaderMinimumSectionSize">
+       <number>32</number>
+      </attribute>
+      <attribute name="horizontalHeaderDefaultSectionSize">
+       <number>100</number>
+      </attribute>
+      <attribute name="horizontalHeaderHighlightSections">
+       <bool>true</bool>
+      </attribute>
+      <column>
+       <property name="text">
+        <string>Group</string>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Cut Off Traces</string>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Cut Off Branches</string>
+       </property>
+      </column>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QPushButton" name="pushButton_help">
+   <property name="geometry">
+    <rect>
+     <x>880</x>
+     <y>10</y>
+     <width>75</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Calibri</family>
+     <pointsize>14</pointsize>
+     <weight>75</weight>
+     <bold>true</bold>
+    </font>
+   </property>
+   <property name="toolTip">
+    <string>Open Help Documentation</string>
    </property>
    <property name="statusTip">
     <string/>
@@ -37,896 +799,11 @@
    <property name="whatsThis">
     <string/>
    </property>
-   <property name="currentIndex">
-    <number>1</number>
+   <property name="text">
+    <string>?</string>
    </property>
-   <widget class="QWidget" name="SingleTA_tab">
-    <attribute name="title">
-     <string>Single Target Area</string>
-    </attribute>
-    <widget class="QComboBox" name="comboBox_area">
-     <property name="geometry">
-      <rect>
-       <x>200</x>
-       <y>200</y>
-       <width>181</width>
-       <height>41</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QLineEdit" name="lineEdit_name">
-     <property name="geometry">
-      <rect>
-       <x>220</x>
-       <y>340</y>
-       <width>113</width>
-       <height>20</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QComboBox" name="comboBox_trace">
-     <property name="geometry">
-      <rect>
-       <x>190</x>
-       <y>30</y>
-       <width>181</width>
-       <height>41</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QComboBox" name="comboBox_branch">
-     <property name="geometry">
-      <rect>
-       <x>190</x>
-       <y>90</y>
-       <width>181</width>
-       <height>41</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QLineEdit" name="lineEdit_folder">
-     <property name="geometry">
-      <rect>
-       <x>220</x>
-       <y>290</y>
-       <width>113</width>
-       <height>20</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_4">
-     <property name="geometry">
-      <rect>
-       <x>90</x>
-       <y>300</y>
-       <width>71</width>
-       <height>16</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Output folder</string>
-     </property>
-    </widget>
-    <widget class="QDialogButtonBox" name="button_box">
-     <property name="geometry">
-      <rect>
-       <x>110</x>
-       <y>400</y>
-       <width>341</width>
-       <height>32</height>
-      </rect>
-     </property>
-     <property name="toolTip">
-      <string comment="what is it" extracomment="what is it">what is it</string>
-     </property>
-     <property name="statusTip">
-      <string>what is it</string>
-     </property>
-     <property name="whatsThis">
-      <string>what is it</string>
-     </property>
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_2">
-     <property name="geometry">
-      <rect>
-       <x>70</x>
-       <y>100</y>
-       <width>91</width>
-       <height>16</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Select branch layer</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label">
-     <property name="geometry">
-      <rect>
-       <x>66</x>
-       <y>40</y>
-       <width>91</width>
-       <height>20</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Select trace layer</string>
-     </property>
-    </widget>
-    <widget class="QComboBox" name="comboBox_node">
-     <property name="geometry">
-      <rect>
-       <x>190</x>
-       <y>140</y>
-       <width>181</width>
-       <height>41</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_5">
-     <property name="geometry">
-      <rect>
-       <x>66</x>
-       <y>340</y>
-       <width>91</width>
-       <height>20</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Target Area Name</string>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="pushButton">
-     <property name="geometry">
-      <rect>
-       <x>360</x>
-       <y>290</y>
-       <width>75</width>
-       <height>23</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>...</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_3">
-     <property name="geometry">
-      <rect>
-       <x>70</x>
-       <y>150</y>
-       <width>91</width>
-       <height>16</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Select node layer</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_6">
-     <property name="geometry">
-      <rect>
-       <x>80</x>
-       <y>210</y>
-       <width>91</width>
-       <height>16</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Select area layer</string>
-     </property>
-    </widget>
-   </widget>
-   <widget class="QWidget" name="MultiTA_tab">
-    <attribute name="title">
-     <string>Multi Target Area</string>
-    </attribute>
-    <widget class="QTableWidget" name="tableWidget_tab2">
-     <property name="geometry">
-      <rect>
-       <x>400</x>
-       <y>290</y>
-       <width>551</width>
-       <height>221</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <pointsize>10</pointsize>
-      </font>
-     </property>
-     <property name="toolTip">
-      <string>Layer table</string>
-     </property>
-     <attribute name="horizontalHeaderDefaultSectionSize">
-      <number>90</number>
-     </attribute>
-     <column>
-      <property name="text">
-       <string>Trace</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Branch</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Node</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Area</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Name</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Group</string>
-      </property>
-     </column>
-    </widget>
-    <widget class="QPushButton" name="pushButton_gname_clear">
-     <property name="geometry">
-      <rect>
-       <x>863</x>
-       <y>23</y>
-       <width>75</width>
-       <height>23</height>
-      </rect>
-     </property>
-     <property name="toolTip">
-      <string>Clear Group and Cut Offs table</string>
-     </property>
-     <property name="statusTip">
-      <string/>
-     </property>
-     <property name="whatsThis">
-      <string/>
-     </property>
-     <property name="text">
-      <string>Clear Table</string>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="pushButton_tab2_table_clear">
-     <property name="geometry">
-      <rect>
-       <x>870</x>
-       <y>260</y>
-       <width>75</width>
-       <height>23</height>
-      </rect>
-     </property>
-     <property name="toolTip">
-      <string>Clear Layer table</string>
-     </property>
-     <property name="text">
-      <string>Clear Table</string>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="pushButton_tab2_run">
-     <property name="geometry">
-      <rect>
-       <x>870</x>
-       <y>520</y>
-       <width>75</width>
-       <height>23</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Run</string>
-     </property>
-    </widget>
-    <widget class="QTableWidget" name="tableWidget_tab2_gnames">
-     <property name="geometry">
-      <rect>
-       <x>730</x>
-       <y>60</y>
-       <width>211</width>
-       <height>192</height>
-      </rect>
-     </property>
-     <property name="toolTip">
-      <string>Group and Cut Offs table</string>
-     </property>
-     <property name="whatsThis">
-      <string/>
-     </property>
-     <attribute name="horizontalHeaderMinimumSectionSize">
-      <number>32</number>
-     </attribute>
-     <attribute name="horizontalHeaderDefaultSectionSize">
-      <number>75</number>
-     </attribute>
-     <attribute name="horizontalHeaderHighlightSections">
-      <bool>true</bool>
-     </attribute>
-     <column>
-      <property name="text">
-       <string>Group</string>
-      </property>
-      <property name="font">
-       <font>
-        <pointsize>12</pointsize>
-       </font>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Cut Off Traces</string>
-      </property>
-      <property name="font">
-       <font>
-        <pointsize>12</pointsize>
-       </font>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Cut Off Branches</string>
-      </property>
-     </column>
-    </widget>
-    <widget class="QWidget" name="layoutWidget">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>30</y>
-       <width>276</width>
-       <height>67</height>
-      </rect>
-     </property>
-     <layout class="QGridLayout" name="gridLayout">
-      <item row="1" column="1">
-       <widget class="QLineEdit" name="lineEdit_tab2_folder">
-        <property name="text">
-         <string>D:\QGIS_Files\test_plots</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="label_26">
-        <property name="font">
-         <font>
-          <pointsize>12</pointsize>
-         </font>
-        </property>
-        <property name="toolTip">
-         <string>Give name to analysis</string>
-        </property>
-        <property name="text">
-         <string>Analysis Name</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QLineEdit" name="lineEdit_tab2_analysis_name">
-        <property name="toolTip">
-         <string>E.g. Loviisa_analysis</string>
-        </property>
-        <property name="text">
-         <string>test_</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="label_9">
-        <property name="font">
-         <font>
-          <pointsize>12</pointsize>
-         </font>
-        </property>
-        <property name="toolTip">
-         <string>Use button (...) to point to a folder where a new folder for results will be created.</string>
-        </property>
-        <property name="text">
-         <string>Output folder</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="2">
-       <widget class="QPushButton" name="pushButton_tab2_folder">
-        <property name="font">
-         <font>
-          <weight>75</weight>
-          <bold>true</bold>
-          <underline>false</underline>
-         </font>
-        </property>
-        <property name="toolTip">
-         <string>Choose folder</string>
-        </property>
-        <property name="text">
-         <string>...</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-    <widget class="QWidget" name="layoutWidget">
-     <property name="geometry">
-      <rect>
-       <x>480</x>
-       <y>60</y>
-       <width>237</width>
-       <height>117</height>
-      </rect>
-     </property>
-     <layout class="QFormLayout" name="formLayout">
-      <item row="0" column="0">
-       <widget class="QLabel" name="label_25">
-        <property name="font">
-         <font>
-          <pointsize>12</pointsize>
-         </font>
-        </property>
-        <property name="toolTip">
-         <string>Input name for group. Short names preferred.</string>
-        </property>
-        <property name="whatsThis">
-         <string/>
-        </property>
-        <property name="text">
-         <string>Group Name</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QLineEdit" name="lineEdit_gname">
-        <property name="toolTip">
-         <string>E.g. KB_20m</string>
-        </property>
-        <property name="whatsThis">
-         <string/>
-        </property>
-        <property name="text">
-         <string>KB_20m</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="label_27">
-        <property name="font">
-         <font>
-          <pointsize>12</pointsize>
-         </font>
-        </property>
-        <property name="toolTip">
-         <string>Input cut off length for traces in meters.</string>
-        </property>
-        <property name="whatsThis">
-         <string/>
-        </property>
-        <property name="text">
-         <string>Cut Off Traces (m)</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QLineEdit" name="lineEdit_tab2_cutoff_traces">
-        <property name="toolTip">
-         <string>E.g. 1.8</string>
-        </property>
-        <property name="whatsThis">
-         <string/>
-        </property>
-        <property name="text">
-         <string>1.8</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="label_28">
-        <property name="font">
-         <font>
-          <pointsize>12</pointsize>
-         </font>
-        </property>
-        <property name="toolTip">
-         <string>Input cut off length for branches in meters.</string>
-        </property>
-        <property name="whatsThis">
-         <string/>
-        </property>
-        <property name="text">
-         <string>Cut Off Branches (m)</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <widget class="QLineEdit" name="lineEdit_tab2_cutoff_branches">
-        <property name="toolTip">
-         <string>E.g. 1.6</string>
-        </property>
-        <property name="whatsThis">
-         <string/>
-        </property>
-        <property name="text">
-         <string>1.6</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="1">
-       <widget class="QPushButton" name="pushButton_gname_add">
-        <property name="font">
-         <font>
-          <pointsize>14</pointsize>
-         </font>
-        </property>
-        <property name="toolTip">
-         <string>Add row to Group and Cut Off table</string>
-        </property>
-        <property name="whatsThis">
-         <string>Add row to Name and Cut Off table</string>
-        </property>
-        <property name="text">
-         <string>Add row</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-    <widget class="QWidget" name="layoutWidget">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>280</y>
-       <width>361</width>
-       <height>281</height>
-      </rect>
-     </property>
-     <layout class="QFormLayout" name="formLayout_2">
-      <item row="0" column="0">
-       <widget class="QLabel" name="label_8">
-        <property name="font">
-         <font>
-          <pointsize>12</pointsize>
-         </font>
-        </property>
-        <property name="toolTip">
-         <string>Select layer with digitized traces</string>
-        </property>
-        <property name="text">
-         <string>Select trace layer</string>
-        </property>
-        <property name="scaledContents">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QComboBox" name="comboBox_trace_2">
-        <property name="maxVisibleItems">
-         <number>20</number>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="label_7">
-        <property name="font">
-         <font>
-          <pointsize>12</pointsize>
-         </font>
-        </property>
-        <property name="toolTip">
-         <string>Select layer with branches (from NetworkGT)</string>
-        </property>
-        <property name="text">
-         <string>Select branch layer</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QComboBox" name="comboBox_branch_2">
-        <property name="maxVisibleItems">
-         <number>20</number>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="label_10">
-        <property name="font">
-         <font>
-          <pointsize>12</pointsize>
-         </font>
-        </property>
-        <property name="toolTip">
-         <string>Select layer with nodes (from NetworkGT)</string>
-        </property>
-        <property name="text">
-         <string>Select node layer</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <widget class="QComboBox" name="comboBox_node_2">
-        <property name="maxVisibleItems">
-         <number>20</number>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="label_11">
-        <property name="font">
-         <font>
-          <pointsize>12</pointsize>
-         </font>
-        </property>
-        <property name="toolTip">
-         <string>Select layer with interpretation boundary polygon</string>
-        </property>
-        <property name="text">
-         <string>Select area layer</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="1">
-       <widget class="QComboBox" name="comboBox_area_2">
-        <property name="maxVisibleItems">
-         <number>20</number>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="0">
-       <widget class="QLabel" name="label_21">
-        <property name="font">
-         <font>
-          <pointsize>12</pointsize>
-         </font>
-        </property>
-        <property name="toolTip">
-         <string>Name the target area. Short names preferred. Duplicates are not allowed.</string>
-        </property>
-        <property name="text">
-         <string>Name target area</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="1">
-       <widget class="QLineEdit" name="lineEdit_tab2_tan">
-        <property name="toolTip">
-         <string>E.g. KB11.</string>
-        </property>
-        <property name="text">
-         <string>KB10</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="0">
-       <widget class="QLabel" name="label_12">
-        <property name="font">
-         <font>
-          <pointsize>12</pointsize>
-         </font>
-        </property>
-        <property name="toolTip">
-         <string>Select Group based on rows in Name and Cut Off table</string>
-        </property>
-        <property name="text">
-         <string>Select group</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="1">
-       <widget class="QComboBox" name="comboBox_tab2_gnames"/>
-      </item>
-      <item row="6" column="1">
-       <widget class="QPushButton" name="pushButton_tab2_add_row">
-        <property name="font">
-         <font>
-          <pointsize>15</pointsize>
-         </font>
-        </property>
-        <property name="toolTip">
-         <string>Add row to Layer table</string>
-        </property>
-        <property name="text">
-         <string>Add row</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-    <widget class="QPushButton" name="pushButton_tab2_set_clear">
-     <property name="geometry">
-      <rect>
-       <x>340</x>
-       <y>70</y>
-       <width>75</width>
-       <height>23</height>
-      </rect>
-     </property>
-     <property name="toolTip">
-      <string>Clear Set and Set limits table</string>
-     </property>
-     <property name="text">
-      <string>Clear Table</string>
-     </property>
-    </widget>
-    <widget class="QWidget" name="layoutWidget">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>100</y>
-       <width>401</width>
-       <height>171</height>
-      </rect>
-     </property>
-     <layout class="QHBoxLayout" name="horizontalLayout">
-      <item>
-       <layout class="QVBoxLayout" name="verticalLayout">
-        <item>
-         <widget class="QLabel" name="label_tab2_set_start_2">
-          <property name="font">
-           <font>
-            <pointsize>12</pointsize>
-           </font>
-          </property>
-          <property name="toolTip">
-           <string>Ranges extending from below 180 to over 0 are allowed. E.g. Set start = 170, Set end = 15</string>
-          </property>
-          <property name="layoutDirection">
-           <enum>Qt::LeftToRight</enum>
-          </property>
-          <property name="text">
-           <string>Input set limits
-in range
-[0, 180]</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <layout class="QGridLayout" name="gridLayout_3">
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_tab2_set_start">
-            <property name="font">
-             <font>
-              <pointsize>12</pointsize>
-             </font>
-            </property>
-            <property name="toolTip">
-             <string>Start of set</string>
-            </property>
-            <property name="text">
-             <string>Set start</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_tab2_set_end">
-            <property name="font">
-             <font>
-              <pointsize>12</pointsize>
-             </font>
-            </property>
-            <property name="toolTip">
-             <string>End of set</string>
-            </property>
-            <property name="text">
-             <string>Set end</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QLineEdit" name="lineEdit_tab2_set_end">
-            <property name="toolTip">
-             <string>E.g. 45</string>
-            </property>
-            <property name="text">
-             <string>90</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QLineEdit" name="lineEdit_tab2_set_start">
-            <property name="toolTip">
-             <string>E.g. 15</string>
-            </property>
-            <property name="text">
-             <string>45</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <widget class="QPushButton" name="pushButton_tab2_set_add">
-          <property name="font">
-           <font>
-            <pointsize>14</pointsize>
-           </font>
-          </property>
-          <property name="toolTip">
-           <string>Add set to Set and Set limits table</string>
-          </property>
-          <property name="text">
-           <string>Add set</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <widget class="QTableWidget" name="tableWidget_tab2_sets">
-        <property name="toolTip">
-         <string>Set and Set limits table</string>
-        </property>
-        <property name="lineWidth">
-         <number>1</number>
-        </property>
-        <column>
-         <property name="text">
-          <string>Set</string>
-         </property>
-         <property name="font">
-          <font>
-           <pointsize>12</pointsize>
-          </font>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>Set limits</string>
-         </property>
-         <property name="font">
-          <font>
-           <pointsize>12</pointsize>
-          </font>
-         </property>
-        </column>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </widget>
   </widget>
  </widget>
  <resources/>
- <connections>
-  <connection>
-   <sender>button_box</sender>
-   <signal>accepted()</signal>
-   <receiver>FractureAnalysis2DDialogBase</receiver>
-   <slot>accept()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>20</x>
-     <y>20</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>20</x>
-     <y>20</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>button_box</sender>
-   <signal>rejected()</signal>
-   <receiver>FractureAnalysis2DDialogBase</receiver>
-   <slot>reject()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>20</x>
-     <y>20</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>20</x>
-     <y>20</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
 </ui>

@@ -1,5 +1,9 @@
+"""
+Handles a single target area or a single grouped area. Does not discriminate between a single target area and
+grouped target areas.
+"""
+
 # Python Windows co-operation imports
-import logging
 from pathlib import Path
 from textwrap import wrap
 
@@ -18,7 +22,7 @@ from scipy.interpolate import make_interp_spline
 from qgis.core import QgsMessageLog, Qgis
 
 # Own code imports
-from fracture_analysis_kit.kit_resources import tools
+from fracture_analysis_kit import tools
 import config
 
 # from . import tools

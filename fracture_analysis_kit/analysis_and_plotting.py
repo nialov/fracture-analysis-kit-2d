@@ -1,5 +1,10 @@
-from fracture_analysis_kit import fracture_analysis_kit_qgis_tools as qgis_tools
-from fracture_analysis_kit.kit_resources import multiple_target_areas as mta
+"""
+Handles analysis and plotting using a MultiTargetAreaAnalysis class. Analysis (i.e. heavy calculations)
+and plotting have been separated into two different methods.
+"""
+
+
+from fracture_analysis_kit import qgis_tools as qgis_tools, multiple_target_areas as mta
 import config
 
 # from . import fracture_analysis_kit_qgis_tools as qgis_tools
@@ -90,6 +95,20 @@ class MultiTargetAreaAnalysis:
     def __init__(
             self, layer_table_df, plotting_directory, analysis_name, group_names_cutoffs_df, set_df
     ):
+        """
+        Initializes data and user inputs for the analysis and plotting. Converts QGIS-layers to geopandas GeoDataFrames.
+
+        :param layer_table_df: DataFrame with user inputted vector layer data and unique names for target areas.
+        :type layer_table_df: pandas.DataFrame
+        :param plotting_directory: Folder to plot results to.
+        :type plotting_directory: str
+        :param analysis_name: Name for the whole analysis.
+        :type analysis_name: str
+        :param group_names_cutoffs_df: DataFrame with group names and corresponding cut-offs for traces and branches.
+        :type group_names_cutoffs_df: pandas.DataFrame
+        :param set_df: DataFrame with set data.
+        :type set_df: pandas.DataFrame
+        """
         self.set_df = set_df
         self.group_names_cutoffs_df = group_names_cutoffs_df
         self.layer_table_df = layer_table_df
@@ -105,6 +124,9 @@ class MultiTargetAreaAnalysis:
         self.layer_table_df['Node_frame'] = self.layer_table_df['Node'].apply(qgis_tools.layer_to_gdf)
 
     def analysis(self):
+        """
+        Method that runs analysis i.e. heavy calculations for trace, branch and node data.
+        """
         # DEBUG
         # self.layer_table_df = self.layer_table_df.drop(columns=['Trace', 'Branch', 'Area', 'Node'])
 
@@ -145,7 +167,9 @@ class MultiTargetAreaAnalysis:
         # Bar at 85
 
     def plot_results(self):
-
+        """
+        Method that runs plotting based on analysis results for trace, branch and node data.
+        """
         # ___________________BRANCH DATA_______________________
         config.styling_plots("branches")
         # Length distributions

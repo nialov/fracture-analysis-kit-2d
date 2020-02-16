@@ -1,4 +1,11 @@
+"""
+Main interface manipulator, handles all buttons and runs fracture_analysis_kit/main.py module
+to start analysis and plotting.
+"""
+
+
 import os.path
+import webbrowser
 
 import pandas as pd
 from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication
@@ -11,7 +18,7 @@ from .resources import *
 
 # Import the code for the dialog
 from .fracture_analysis_2d_dialog import FractureAnalysis2DDialog
-from .fracture_analysis_kit import main_target_analysis
+from .fracture_analysis_kit import main
 
 
 class FractureAnalysis2D:
@@ -210,10 +217,10 @@ class FractureAnalysis2D:
 
         # Additions
         name = self.dlg.lineEdit_tab2_tan.text()
-        trace_layer = self.line_layers[self.dlg.comboBox_trace_2.currentIndex()]
-        branch_layer = self.line_layers[self.dlg.comboBox_branch_2.currentIndex()]
-        node_layer = self.point_layers[self.dlg.comboBox_node_2.currentIndex()]
-        area_layer = self.polygon_layers[self.dlg.comboBox_area_2.currentIndex()]
+        trace_layer = self.line_layers[self.dlg.comboBox_trace.currentIndex()]
+        branch_layer = self.line_layers[self.dlg.comboBox_branch.currentIndex()]
+        node_layer = self.point_layers[self.dlg.comboBox_node.currentIndex()]
+        area_layer = self.polygon_layers[self.dlg.comboBox_area.currentIndex()]
         target_area_group = self.dlg.comboBox_tab2_gnames.currentText()
         # Substitute for blank names
         if name == "":
@@ -257,10 +264,10 @@ class FractureAnalysis2D:
             , ignore_index=True)
         # Switch list item with a dummy
         # TODO: Further testing required
-        self.line_layers[self.dlg.comboBox_trace_2.currentIndex()] = DummyLayer()
-        self.line_layers[self.dlg.comboBox_branch_2.currentIndex()] = DummyLayer()
-        self.point_layers[self.dlg.comboBox_node_2.currentIndex()] = DummyLayer()
-        self.polygon_layers[self.dlg.comboBox_area_2.currentIndex()] = DummyLayer()
+        self.line_layers[self.dlg.comboBox_trace.currentIndex()] = DummyLayer()
+        self.line_layers[self.dlg.comboBox_branch.currentIndex()] = DummyLayer()
+        self.point_layers[self.dlg.comboBox_node.currentIndex()] = DummyLayer()
+        self.polygon_layers[self.dlg.comboBox_area.currentIndex()] = DummyLayer()
         self.update_layers_tab2()
 
     def clear_layer_table(self):
@@ -280,30 +287,30 @@ class FractureAnalysis2D:
         Updates layers to combo-boxes for tab2.
         """
         # Clear the contents of the comboBox from previous runs tab 2
-        self.dlg.comboBox_trace_2.clear()
-        self.dlg.comboBox_branch_2.clear()
-        self.dlg.comboBox_node_2.clear()
-        self.dlg.comboBox_area_2.clear()
+        self.dlg.comboBox_trace.clear()
+        self.dlg.comboBox_branch.clear()
+        self.dlg.comboBox_node.clear()
+        self.dlg.comboBox_area.clear()
         # Populate the comboBox with names of all the updated layers tab 2
-        self.dlg.comboBox_trace_2.addItems([layer.name() for layer in self.line_layers])
-        self.dlg.comboBox_branch_2.addItems([layer.name() for layer in self.line_layers])
-        self.dlg.comboBox_node_2.addItems([layer.name() for layer in self.point_layers])
-        self.dlg.comboBox_area_2.addItems([layer.name() for layer in self.polygon_layers])
+        self.dlg.comboBox_trace.addItems([layer.name() for layer in self.line_layers])
+        self.dlg.comboBox_branch.addItems([layer.name() for layer in self.line_layers])
+        self.dlg.comboBox_node.addItems([layer.name() for layer in self.point_layers])
+        self.dlg.comboBox_area.addItems([layer.name() for layer in self.polygon_layers])
 
-    def update_layers_tab1(self):
-        """
-        Updates layers to combo-boxes for tab1.
-        """
-        # Clear the contents of the comboBox from previous runs tab 2
-        self.dlg.comboBox_trace_2.clear()
-        self.dlg.comboBox_branch_2.clear()
-        self.dlg.comboBox_node_2.clear()
-        self.dlg.comboBox_area_2.clear()
-        # Populate the comboBox with names of all the updated layers tab 2
-        self.dlg.comboBox_trace_2.addItems([layer.name() for layer in self.line_layers])
-        self.dlg.comboBox_branch_2.addItems([layer.name() for layer in self.line_layers])
-        self.dlg.comboBox_node_2.addItems([layer.name() for layer in self.point_layers])
-        self.dlg.comboBox_area_2.addItems([layer.name() for layer in self.polygon_layers])
+    # def update_layers_tab1(self):
+    #     """
+    #     Updates layers to combo-boxes for tab1.
+    #     """
+    #     # Clear the contents of the comboBox from previous runs tab 2
+    #     self.dlg.comboBox_trace.clear()
+    #     self.dlg.comboBox_branch.clear()
+    #     self.dlg.comboBox_node.clear()
+    #     self.dlg.comboBox_area.clear()
+    #     # Populate the comboBox with names of all the updated layers tab 2
+    #     self.dlg.comboBox_trace.addItems([layer.name() for layer in self.line_layers])
+    #     self.dlg.comboBox_branch.addItems([layer.name() for layer in self.line_layers])
+    #     self.dlg.comboBox_node.addItems([layer.name() for layer in self.point_layers])
+    #     self.dlg.comboBox_area.addItems([layer.name() for layer in self.polygon_layers])
 
     def add_row_group_name_cutoff(self):
         group_name = self.dlg.lineEdit_gname.text()
@@ -457,6 +464,10 @@ class FractureAnalysis2D:
         dialog.show()
         return dialog, bar
 
+    def open_help_doc(self):
+        current_dir = os.path.dirname(__file__)
+        webbrowser.open(url=f'{current_dir}\help\index.html', new=2)
+
     def run(self):
         """Run method that performs all the real work"""
 
@@ -465,16 +476,16 @@ class FractureAnalysis2D:
         if self.first_start == True:
             self.first_start = False
             self.dlg = FractureAnalysis2DDialog()
-            self.dlg.pushButton.clicked.connect(lambda: self.select_output_folder(1))
+            # self.dlg.pushButton.clicked.connect(lambda: self.select_output_folder(1))
             '''-------------Multi Target Area----------------'''
-            # Select ouput folder for Multi Target Area
+            # Select output folder for Multi Target Area
             self.dlg.pushButton_tab2_folder.clicked.connect(lambda: self.select_output_folder(2))
             # Clear group name table from prev runs
             self.dlg.tableWidget_tab2_gnames.clearContents()
             # Clear group name list
             self.dlg.pushButton_gname_clear.clicked.connect(self.clear_group_name_cut_off_table)
             # Add row to table for layers and info
-            self.dlg.pushButton_tab2_add_row.clicked.connect(self.add_row_layer)
+            self.dlg.pushButton_tab2_add_row_layers.clicked.connect(self.add_row_layer)
             # Clear table
             self.dlg.pushButton_tab2_table_clear.clicked.connect(self.clear_layer_table)
             # Run multi-target analysis
@@ -485,12 +496,15 @@ class FractureAnalysis2D:
             self.dlg.pushButton_tab2_set_add.clicked.connect(self.add_row_set)
             # Clear set table
             self.dlg.pushButton_tab2_set_clear.clicked.connect(self.clear_set_table)
+            # Open Help Documentation
+            self.dlg.pushButton_help.clicked.connect(self.open_help_doc)
+
 
             QgsMessageLog.logMessage(message="Plugin initialized.", tag=f'{__name__}', level=Qgis.Info)
 
         self.fetch_correct_vector_layers()
         self.update_layers_tab2()
-        self.update_layers_tab1()
+        # self.update_layers_tab1()
 
         # show the dialog
         self.dlg.show()
@@ -566,9 +580,9 @@ class FractureAnalysis2D:
                 return
 
         # Run analysis
-        main_target_analysis.main_multi_target_area(self.layer_table_df, results_folder, analysis_name,
-                                                    self.group_names_cutoffs_df,
-                                                    self.set_df)
+        main.main_multi_target_area(self.layer_table_df, results_folder, analysis_name,
+                                    self.group_names_cutoffs_df,
+                                    self.set_df)
         # TODO: Implement more tasks (traces and branches)?
         # Run as task
         # main_target_analysis.task_main_multi_target_area(self.layer_table_df, results_folder, analysis_name,

@@ -1,16 +1,7 @@
-fracture\_analysis\_2d package
-==============================
+Package fracture\_analysis\_2d contents:
+===========================================
 
-Subpackages
------------
-
-.. toctree::
-
-
-Submodules
-----------
-
-fracture\_analysis\_2d.config module
+config
 ------------------------------------
 
 .. automodule:: fracture_analysis_2d.config
@@ -18,7 +9,7 @@ fracture\_analysis\_2d.config module
    :undoc-members:
    :show-inheritance:
 
-fracture\_analysis\_2d.fracture\_analysis\_2d module
+fracture_analysis_2d
 ----------------------------------------------------
 
 .. automodule:: fracture_analysis_2d.fracture_analysis_2d
@@ -26,7 +17,7 @@ fracture\_analysis\_2d.fracture\_analysis\_2d module
    :undoc-members:
    :show-inheritance:
 
-fracture\_analysis\_2d.fracture\_analysis\_2d\_dialog module
+fracture_analysis_2d_dialog
 ------------------------------------------------------------
 
 .. automodule:: fracture_analysis_2d.fracture_analysis_2d_dialog
@@ -36,10 +27,19 @@ fracture\_analysis\_2d.fracture\_analysis\_2d\_dialog module
 
 
 
-Module contents
----------------
+Subpackage fracture_analysis_kit contents:
+--------------------------------------------
 
-.. automodule:: fracture_analysis_2d
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. toctree::
+   :maxdepth: 4
+   
+   fracture_analysis_kit
+
+
+
+
+
+
+
+
+

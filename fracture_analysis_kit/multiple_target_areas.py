@@ -1,5 +1,9 @@
+"""
+Handles multiple given target areas and makes groups of them based on user inputs using a MultiTargetAreaQGIS class.
+MultiTargetAreaQGIS-objects are made separately for trace and branch data. Both contain the same node data.
+"""
+
 # Python Windows co-operation imports
-import math
 from pathlib import Path
 
 # Math and analysis imports
@@ -8,22 +12,19 @@ from pathlib import Path
 from textwrap import wrap
 
 import geopandas as gpd
-import matplotlib.patheffects as path_effects
 import matplotlib.pyplot as plt
-import seaborn as sns
 import numpy as np
 import pandas as pd
 import shapely
 import ternary
-from matplotlib.ticker import FormatStrFormatter
 import sklearn.metrics as sklm
-from pandas import Series
 from qgis.core import QgsMessageLog, Qgis
 
 # Own code imports
-from fracture_analysis_kit.kit_resources import tools
 import config
-from fracture_analysis_kit.kit_resources import target_area as ta
+from fracture_analysis_kit import target_area as ta, tools
+
+
 # from . import target_area as ta
 # from . import tools
 # from ... import config

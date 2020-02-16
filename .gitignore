@@ -75,3 +75,8 @@ atlassian-ide-plugin.xml
 .idea/caches/build_file_checksums.ser
 /fracture_analysis_kit/kit_resources/azimuth_testing.py
 /compile.bat
+/zip_build/
+/scripts/
+/i18n/
+/fracture_analysis_kit/.idea/
+/fracture_analysis_kit/.spyproject/

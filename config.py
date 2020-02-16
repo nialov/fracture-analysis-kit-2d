@@ -1,7 +1,16 @@
+"""
+Configuration file.
+"""
+
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patheffects as patheffects
 import seaborn as sns
+
+# ---------------------------------------------------------
+# Plot colors
+# ---------------------------------------------------------
+# TODO: Plot color setup
 
 # Values used in spatial estimates of intersections
 buffer_value = 0.001
@@ -43,25 +52,6 @@ n_g = -1
 ta_list = []
 # Group name list
 g_list = []
-
-# Default color list if there is no user input.
-# def get_color_list(unified: bool):
-#     """
-#     Returns the default color list, which was setup for the correct number of target areas and groups.
-#     Assertations will fail if setup hasn't been done. => AssertationError
-#
-#     :param unified: Whether the cycle for target areas or grouped data is wanted.
-#     :type unified: bool
-#     :return: Default color list.
-#     :rtype: sns.palettes._ColorPalette
-#     :raise AssertationError: Assertations will fail if setup hasn't been done.
-#
-#     """
-#     assert n_ta != -1
-#     assert n_g != -1
-#     n_colors = n_g if unified else n_ta
-#     color_list = sns.color_palette('dark', n_colors)
-#     return color_list
 
 
 def get_color_dict(unified: bool) -> dict:

@@ -19,22 +19,21 @@ This plugin uses three types of vector data as inputs: *traces*, *branches* and 
 Traces can be manually or automatically digitized GIS polyline features from e.g. 
 Light Detection And Ranging (LiDAR) digital elevation models (DEMs)
 or from drone orthophotography of bedrock outcrop surfaces. 
-The plugin doesn't discriminate between original source of the traces.
+The plugin doesn't discriminate between traces extracted using different datasets.
 
 Both branches and nodes are derived from :ref:`ngt`. 
 For their definition along with the definition of the plots and the plotted parameters, 
 I refer you to multiple sources. Sources are in order of importance.
 
-* Sanderson and Nixon, 2015
-
-	* Trace and branch size, abundance and topological parameter definitions.
 * Nyberg et al., 2018
 
 	* NetworkGT Plugin introduction and guide.
+* Sanderson and Nixon, 2015
+
+	* Trace and branch size, abundance and topological parameter definitions.
 * My Master's Thesis, Ovaskainen, 2020
 
 	* Plots used in my Thesis were done with an older version of the same code used for this plugin.
-
 * Sanderson and Peacock, 2020
 
 	* Information about rose plots.
@@ -71,6 +70,20 @@ Example plots
 
 **Installation**
 ==================
+
+Requirements
+------------
+
+Plugin has **only** been tested on Windows. No functionality on other platforms guaranteed.
+
+External Python module installation
+-----------------------------------
+
+
+**Help**
+==================
+
+
 
 **Dependencies and References**
 ===============================
@@ -110,18 +123,19 @@ See :ref:`installation` for installation guide.
 .. _python-ternary: https://github.com/marcharper/python-ternary
 
 
-**Modules**
+**Doc**
 ==================
 
 For Developers: Plugin documentation
 ------------------------------------
 
-Documentation for Python modules has been created using Autodoc.
+Documentation for Python modules has been created using Autodoc. Autodoc has trouble running without setting the matplotlib backend to Qt5Agg. 
+If you wish to remake documentation: Check conf.py and replace my 'QT_QPA_PLATFORM_PLUGIN_PATH' with your own path.
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 4
    
-   modules
+   fracture_analysis_2d
 
 
 **Indices and tables**

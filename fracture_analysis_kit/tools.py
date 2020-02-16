@@ -1,5 +1,8 @@
+"""
+Contains calculation and plotting tools.
+"""
+
 import math
-import os
 from textwrap import wrap
 
 import geopandas as gpd
@@ -15,13 +18,10 @@ from shapely.geometry import Point
 from shapely.ops import linemerge
 from shapely import strtree
 
-# import multiple_target_areas as mta
-
-from fracture_analysis_kit.kit_resources import target_area as ta
+# Own code imports
+from fracture_analysis_kit import target_area as ta
 import config
 
-# from . import target_area as ta
-# from ... import config
 
 style = config.styled_text_dict
 prop = config.styled_prop
@@ -1389,9 +1389,7 @@ def get_nodes_intersecting_sets(xypointsframe, traceframe):
     E.g.
 
     >>> p = gpd.GeoDataFrame(data={'geometry': [Point(0, 0), Point(1, 1), Point(3, 3)]})
-
     >>> l = gpd.GeoDataFrame(data={'geometry': [LineString([(0, 0), (2, 2)]), LineString([(0, 0), (0.5, 0.5)])], 'set': [1, 2]})
-
     >>> get_nodes_intersecting_sets(p, l)
     geometry
     0  POINT (0.00000 0.00000)
