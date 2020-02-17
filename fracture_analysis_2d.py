@@ -435,7 +435,10 @@ class FractureAnalysis2D:
         # Filter to polyline, point and polygon layers
         line_layers, point_layers, polygon_layers = [], [], []
         for layer in layers:
-            if "VectorLayer" in str(layer.type()):
+            # layer.type() returns an integer to point to the layer type in older QGIS versions.
+            # This must be taken into account.
+            # 0 == VectorLayer
+            if "VectorLayer" in str(layer.type()) or "0" == str(layer.type()):
                 vector_layers.append(layer)
                 layer_features_iter = layer.getFeatures()
                 # Find feature type by checking the geometry of the first item in the geometry column of the layer
