@@ -13,15 +13,14 @@ import pandas as pd
 import seaborn as sns
 import shapely
 import ternary
+from shapely import strtree
 from shapely.geometry import LineString
 from shapely.geometry import Point
 from shapely.ops import linemerge
-from shapely import strtree
 
+import config
 # Own code imports
 from fracture_analysis_kit import target_area as ta
-import config
-
 
 style = config.styled_text_dict
 prop = config.styled_prop
@@ -157,7 +156,7 @@ def calc_azimu(line):
     try:
         coord_list = list(line.coords)
     except NotImplementedError:
-        # TODO: Test.....
+        # TODO: Needs more testing?
         line = linemerge(line)
         try:
             coord_list = list(line.coords)
@@ -584,7 +583,8 @@ def azimuth_plot_attributes_experimental(lineframe, weights=False):
 
 def plot_azimuth_plot(two_halves, weights=False):
     """
-    Plots an azimuth plot using a bin array. Weighted or non-weighted
+    Plots an azimuth plot using a bin array. Weighted or non-weighted.
+
     :param two_halves: Azimuth bin array
     :type two_halves: np.ndarray
     :param weights: Whether to use weights for bins.
@@ -621,7 +621,8 @@ def plot_azimuth_plot(two_halves, weights=False):
 
 def length_distribution_plot(length_distribution):
     """
-    Plots a length distribution plot
+    Plots a length distribution plot.
+
     :param length_distribution: TargetAreaLines Class
     :type length_distribution: TargetAreaLines
     """
@@ -643,6 +644,7 @@ def length_distribution_plot(length_distribution):
 def length_distribution_plot_with_fit(length_distribution):
     """
     Plots a length distribution plot with fit.
+
     :param length_distribution: TargetAreaLines Class
     :type length_distribution: TargetAreaLines
     """
@@ -672,7 +674,8 @@ def length_distribution_plot_with_fit(length_distribution):
 
 def length_distribution_plot_sets(length_distribution):
     """
-    Plots a length distribution plot using sets
+    Plots a length distribution plot using sets.
+
     :param length_distribution: TargetAreaLines Class
     :type length_distribution: TargetAreaLines
     """
@@ -694,7 +697,7 @@ def length_distribution_plot_sets(length_distribution):
 
 def sd_calc(data):
     """
-    TODO: Wrong results?
+    TODO: Wrong results atm. Needs to take into account real length, not just orientation of unit vector.
     Calculates standard deviation for radial data (degrees)
 
     E.g.
@@ -797,6 +800,16 @@ def get_azimu_statistics(lineframe):
 
 
 def tern_yi_func(c, x):
+    """
+    Function for plotting *Connections per branch* line to branch ternary plot. Absolute values.
+
+    :param c:
+    :type c:
+    :param x:
+    :type x:
+    :return:
+    :rtype:
+    """
     temp = (6 * (1 - 0.5 * c))
     temp2 = (3 - (3 / 2) * c)
     temp3 = 1 + c / temp
@@ -804,32 +817,31 @@ def tern_yi_func(c, x):
     i = 1 - x - y
     return x, i, y
 
-
-def tern_yi_func_perc(c, x):
-    temp = (6 * (1 - 0.5 * c))
-    temp2 = (3 - (3 / 2) * c)
-    temp3 = 1 + c / temp
-    y = (c + 3 * c * x) / (temp * temp3) - (4 * x) / (temp2 * temp3)
-    i = 1 - x - y
-    return 100 * x, 100 * i, 100 * y
-
-
-def tern_find_last_x(c, x_start=0):
-    x, i, y = tern_yi_func(c, x_start)
-    while y > 0:
-        x_start += 0.01
-        x, i, y = tern_yi_func(c, x_start)
-    return x
-
-
 def tern_plot_the_fing_lines(tax, cs_locs=(1.3, 1.5, 1.7, 1.9)):
     """
-    Plots connections per branch paramter to XYI-plot
+    Plots *connections per branch* parameter to XYI-plot.
+
     :param tax: Ternary axis to plot to
     :type tax: ternary.TernaryAxesSubplot
     :param cs_locs: Pre-determined locations for lines
     :type cs_locs: tuple
     """
+
+    def tern_find_last_x(c, x_start=0):
+        x, i, y = tern_yi_func(c, x_start)
+        while y > 0:
+            x_start += 0.01
+            x, i, y = tern_yi_func(c, x_start)
+        return x
+
+    def tern_yi_func_perc(c, x):
+        temp = (6 * (1 - 0.5 * c))
+        temp2 = (3 - (3 / 2) * c)
+        temp3 = 1 + c / temp
+        y = (c + 3 * c * x) / (temp * temp3) - (4 * x) / (temp2 * temp3)
+        i = 1 - x - y
+        return 100 * x, 100 * i, 100 * y
+
     for c in cs_locs:
         last_x = tern_find_last_x(c)
         x1 = 0
@@ -848,8 +860,11 @@ def tern_plot_the_fing_lines(tax, cs_locs=(1.3, 1.5, 1.7, 1.9)):
 
 def tern_plot_branch_lines(tax):
     """
-    Plot line of random assignenment of nodes to branches. Line positions from NetworkGT code.
+    Plot line of random assignment of nodes to branches to a given branch ternary tax.
+    Line positions taken from NetworkGT open source code.
+    Credit to:
     https://github.com/BjornNyberg/NetworkGT
+
     :param tax: Ternary axis to plot to
     :type tax: ternary.TernaryAxesSubplot
     """
@@ -1042,7 +1057,6 @@ def calc_cut_off_length(lineframe_main, cut_off: float):
     return cut_off_length
 
 
-
 def calc_xlims(lineframe):
     left = lineframe.length.min() / 50
     right = lineframe.length.max() * 50
@@ -1100,18 +1114,33 @@ def define_set(azimuth, set_df):  # Uses HALVED azimuth: 0-180
 def construct_length_distribution_base(lineframe: gpd.GeoDataFrame, areaframe: gpd.GeoDataFrame, name: str, group: str,
                                        cut_off_length=1,
                                        using_branches=False):
+    """
+    Helper function to construct TargetAreaLines to a pandas DataFrame using apply().
+    """
     ld = ta.TargetAreaLines(lineframe, areaframe, name, group, using_branches, cut_off_length)
     return ld
 
 
 def construct_node_data_base(nodeframe, name, group):
+    """
+    Helper function to construct TargetAreaNodes to a pandas DataFrame using apply().
+    """
     node_data_base = ta.TargetAreaNodes(nodeframe, name, group)
     return node_data_base
 
 
 def unify_lds(list_of_lds: list, group: str, cut_off_length: float):
     """
-    Unifies/adds multiple length distribution objects together
+    Unifies/adds multiple TargetAreaLines objects together
+
+    :param list_of_lds: List of TargetAreaLines objects
+    :type list_of_lds: list
+    :param group: Group name for the objects
+    :type group: str
+    :param cut_off_length: Cut-off for the group objects.
+    :type cut_off_length: float
+    :return: Unified TargetAreaLines object
+    :rtype: ta.TargetAreaLines
     """
     df = pd.DataFrame(columns=['lineframe_main', 'lineframe_main_cut', 'areaframe', 'name'])
     for ld in list_of_lds:
@@ -1136,6 +1165,16 @@ def unify_lds(list_of_lds: list, group: str, cut_off_length: float):
 
 
 def unify_nds(list_of_nds: list, group: str):
+    """
+    Unifies/adds multiple TargetAreaNodes objects together
+
+    :param list_of_nds: List of TargetAreaNodes objects
+    :type list_of_nds: list
+    :param group: Group name
+    :type group: str
+    :return: Unified TargetAreaNodes object
+    :rtype: ta.TargetAreaNodes
+    """
     df = pd.DataFrame(columns=['nodeframe', 'name'])
     for nd in list_of_nds:
         df = df.append({'nodeframe': nd.nodeframe, 'name': nd.name}, ignore_index=True)
@@ -1223,114 +1262,122 @@ def plot_curv_plot(lineframe, ax=plt.gca(), name=''):
 #         plot_curv_plot(lineframe, ax, name)
 
 
-def plot_azimuths_sub_plot(lineframe, ax, filename, weights, striations=False, small_text=False,
-                           single_plot=False):
-    lineframe = lineframe.dropna(subset=['azimu'])
-    stats = get_azimu_statistics(lineframe)
-    azimuths = lineframe.loc[:, 'azimu'].values
-    bin_edges = np.arange(-5, 366, 10)
-    lengths = None
-    if weights:
-        lineframe['length'] = lineframe.geometry.length
-        lengths = lineframe.loc[:, 'length'].values
-        number_of_azimuths, bin_edges = np.histogram(azimuths, bin_edges, weights=lengths)
-    # elif ellipse_weights:
-    #     ellipse_weight_values = lineframe.loc[:, 'ellipse_weight'].values
-    #     number_of_azimuths, bin_edges = np.histogram(azimuths, bin_edges, weights=ellipse_weight_values)
-    else:
-        number_of_azimuths, bin_edges = np.histogram(azimuths, bin_edges)
-    number_of_azimuths[0] += number_of_azimuths[-1]
-    half = np.sum(np.split(number_of_azimuths[:-1], 2), 0)
+# def plot_azimuths_sub_plot(lineframe, ax, filename, weights, striations=False, small_text=False,
+#                            single_plot=False):
+#     lineframe = lineframe.dropna(subset=['azimu'])
+#     stats = get_azimu_statistics(lineframe)
+#     azimuths = lineframe.loc[:, 'azimu'].values
+#     bin_edges = np.arange(-5, 366, 10)
+#     lengths = None
+#     if weights:
+#         lineframe['length'] = lineframe.geometry.length
+#         lengths = lineframe.loc[:, 'length'].values
+#         number_of_azimuths, bin_edges = np.histogram(azimuths, bin_edges, weights=lengths)
+#     # elif ellipse_weights:
+#     #     ellipse_weight_values = lineframe.loc[:, 'ellipse_weight'].values
+#     #     number_of_azimuths, bin_edges = np.histogram(azimuths, bin_edges, weights=ellipse_weight_values)
+#     else:
+#         number_of_azimuths, bin_edges = np.histogram(azimuths, bin_edges)
+#     number_of_azimuths[0] += number_of_azimuths[-1]
+#     half = np.sum(np.split(number_of_azimuths[:-1], 2), 0)
+#
+#     two_halves = np.concatenate([half, half])
+#     if weights:
+#         azi_count = lengths.sum()
+#     # elif ellipse_weights:
+#     #     azi_count = ellipse_weight_values.sum()
+#     else:
+#         azi_count = len(azimuths)
+#     two_halves = (two_halves / azi_count) * 100
+#
+#     ax.bar(np.deg2rad(np.arange(0, 360, 10)), two_halves, width=np.deg2rad(10), bottom=0.0, color='#F7CECC',
+#            edgecolor='r', alpha=0.85, zorder=4)
+#     ax.set_theta_zero_location('N')
+#     ax.set_theta_direction(-1)
+#     # ax.set_thetagrids(np.arange(0, 360, 45), labels=np.linspace(0, 360, 9).astype('int'), fmt='%d%°', fontweight= 'bold')
+#     ax.set_thetagrids(np.arange(0, 360, 45), fontweight='bold')
+#     # ax.set_rgrids(np.arange(0, two_halves.max() + 1, two_halves.max()/2), angle=0, weight= 'black')
+#     ax.set_rgrids(np.linspace(5, 10, num=2), angle=0, weight='black', fmt='%d%%', fontsize=7)
+#     ax.grid(linewidth=1, color='k')
+#
+#     title_props = dict(boxstyle='square', facecolor='wheat', path_effects=[path_effects.withSimplePatchShadow()])
+#     title_x = 0.18
+#     title_y = 1.25
+#     if small_text:
+#         fontmult = 0.5
+#     else:
+#         fontmult = 1
+#     if weights:
+#         ax.set_title(filename + '\nWEIGHTED', x=title_x, y=title_y, fontsize=fontmult * 20, fontweight='heavy'
+#                      , fontfamily='Times New Roman', bbox=title_props, va='top')
+#     # elif ellipse_weights:
+#     #     ax.set_title(filename + '\nELLIPSE\nWEIGHTED', x=title_x, y=title_y, fontsize=fontmult * 17, fontweight='heavy'
+#     #                  , fontfamily='Times New Roman', bbox=title_props, va='center')
+#     else:
+#         title_x = 0.18
+#         title_y = 0.9
+#         font_size = 20
+#         if single_plot:
+#             title_x = 0.14
+#             title_y = 1.05
+#             font_size = 25
+#         ax.set_title(filename, x=title_x, y=title_y, fontsize=fontmult * font_size, fontweight='heavy'
+#                      , fontfamily='Times New Roman', bbox=title_props, va='center')
+#
+#     props = dict(boxstyle='round', facecolor='wheat', path_effects=[path_effects.withSimplePatchShadow()])
+#
+#     text_x = 0.55
+#     text_y = 1.42
+#     if not small_text:
+#         if striations:
+#             text_x = 0.55
+#             text_y = 1
+#             if single_plot:
+#                 text_x = 0.65
+#                 text_y = 1.05
+#             text = 'Striation count: ' + str(len(lineframe)) \
+#                    + '\nMean striation: ' + str(int(stats['mean']))
+#             ax.text(text_x, text_y, text, transform=ax.transAxes, fontsize=fontmult * 25, weight='roman'
+#                     , bbox=props, fontfamily='Times New Roman', va='center')
+#             # TICKLABELS
+#             labels = ax.get_xticklabels()
+#             for label in labels:
+#                 label._y = -0.05
+#                 label._fontproperties._size = 24
+#                 label._fontproperties._weight = 'bold'
+#         else:
+#             text = 'n = ' + str(len(lineframe)) + '\n'
+#             text = text + create_azimuth_set_text(lineframe)
+#             # +'\nMedian Azimuth: '+str(stats['median'])\
+#             # +'\nSTD Azimuth: '+str(stats['std'])
+#             ax.text(text_x, text_y, text, transform=ax.transAxes, fontsize=fontmult * 20, weight='roman'
+#                     , bbox=props, fontfamily='Times New Roman', va='top')
+#             # TICKLABELS
+#             labels = ax.get_xticklabels()
+#             for label in labels:
+#                 label._y = -0.05
+#                 label._fontproperties._size = 24
+#                 label._fontproperties._weight = 'bold'
+#
+#     if striations:
+#         mean_striation = stats['mean']
+#         arrow_dir = (180 + (180 - mean_striation))
+#         arrow_len = two_halves.max() - 10
+#         ax.vlines(np.deg2rad(mean_striation), 0, arrow_len, zorder=5, colors=['blue'], alpha=0.8)
+#         ax.vlines(np.deg2rad(mean_striation + 180), 0, arrow_len, zorder=5, colors=['blue'], alpha=0.8)
+#         ax.scatter(np.deg2rad(mean_striation), arrow_len, marker=(3, 0, arrow_dir), s=500, zorder=6, color='blue')
 
-    two_halves = np.concatenate([half, half])
-    if weights:
-        azi_count = lengths.sum()
-    # elif ellipse_weights:
-    #     azi_count = ellipse_weight_values.sum()
-    else:
-        azi_count = len(azimuths)
-    two_halves = (two_halves / azi_count) * 100
-
-    ax.bar(np.deg2rad(np.arange(0, 360, 10)), two_halves, width=np.deg2rad(10), bottom=0.0, color='#F7CECC',
-           edgecolor='r', alpha=0.85, zorder=4)
-    ax.set_theta_zero_location('N')
-    ax.set_theta_direction(-1)
-    # ax.set_thetagrids(np.arange(0, 360, 45), labels=np.linspace(0, 360, 9).astype('int'), fmt='%d%°', fontweight= 'bold')
-    ax.set_thetagrids(np.arange(0, 360, 45), fontweight='bold')
-    # ax.set_rgrids(np.arange(0, two_halves.max() + 1, two_halves.max()/2), angle=0, weight= 'black')
-    ax.set_rgrids(np.linspace(5, 10, num=2), angle=0, weight='black', fmt='%d%%', fontsize=7)
-    ax.grid(linewidth=1, color='k')
-
-    title_props = dict(boxstyle='square', facecolor='wheat', path_effects=[path_effects.withSimplePatchShadow()])
-    title_x = 0.18
-    title_y = 1.25
-    if small_text:
-        fontmult = 0.5
-    else:
-        fontmult = 1
-    if weights:
-        ax.set_title(filename + '\nWEIGHTED', x=title_x, y=title_y, fontsize=fontmult * 20, fontweight='heavy'
-                     , fontfamily='Times New Roman', bbox=title_props, va='top')
-    # elif ellipse_weights:
-    #     ax.set_title(filename + '\nELLIPSE\nWEIGHTED', x=title_x, y=title_y, fontsize=fontmult * 17, fontweight='heavy'
-    #                  , fontfamily='Times New Roman', bbox=title_props, va='center')
-    else:
-        title_x = 0.18
-        title_y = 0.9
-        font_size = 20
-        if single_plot:
-            title_x = 0.14
-            title_y = 1.05
-            font_size = 25
-        ax.set_title(filename, x=title_x, y=title_y, fontsize=fontmult * font_size, fontweight='heavy'
-                     , fontfamily='Times New Roman', bbox=title_props, va='center')
-
-    props = dict(boxstyle='round', facecolor='wheat', path_effects=[path_effects.withSimplePatchShadow()])
-
-    text_x = 0.55
-    text_y = 1.42
-    if not small_text:
-        if striations:
-            text_x = 0.55
-            text_y = 1
-            if single_plot:
-                text_x = 0.65
-                text_y = 1.05
-            text = 'Striation count: ' + str(len(lineframe)) \
-                   + '\nMean striation: ' + str(int(stats['mean']))
-            ax.text(text_x, text_y, text, transform=ax.transAxes, fontsize=fontmult * 25, weight='roman'
-                    , bbox=props, fontfamily='Times New Roman', va='center')
-            # TICKLABELS
-            labels = ax.get_xticklabels()
-            for label in labels:
-                label._y = -0.05
-                label._fontproperties._size = 24
-                label._fontproperties._weight = 'bold'
-        else:
-            text = 'n = ' + str(len(lineframe)) + '\n'
-            text = text + create_azimuth_set_text(lineframe)
-            # +'\nMedian Azimuth: '+str(stats['median'])\
-            # +'\nSTD Azimuth: '+str(stats['std'])
-            ax.text(text_x, text_y, text, transform=ax.transAxes, fontsize=fontmult * 20, weight='roman'
-                    , bbox=props, fontfamily='Times New Roman', va='top')
-            # TICKLABELS
-            labels = ax.get_xticklabels()
-            for label in labels:
-                label._y = -0.05
-                label._fontproperties._size = 24
-                label._fontproperties._weight = 'bold'
-
-    if striations:
-        mean_striation = stats['mean']
-        arrow_dir = (180 + (180 - mean_striation))
-        arrow_len = two_halves.max() - 10
-        ax.vlines(np.deg2rad(mean_striation), 0, arrow_len, zorder=5, colors=['blue'], alpha=0.8)
-        ax.vlines(np.deg2rad(mean_striation + 180), 0, arrow_len, zorder=5, colors=['blue'], alpha=0.8)
-        ax.scatter(np.deg2rad(mean_striation), arrow_len, marker=(3, 0, arrow_dir), s=500, zorder=6, color='blue')
 
 
-# Methods for cross.cutting and abutting relationship spatial calculations
 def line_end_point(line):
+    """
+    Determine the end point of a given shapely Line.
+
+    :param line:
+    :type line:
+    :return: Point or np.NaN if unsuccessful.
+    :rtype: shapely.geometry.Point | numpy.NaN
+    """
     try:
         coord_list = list(line.coords)
     except:
@@ -1339,7 +1386,16 @@ def line_end_point(line):
     end_y = coord_list[-1][1]
     return shapely.geometry.Point(end_x, end_y)
 
+
 def line_start_point(line):
+    """
+    Determine the start point of a given shapely Line.
+
+    :param line:
+    :type line:
+    :return: Point or np.NaN if unsuccessful.
+    :rtype: shapely.geometry.Point | numpy.NaN
+    """
     try:
         coord_list = list(line.coords)
     except:
@@ -1347,6 +1403,7 @@ def line_start_point(line):
     start_x = coord_list[0][0]
     start_y = coord_list[0][1]
     return shapely.geometry.Point(start_x, start_y)
+
 
 def prepare_geometry_traces(traceframe):
     traces = traceframe.geometry.values
@@ -1371,7 +1428,6 @@ def prepare_geometry_traces(traceframe):
 
 
 def make_point_tree(traceframe):
-
     points = []
     for idx, row in traceframe.iterrows():
         sp = row.startpoint
@@ -1423,7 +1479,6 @@ def get_nodes_intersecting_sets(xypointsframe, traceframe):
 
 
 def get_intersect_frame(intersecting_nodes_frame, traceframe, set_tuple):
-
     """
     Does spatial intersects to determine how abutments and crosscuts occur between two sets
 
@@ -1490,7 +1545,8 @@ def get_intersect_frame(intersecting_nodes_frame, traceframe, set_tuple):
                 addition = {'node': node, 'nodeclass': c, 'sets': sets, 'error': False}
 
             if (l1 is True) and (l2 is False):  # It's an x-node inside set 1
-                raise Exception(f'Node {node} does not intersect both sets {set1} and {set2}\n l1 is {l1} and l2 is {l2}')
+                raise Exception(
+                    f'Node {node} does not intersect both sets {set1} and {set2}\n l1 is {l1} and l2 is {l2}')
                 # sets = (set1, set1)
                 # addition = {'node': node, 'nodeclass': c, 'sets': sets}
 
@@ -1560,7 +1616,7 @@ def initialize_ternary_branches_points(ax, tax):
     tax.get_axes().axis('off')
     fontsize = 20
     fdict = {'path_effects': [path_effects.withStroke(linewidth=3, foreground='k')]
-    , 'color': 'w', 'family': 'Calibri', 'size': fontsize, 'weight': 'bold'}
+        , 'color': 'w', 'family': 'Calibri', 'size': fontsize, 'weight': 'bold'}
     ax.text(-0.1, -0.06, 'I - C', transform=ax.transAxes, fontdict=fdict)
     ax.text(1.0, -0.06, 'C - C', transform=ax.transAxes, fontdict=fdict)
     ax.text(0.5, 1.07, 'I - I', transform=ax.transAxes, fontdict=fdict, ha='center')
@@ -1590,7 +1646,7 @@ def setup_ax_for_ld(ax_for_setup, using_branches):
     else:
         ax.set_xlabel('Trace Length (m)', fontsize='xx-large', fontfamily='Calibri', style='italic', labelpad=16)
     ccm_unit = r'$(\frac{1}{m^2})$'
-    ax.set_ylabel('Complementary Cumulative Number '+ccm_unit, fontsize='xx-large', fontfamily='Calibri'
+    ax.set_ylabel('Complementary Cumulative Number ' + ccm_unit, fontsize='xx-large', fontfamily='Calibri'
                   , style='italic')
     # TICKS
     plt.xticks(color='black', fontsize='x-large')

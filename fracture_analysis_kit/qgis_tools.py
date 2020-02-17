@@ -3,13 +3,13 @@ Contains tools relevant to QGIS layer transformations and plugin functionality.
 """
 
 import os
-import shutil
 from pathlib import Path
+
 import geopandas as gpd
 import pandas as pd
-
 from qgis.PyQt.QtWidgets import QMessageBox
 from qgis.core import QgsMessageLog, Qgis
+
 
 # Convert QGIS vectorlayer to pandas DataFrame
 def layer_to_df(layer):
@@ -17,18 +17,14 @@ def layer_to_df(layer):
     Converts QGIS vector layer to a pandas DataFrame and extracts coordinate system from the layer.
 
     :param layer: QGIS vector layer.
-    :type layer: TODO: Why doesnt type() work?
+    :type layer: qgis.core.QgsVectorLayer
     :return: Converted pandas DataFrame and layer coord system.
     :rtypes: pandas.DataFrame and crs
     """
     fieldnames = [field.name() for field in layer.fields()]
-    # DEBUG
-    QgsMessageLog.logMessage(message=f"Type() of QGIS vector layer: {str(type(layer))}", tag=__name__, level=Qgis.Info)
     fieldnames.append('geometry')
     features = layer.getFeatures()
     coord_system = layer.crs()
-    # DEBUG
-    QgsMessageLog.logMessage(message=f"Type() of QGIS crs: {str(type(coord_system))}", tag=__name__, level=Qgis.Info)
     df = pd.DataFrame(columns=fieldnames)
     for feature in features:
         row_add = {}
@@ -56,7 +52,7 @@ def df_to_gdf(df, coord_system):
     :param df: Pandas DataFrame with QGIS vector layer data.
     :type df: pandas.DataFrame
     :param coord_system: Given coordinate system.
-    :type coord_system:
+    :type coord_system: qgis.core.QgsCoordinateReferenceSystem
     :return: Converted GeoDataFrame
     :rtype: geopandas.GeoDataFrame
     """
@@ -71,7 +67,7 @@ def layer_to_gdf(layer):
     Converts QGIS vector layer to a GeoDataFrame.
 
     :param layer: QGIS vector layer
-    :type layer: TODO: Check scripts in qgis?
+    :type layer: qgis.core.QgsVectorLayer
     :return: Converted GeoDataFrame
     :rtype: geopandas.GeoDataFrame
     """
@@ -144,8 +140,9 @@ def plotting_directories(results_folder, name):
     # i.e. Folder creation has failed and same folder is used again or if some folders have been removed and same
     # plotting directory is used again. Edge cases.
     except FileExistsError:
-        QMessageBox.critical(title="Error", text=f'Given folder contains a plots_{name} -folder with incomplete folders.\n'
-                                                 f'Try again with new folder and analysis name.')
+        QMessageBox.critical(title="Error",
+                             text=f'Given folder contains a plots_{name} -folder with incomplete folders.\n'
+                                  f'Try again with new folder and analysis name.')
         raise
         # print("Earlier decrepit directories found. Deleting decrepit result-plots folder in plots and remaking.")
         # shutil.rmtree(Path(f"{plotting_directory}"))

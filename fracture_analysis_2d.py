@@ -153,7 +153,10 @@ class FractureAnalysis2D:
         return action
 
     def initGui(self):
-        """Create the menu entries and toolbar icons inside the QGIS GUI."""
+        """
+        Create the menu entries and toolbar icons inside the QGIS GUI.
+
+        """
 
         icon_path = ":/plugins/fracture_analysis_2d/icon.png"
         self.add_action(
@@ -167,7 +170,9 @@ class FractureAnalysis2D:
         self.first_start = True
 
     def unload(self):
-        """Removes the plugin menu item and icon from QGIS GUI."""
+        """
+        Removes the plugin menu item and icon from QGIS GUI.
+        """
         for action in self.actions:
             self.iface.removePluginVectorMenu(
                 self.tr("&2D Fracture Analysis Kit"), action
@@ -175,6 +180,12 @@ class FractureAnalysis2D:
             self.iface.removeToolBarIcon(action)
 
     def select_output_folder(self, tab: int):
+        """
+        Used to select the output folder where a new folder for plots will be created.
+
+        :param tab: Which tab in the interface.
+        :type tab: int
+        """
         outp = QFileDialog.getExistingDirectory(self.dlg, "Select output directory ")
         if type(outp) is (tuple or list):
             raise Exception("Multiple outputs from QFileDialog.getExistingDirectory")
@@ -185,13 +196,19 @@ class FractureAnalysis2D:
         elif tab == 2:
             self.dlg.lineEdit_tab2_folder.setText(folder)
         else:
-            raise Exception('how is tab not 1 or 2')
+            raise Exception('Invalid tab number given')
 
     def clear_group_name_cut_off_table(self):
+        """
+        Clear Group name and Cut Off table along with the complementary DataFrame.
+        """
         self.dlg.tableWidget_tab2_gnames.clearContents()
         self.group_names_cutoffs_df = self.group_names_cutoffs_df.iloc[0:0]
 
     def populate_groups(self):
+        """
+        Populates group names to comboBox for target area layer grouping.
+        """
         # Get group name list
         gname_list = self.group_names_cutoffs_df.Group.tolist()
         # Clear contents
@@ -263,7 +280,6 @@ class FractureAnalysis2D:
                 , 'Area': area_layer, 'Name': name, 'Group': target_area_group}
             , ignore_index=True)
         # Switch list item with a dummy
-        # TODO: Further testing required
         self.line_layers[self.dlg.comboBox_trace.currentIndex()] = DummyLayer()
         self.line_layers[self.dlg.comboBox_branch.currentIndex()] = DummyLayer()
         self.point_layers[self.dlg.comboBox_node.currentIndex()] = DummyLayer()
@@ -313,6 +329,9 @@ class FractureAnalysis2D:
     #     self.dlg.comboBox_area.addItems([layer.name() for layer in self.polygon_layers])
 
     def add_row_group_name_cutoff(self):
+        """
+        Adds row to Group name Cut Off table with given inputs.
+        """
         group_name = self.dlg.lineEdit_gname.text()
         cut_off_traces = self.dlg.lineEdit_tab2_cutoff_traces.text()
         cut_off_branches = self.dlg.lineEdit_tab2_cutoff_branches.text()
@@ -384,6 +403,9 @@ class FractureAnalysis2D:
         self.dlg.lineEdit_tab2_cutoff_branches.clear()
 
     def add_row_set(self):
+        """
+        Adds row to set table with given inputs.
+        """
         set_start = self.dlg.lineEdit_tab2_set_start.text()
         set_end = self.dlg.lineEdit_tab2_set_end.text()
         # Verify addition
@@ -423,10 +445,18 @@ class FractureAnalysis2D:
         self.dlg.lineEdit_tab2_set_end.setText('170')
 
     def clear_set_table(self):
+        """
+        Clears set table.
+        """
         self.dlg.tableWidget_tab2_sets.clearContents()
         self.set_df = self.set_df.iloc[0:0]
 
     def fetch_correct_vector_layers(self):
+        """
+        Fetches current layers and checks which ones are suitable for which comboBox selection.
+        E.g. Only VectorLayers are suitable, no raster layers in any comboBox selection and only VectorLayers
+        with LineStrings or MultiLineStrings are suitable for traces and branches.
+        """
         # Fetch the currently loaded layers
         layers = QgsProject.instance().mapLayers().values()
 
@@ -455,24 +485,29 @@ class FractureAnalysis2D:
         # Save as class attributes
         self.line_layers, self.point_layers, self.polygon_layers, = line_layers, point_layers, polygon_layers
 
-    def create_progress_dialog(self):
-        dialog = QProgressDialog()
-        dialog.setWindowTitle("Analysis Progress")
-        dialog.setLabelText("Note: Only a rough indicator")
-        bar = QProgressBar(dialog)
-        bar.setTextVisible(True)
-        bar.setValue(0)
-        dialog.setBar(bar)
-        dialog.setMinimumWidth(300)
-        dialog.show()
-        return dialog, bar
+    # def create_progress_dialog(self):
+    #     dialog = QProgressDialog()
+    #     dialog.setWindowTitle("Analysis Progress")
+    #     dialog.setLabelText("Note: Only a rough indicator")
+    #     bar = QProgressBar(dialog)
+    #     bar.setTextVisible(True)
+    #     bar.setValue(0)
+    #     dialog.setBar(bar)
+    #     dialog.setMinimumWidth(300)
+    #     dialog.show()
+    #     return dialog, bar
 
     def open_help_doc(self):
+        """
+        Opens help documentation when ? is clicked.
+        """
         current_dir = os.path.dirname(__file__)
         webbrowser.open(url=f'{current_dir}\help\index.html', new=2)
 
     def run(self):
-        """Run method that performs all the real work"""
+        """
+        Run method that performs the dialog event loop.
+        """
 
         # Create the dialog with elements (after translation) and keep reference
         # Only create GUI ONCE in callback, so that it will only load when the plugin is started
@@ -515,6 +550,7 @@ class FractureAnalysis2D:
         result = self.dlg.exec_()
         # See if OK was pressed
         if result:
+            # TODO: Reimplement single target area using df functionality?
             QMessageBox.critical(None, "Error"
                                  , f'Single Target Area Analysis Not Implemented')
             return
@@ -522,8 +558,7 @@ class FractureAnalysis2D:
             # # substitute with your code.
             # results_folder = self.dlg.lineEdit_folder.text()
             # name = self.dlg.lineEdit_name.text()
-            # # TODO: Uses same layers as multi target: errors with list popping feature possible
-            # TODO: Reimplement using df functionality
+
             # trace_layer = self.line_layers[self.dlg.comboBox_trace.currentIndex()]
             # branch_layer = self.line_layers[self.dlg.comboBox_branch.currentIndex()]
             # node_layer = self.point_layers[self.dlg.comboBox_node.currentIndex()]
@@ -545,7 +580,11 @@ class FractureAnalysis2D:
             # )
 
     def run_multi_target_analysis(self):
-        # TODO: Invalidate inputs when there are groups without any target areas.
+        """
+        Starts analysis and doesn't stop until plots have been all saved to folder.
+        Will push a finish message when done.
+        """
+
         # Log start
         QgsMessageLog.logMessage(message="Multi Target Analysis started.", tag=f'{__name__}', level=Qgis.Info)
         # Output folder
@@ -582,11 +621,18 @@ class FractureAnalysis2D:
             else:
                 return
 
+        # Invalidate inputs when there are groups without any target areas.
+        if len(set(self.group_names_cutoffs_df.Group) & set(self.layer_table_df.Group)) \
+                != len(set(self.group_names_cutoffs_df.Group)):
+            QMessageBox.critical(None, "Error"
+                                 , f'Group names without target areas are not allowed.')
+            return
+
         # Run analysis
         main.main_multi_target_area(self.layer_table_df, results_folder, analysis_name,
                                     self.group_names_cutoffs_df,
                                     self.set_df)
-        # TODO: Implement more tasks (traces and branches)?
+        # TODO: Implement tasks (traces and branches)?
         # Run as task
         # main_target_analysis.task_main_multi_target_area(self.layer_table_df, results_folder, analysis_name,
         #                                             self.group_names_cutoffs_df,

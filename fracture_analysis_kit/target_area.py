@@ -18,12 +18,13 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 import ternary
-from scipy.interpolate import make_interp_spline
 from qgis.core import QgsMessageLog, Qgis
+from scipy.interpolate import make_interp_spline
 
+import config
 # Own code imports
 from fracture_analysis_kit import tools
-import config
+
 
 # from . import tools
 # from ... import config
@@ -40,10 +41,9 @@ class TargetAreaLines:
     are therefore not allowed.
     """
 
-    def __init__(self, lineframe, areaframe, name, group, using_branches: bool, cut_off_length=1.0):
+    def __init__(self, lineframe, areaframe, name, group, using_branches: bool, cut_off_length=0):
         """
         Init of TargetAreaLines.
-        TODO: Default cut-off.
 
         :param lineframe: GeoDataFrame containing line data
         :type lineframe: gpd.GeoDataFrame
@@ -85,6 +85,7 @@ class TargetAreaLines:
             except KeyError:
                 self.lineframe['length'] = lineframe['SHAPE_Leng'].astype(str).astype(float)
 
+
         # Assign None to later initialized attributes
         # TODO: Add DF columns here?
         self.lineframe_main = None
@@ -111,7 +112,7 @@ class TargetAreaLines:
         self.lineframe_main = tools.calc_y_distribution(self.lineframe_main, self.area)
 
         self.lineframe_main['azimu'] = self.lineframe_main.geometry.apply(tools.calc_azimu)
-        # TODO: TEST AND UNDERSTAND WHY THERE ARE nan in AZIMU CALC
+        # TODO: TEST AND UNDERSTAND WHY THERE ARE nan in AZIMU CALC. LineString errors?
         self.lineframe_main = self.lineframe_main.dropna(subset=['azimu'])
         self.lineframe_main['halved'] = self.lineframe_main.azimu.apply(tools.azimu_half)
 
@@ -126,7 +127,6 @@ class TargetAreaLines:
         self.top, self.bottom = tools.calc_ylims(self.lineframe_main)
 
         self.lineframe_main_cut = self.lineframe_main.loc[self.lineframe_main['length'] >= self.cut_off_length]
-
 
     def define_sets(self, set_df):
         """
@@ -198,293 +198,293 @@ class TargetAreaLines:
             lineframe_main.plot.scatter(x='length', y='y', s=50
                                         , logx=True, logy=True, label=self.name, ax=ax, color=color_for_plot)
 
-    def plot_curviness(self, cut_data=False):
-        fig = plt.figure()
-        ax = plt.gca()
-        if ~cut_data:
-            lineframe = self.lineframe_main
-        else:
-            lineframe = self.lineframe_main_cut
-        name = self.name
-        lineframe['set'] = lineframe.set.astype('category')
-        sns.boxplot(data=lineframe, x='curviness', y='set', notch=True, ax=ax)
-        ax.set_title(name, fontsize=14, fontweight='heavy', fontfamily='Times New Roman')
-        ax.set_ylabel('Set (°)', fontfamily='Times New Roman', style='italic')
-        ax.set_xlabel('Curvature (°)', fontfamily='Times New Roman', style='italic')
-        ax.grid(True, color='k', linewidth=0.3)
-        plt.savefig(Path('plots/curviness/{}.png'.format(name)), dpi=100)
+    # def plot_curviness(self, cut_data=False):
+    #     fig = plt.figure()
+    #     ax = plt.gca()
+    #     if ~cut_data:
+    #         lineframe = self.lineframe_main
+    #     else:
+    #         lineframe = self.lineframe_main_cut
+    #     name = self.name
+    #     lineframe['set'] = lineframe.set.astype('category')
+    #     sns.boxplot(data=lineframe, x='curviness', y='set', notch=True, ax=ax)
+    #     ax.set_title(name, fontsize=14, fontweight='heavy', fontfamily='Times New Roman')
+    #     ax.set_ylabel('Set (°)', fontfamily='Times New Roman', style='italic')
+    #     ax.set_xlabel('Curvature (°)', fontfamily='Times New Roman', style='italic')
+    #     ax.grid(True, color='k', linewidth=0.3)
+    #     plt.savefig(Path('plots/curviness/{}.png'.format(name)), dpi=100)
+    #
+    # def plot_curviness_violins(self, cut_data=False):
+    #     fig = plt.figure()
+    #     ax = plt.gca()
+    #     if ~cut_data:
+    #         lineframe = self.lineframe_main
+    #     else:
+    #         lineframe = self.lineframe_main_cut
+    #     name = self.name
+    #     lineframe['set'] = lineframe.set.astype('category')
+    #     sns.violinplot(data=lineframe, x='curviness', y='set', ax=ax)
+    #     ax.set_title(name, fontsize=14, fontweight='heavy', fontfamily='Times New Roman')
+    #     ax.set_ylabel('Set', fontfamily='Times New Roman', style='italic')
+    #     ax.set_xlabel('Curvature (°)', fontfamily='Times New Roman', style='italic')
+    #     ax.grid(True, color='k', linewidth=0.3)
+    #     ax.set_xlim(left=0)
+    #     plt.savefig(Path('plots/curviness/{}_violin.png'.format(name)), dpi=100)
 
-    def plot_curviness_violins(self, cut_data=False):
-        fig = plt.figure()
-        ax = plt.gca()
-        if ~cut_data:
-            lineframe = self.lineframe_main
-        else:
-            lineframe = self.lineframe_main_cut
-        name = self.name
-        lineframe['set'] = lineframe.set.astype('category')
-        sns.violinplot(data=lineframe, x='curviness', y='set', ax=ax)
-        ax.set_title(name, fontsize=14, fontweight='heavy', fontfamily='Times New Roman')
-        ax.set_ylabel('Set', fontfamily='Times New Roman', style='italic')
-        ax.set_xlabel('Curvature (°)', fontfamily='Times New Roman', style='italic')
-        ax.grid(True, color='k', linewidth=0.3)
-        ax.set_xlim(left=0)
-        plt.savefig(Path('plots/curviness/{}_violin.png'.format(name)), dpi=100)
+    # def create_setframes(self):
+    #     sets = self.lineframe_main.set.unique()
+    #     sets.sort()
+    #
+    #     setframes = []
+    #     setframes_cut = []
+    #     for s in sets:
+    #         setframe = self.lineframe_main.loc[self.lineframe_main.set == s]
+    #         setframe_cut = self.lineframe_main_cut.loc[self.lineframe_main_cut.set == s]
+    #         setframe = tools.calc_y_distribution(setframe, self.area)
+    #         setframe_cut = tools.calc_y_distribution(setframe_cut, self.area)
+    #         setframes.append(setframe)
+    #         setframes_cut.append(setframe_cut)
+    #     self.setframes = setframes
+    #     self.setframes_cut = setframes_cut
 
-    def create_setframes(self):
-        sets = self.lineframe_main.set.unique()
-        sets.sort()
-
-        setframes = []
-        setframes_cut = []
-        for s in sets:
-            setframe = self.lineframe_main.loc[self.lineframe_main.set == s]
-            setframe_cut = self.lineframe_main_cut.loc[self.lineframe_main_cut.set == s]
-            setframe = tools.calc_y_distribution(setframe, self.area)
-            setframe_cut = tools.calc_y_distribution(setframe_cut, self.area)
-            setframes.append(setframe)
-            setframes_cut.append(setframe_cut)
-        self.setframes = setframes
-        self.setframes_cut = setframes_cut
-
-    def plot_azimuth(self, rose_type, save=False, savefolder='', branches=False, big_plots=False
-                     , ax=None, ax_w=None):
-        """
-        Plot azimuth to either ax or to its own figure,
-        in which case both non-weighted and weighted versions area made.
-
-        :param rose_type: Whether to plot equal-radius or equal-area rose plot e.g. 'equal-radius' or 'equal-area'
-        :type rose_type: str
-        :param save: Whether to save
-        :type save: bool
-        :param savefolder: Folder to save to
-        :type savefolder: str
-        :param branches: Branches or traces
-        :type branches: bool
-        :param big_plots: Plotting to a big plot or to an individual one
-        :type big_plots: bool
-        :param ax: Ax to plot to
-        :type ax: matplotlib.projections.polar.PolarAxes
-        :param ax_w: Weighted azimuth ax to plot to
-        :type ax_w: matplotlib.projections.polar.PolarAxes
-        """
-        if big_plots:
-
-            self.plot_azimuth_ax(ax=ax, name=self.name, weights=False, rose_type=rose_type, font_multiplier=0.5)
-            self.plot_azimuth_ax(ax=ax_w, name=self.name, weights=True, rose_type=rose_type, font_multiplier=0.5)
-
-        else:
-            # Non-weighted
-            fig, ax = plt.subplots(subplot_kw=dict(polar=True), constrained_layout=True, figsize=(6.5, 5.1))
-            self.plot_azimuth_ax(ax=ax, name=self.name, weights=False, rose_type=rose_type, font_multiplier=1)
-
-            if save:
-                if branches:
-                    savename = Path(savefolder + '/{}_azimuth_branches.png'.format(self.name))
-                else:
-                    savename = Path(savefolder + '/{}_azimuth_traces.png'.format(self.name))
-                plt.savefig(savename, dpi=150)
-            # Weighted
-            fig, ax_w = plt.subplots(subplot_kw=dict(polar=True), constrained_layout=True, figsize=(6.5, 5.1))
-            self.plot_azimuth_ax(ax=ax_w, name=self.name, weights=True, rose_type=rose_type, font_multiplier=1)
-            if save:
-                if branches:
-                    savename = Path(savefolder + '/{}_azimuth_branches_WEIGHTED.png'.format(self.name))
-                else:
-                    savename = Path(savefolder + '/{}_azimuth_traces_WEIGHTED.png'.format(self.name))
-                plt.savefig(savename, dpi=150)
-
-    def plot_azimuth_ax(self, ax, name, weights, rose_type, font_multiplier=1.0):
-        """
-        Plot azimuth to ax. Text size can be changed with a multiplier.
-
-        :param ax: Polar axis to plot to.
-        :type ax: matplotlib.projections.polar.PolarAxes
-        :param name: Name used
-        :type name: str
-        :param weights: Whether to weighted or not
-        :type weights: bool
-        :param rose_type: Whether to plot equal-radius or equal-area rose plot e.g. 'equal-radius' or 'equal-area'
-        :type rose_type: str
-        :param font_multiplier: Multiplier for font sizes. Optional, 1.0 is default
-        :type font_multiplier: float
-        """
-
-        if weights:
-            if rose_type == 'equal-radius':
-                two_halves = self.two_halves_weighted
-            elif rose_type == 'equal-area':
-                two_halves = np.sqrt(self.two_halves_weighted)
-            else:
-                raise ValueError('Unknown weighted rose type')
-        else:
-            if rose_type == 'equal-radius':
-                two_halves = self.two_halves_non_weighted
-            elif rose_type == 'equal-area':
-                two_halves = np.sqrt(self.two_halves_non_weighted)
-            else:
-                raise Exception('Unknown non-weighted rose type')
-            # two_halves = self.two_halves_non_weighted
-        # Plot azimuth rose plot
-        ax.bar(np.deg2rad(np.arange(0, 360, 10)), two_halves, width=np.deg2rad(10), bottom=0.0, color='#F7CECC',
-               edgecolor='r', alpha=0.85, zorder=4)
-
-        # Plot setup
-        ax.set_theta_zero_location('N')
-        ax.set_theta_direction(-1)
-        ax.set_thetagrids(np.arange(0, 360, 45), fontweight='bold')
-        ax.set_rgrids(np.linspace(5, 10, num=2), angle=0, weight='black', fmt='%d%%', fontsize=7)
-        ax.grid(linewidth=1, color='k')
-
-        title_props = dict(boxstyle='square', facecolor='white', path_effects=[path_effects.withSimplePatchShadow()])
-        font_size = 20
-        title_x = 0.18
-        title_y = 1.25
-        if weights:
-            ax.set_title(name + '\nWEIGHTED', x=title_x, y=title_y, fontsize=font_multiplier * font_size,
-                         fontweight='heavy'
-                         , fontfamily='Times New Roman', bbox=title_props, va='top')
-        else:
-            ax.set_title(name, x=title_x, y=title_y, fontsize=font_multiplier * font_size, fontweight='heavy'
-                         , fontfamily='Times New Roman', bbox=title_props, va='center')
-        props = dict(boxstyle='round', facecolor='wheat', path_effects=[path_effects.withSimplePatchShadow()])
-
-        text_x = 0.55
-        text_y = 1.42
-        text = 'n = ' + str(len(self.lineframe_main)) + '\n'
-        text = text + tools.create_azimuth_set_text(self.lineframe_main)
-        ax.text(text_x, text_y, text, transform=ax.transAxes, fontsize=font_multiplier * 20, weight='roman'
-                , bbox=props, fontfamily='Times New Roman', va='top')
-        # TickLabels
-        labels = ax.get_xticklabels()
-        for label in labels:
-            label._y = -0.05
-            label._fontproperties._size = 24
-            label._fontproperties._weight = 'bold'
-
-    def plot_azimuth_exp(self, rose_type, save=False, savefolder='', branches=False, big_plots=False
-                         , ax=None, ax_w=None):
-        """
-
-        :param rose_type: Whether to plot equal-radius or equal-area rose plot: 'equal-radius' or 'equal-area'
-        :type rose_type: str
-        :param save: Whether to save
-        :type save: bool
-        :param savefolder: Folder to save to
-        :type savefolder: str
-        :param branches: Branches or traces
-        :type branches: bool
-        :param big_plots: Plotting to a big plot or to an individual one
-        :type big_plots: bool
-        :param ax: Ax to plot to
-        :type ax: matplotlib.projections.polar.PolarAxes
-        :param ax_w: Weighted azimuth ax to plot to
-        :type ax_w: matplotlib.projections.polar.PolarAxes
-        """
-        if big_plots:
-
-            self.plot_azimuth_ax_exp(ax=ax, name=self.name, weights=False, rose_type=rose_type, font_multiplier=0.5)
-            self.plot_azimuth_ax_exp(ax=ax_w, name=self.name, weights=True, rose_type=rose_type, font_multiplier=0.5)
-
-        else:
-            # Non-weighted
-            fig, ax = plt.subplots(subplot_kw=dict(polar=True), constrained_layout=True, figsize=(6.5, 5.1))
-            self.plot_azimuth_ax_exp(ax=ax, name=self.name, weights=False, rose_type=rose_type, font_multiplier=1)
-
-            if save:
-                if branches:
-                    savename = Path(savefolder + '/{}_exp_azimuth_branches.png'.format(self.name))
-                else:
-                    savename = Path(savefolder + '/{}_exp_azimuth_traces.png'.format(self.name))
-                plt.savefig(savename, dpi=150)
-            # Weighted
-            fig, ax_w = plt.subplots(subplot_kw=dict(polar=True), constrained_layout=True, figsize=(6.5, 5.1))
-            self.plot_azimuth_ax_exp(ax=ax_w, name=self.name, weights=True, rose_type=rose_type, font_multiplier=1)
-            if save:
-                if branches:
-                    savename = Path(savefolder + '/{}_exp_azimuth_branches_WEIGHTED.png'.format(self.name))
-                else:
-                    savename = Path(savefolder + '/{}_exp_azimuth_traces_WEIGHTED.png'.format(self.name))
-                plt.savefig(savename, dpi=150)
-
-    def plot_azimuth_ax_exp(self, ax, name, weights, rose_type, font_multiplier=1.0):
-        """
-        EXPERIMENTAL
-
-        :param ax: Polar axis to plot to.
-        :type ax: matplotlib.projections.polar.PolarAxes
-        :param name: Name used
-        :type name: str
-        :param weights: Whether to weight or not
-        :type weights: bool
-        :param rose_type: Whether to plot equal-radius or equal-area rose plot e.g. 'equal-radius' or 'equal-area'
-        :type rose_type: str
-        :param font_multiplier: Multiplier for font sizes. Optional, 1.0 is default
-        :type font_multiplier: float
-        """
-
-        if rose_type == 'equal-radius':
-            number_of_azimuths = self.number_of_azimuths
-        elif rose_type == 'equal-area':
-            number_of_azimuths = np.sqrt(self.number_of_azimuths)
-        else:
-            raise Exception('Unknown weighted rose type')
-        # if weights:
-        #     if rose_type == 'equal-radius':
-        #         two_halves = self.two_halves_weighted
-        #     elif rose_type == 'equal-area':
-        #         two_halves = np.sqrt(self.two_halves_weighted)
-        #     else:
-        #         raise Exception('Unknown weighted rose type')
-        # else:
-        #     if rose_type == 'equal-radius':
-        #         two_halves = self.two_halves_non_weighted
-        #     elif rose_type == 'equal-area':
-        #         two_halves = np.sqrt(self.two_halves_non_weighted)
-        #     else:
-        #         raise Exception('Unknown non-weighted rose type')
-        # two_halves = self.two_halves_non_weighted
-
-        # Plot azimuth rose plot
-        ax.bar(np.deg2rad(self.bin_locs), number_of_azimuths, width=np.deg2rad(self.bin_width), bottom=0.0,
-               color='#F7CECC',
-               edgecolor='r', alpha=0.85, zorder=4)
-
-        # Plot setup
-        ax.set_theta_zero_location('N')
-        ax.set_theta_direction(-1)
-        ax.set_thetagrids(np.arange(0, 181, 45), fontweight='bold')
-        ax.set_thetamin(0)
-        ax.set_thetamax(180)
-        ax.set_rgrids(np.linspace(np.sqrt(number_of_azimuths).mean(), np.sqrt(number_of_azimuths).max() * 1.05, num=2),
-                      angle=0, weight='black', fmt='%d', fontsize=7)
-        ax.grid(linewidth=1, color='k')
-
-        title_props = dict(boxstyle='square', facecolor='white', path_effects=[path_effects.withSimplePatchShadow()])
-        font_size = 20
-        title_x = 0.18
-        title_y = 1.25
-        if weights:
-            ax.set_title(name + '\nWEIGHTED', x=title_x, y=title_y, fontsize=font_multiplier * font_size,
-                         fontweight='heavy'
-                         , fontfamily='Times New Roman', bbox=title_props, va='top')
-        else:
-            ax.set_title(name, x=title_x, y=title_y, fontsize=font_multiplier * font_size, fontweight='heavy'
-                         , fontfamily='Times New Roman', bbox=title_props, va='center')
-        props = dict(boxstyle='round', facecolor='wheat', path_effects=[path_effects.withSimplePatchShadow()])
-
-        text_x = 0.55
-        text_y = 1.42
-        text = 'n = ' + str(len(self.lineframe_main)) + '\n'
-        text = text + tools.create_azimuth_set_text(self.lineframe_main)
-        ax.text(text_x, text_y, text, transform=ax.transAxes, fontsize=font_multiplier * 9, weight='roman'
-                , bbox=props, fontfamily='Times New Roman', va='top')
-        # TickLabels
-        labels = ax.get_xticklabels()
-        for label in labels:
-            label._y = -0.05
-            label._fontproperties._size = 24
-            label._fontproperties._weight = 'bold'
+    # def plot_azimuth(self, rose_type, save=False, savefolder='', branches=False, big_plots=False
+    #                  , ax=None, ax_w=None):
+    #     """
+    #     Plot azimuth to either ax or to its own figure,
+    #     in which case both non-weighted and weighted versions area made.
+    #
+    #     :param rose_type: Whether to plot equal-radius or equal-area rose plot e.g. 'equal-radius' or 'equal-area'
+    #     :type rose_type: str
+    #     :param save: Whether to save
+    #     :type save: bool
+    #     :param savefolder: Folder to save to
+    #     :type savefolder: str
+    #     :param branches: Branches or traces
+    #     :type branches: bool
+    #     :param big_plots: Plotting to a big plot or to an individual one
+    #     :type big_plots: bool
+    #     :param ax: Ax to plot to
+    #     :type ax: matplotlib.projections.polar.PolarAxes
+    #     :param ax_w: Weighted azimuth ax to plot to
+    #     :type ax_w: matplotlib.projections.polar.PolarAxes
+    #     """
+    #     if big_plots:
+    #
+    #         self.plot_azimuth_ax(ax=ax, name=self.name, weights=False, rose_type=rose_type, font_multiplier=0.5)
+    #         self.plot_azimuth_ax(ax=ax_w, name=self.name, weights=True, rose_type=rose_type, font_multiplier=0.5)
+    #
+    #     else:
+    #         # Non-weighted
+    #         fig, ax = plt.subplots(subplot_kw=dict(polar=True), constrained_layout=True, figsize=(6.5, 5.1))
+    #         self.plot_azimuth_ax(ax=ax, name=self.name, weights=False, rose_type=rose_type, font_multiplier=1)
+    #
+    #         if save:
+    #             if branches:
+    #                 savename = Path(savefolder + '/{}_azimuth_branches.png'.format(self.name))
+    #             else:
+    #                 savename = Path(savefolder + '/{}_azimuth_traces.png'.format(self.name))
+    #             plt.savefig(savename, dpi=150)
+    #         # Weighted
+    #         fig, ax_w = plt.subplots(subplot_kw=dict(polar=True), constrained_layout=True, figsize=(6.5, 5.1))
+    #         self.plot_azimuth_ax(ax=ax_w, name=self.name, weights=True, rose_type=rose_type, font_multiplier=1)
+    #         if save:
+    #             if branches:
+    #                 savename = Path(savefolder + '/{}_azimuth_branches_WEIGHTED.png'.format(self.name))
+    #             else:
+    #                 savename = Path(savefolder + '/{}_azimuth_traces_WEIGHTED.png'.format(self.name))
+    #             plt.savefig(savename, dpi=150)
+    #
+    # def plot_azimuth_ax(self, ax, name, weights, rose_type, font_multiplier=1.0):
+    #     """
+    #     Plot azimuth to ax. Text size can be changed with a multiplier.
+    #
+    #     :param ax: Polar axis to plot to.
+    #     :type ax: matplotlib.projections.polar.PolarAxes
+    #     :param name: Name used
+    #     :type name: str
+    #     :param weights: Whether to weighted or not
+    #     :type weights: bool
+    #     :param rose_type: Whether to plot equal-radius or equal-area rose plot e.g. 'equal-radius' or 'equal-area'
+    #     :type rose_type: str
+    #     :param font_multiplier: Multiplier for font sizes. Optional, 1.0 is default
+    #     :type font_multiplier: float
+    #     """
+    #
+    #     if weights:
+    #         if rose_type == 'equal-radius':
+    #             two_halves = self.two_halves_weighted
+    #         elif rose_type == 'equal-area':
+    #             two_halves = np.sqrt(self.two_halves_weighted)
+    #         else:
+    #             raise ValueError('Unknown weighted rose type')
+    #     else:
+    #         if rose_type == 'equal-radius':
+    #             two_halves = self.two_halves_non_weighted
+    #         elif rose_type == 'equal-area':
+    #             two_halves = np.sqrt(self.two_halves_non_weighted)
+    #         else:
+    #             raise Exception('Unknown non-weighted rose type')
+    #         # two_halves = self.two_halves_non_weighted
+    #     # Plot azimuth rose plot
+    #     ax.bar(np.deg2rad(np.arange(0, 360, 10)), two_halves, width=np.deg2rad(10), bottom=0.0, color='#F7CECC',
+    #            edgecolor='r', alpha=0.85, zorder=4)
+    #
+    #     # Plot setup
+    #     ax.set_theta_zero_location('N')
+    #     ax.set_theta_direction(-1)
+    #     ax.set_thetagrids(np.arange(0, 360, 45), fontweight='bold')
+    #     ax.set_rgrids(np.linspace(5, 10, num=2), angle=0, weight='black', fmt='%d%%', fontsize=7)
+    #     ax.grid(linewidth=1, color='k')
+    #
+    #     title_props = dict(boxstyle='square', facecolor='white', path_effects=[path_effects.withSimplePatchShadow()])
+    #     font_size = 20
+    #     title_x = 0.18
+    #     title_y = 1.25
+    #     if weights:
+    #         ax.set_title(name + '\nWEIGHTED', x=title_x, y=title_y, fontsize=font_multiplier * font_size,
+    #                      fontweight='heavy'
+    #                      , fontfamily='Times New Roman', bbox=title_props, va='top')
+    #     else:
+    #         ax.set_title(name, x=title_x, y=title_y, fontsize=font_multiplier * font_size, fontweight='heavy'
+    #                      , fontfamily='Times New Roman', bbox=title_props, va='center')
+    #     props = dict(boxstyle='round', facecolor='wheat', path_effects=[path_effects.withSimplePatchShadow()])
+    #
+    #     text_x = 0.55
+    #     text_y = 1.42
+    #     text = 'n = ' + str(len(self.lineframe_main)) + '\n'
+    #     text = text + tools.create_azimuth_set_text(self.lineframe_main)
+    #     ax.text(text_x, text_y, text, transform=ax.transAxes, fontsize=font_multiplier * 20, weight='roman'
+    #             , bbox=props, fontfamily='Times New Roman', va='top')
+    #     # TickLabels
+    #     labels = ax.get_xticklabels()
+    #     for label in labels:
+    #         label._y = -0.05
+    #         label._fontproperties._size = 24
+    #         label._fontproperties._weight = 'bold'
+    #
+    # def plot_azimuth_exp(self, rose_type, save=False, savefolder='', branches=False, big_plots=False
+    #                      , ax=None, ax_w=None):
+    #     """
+    #
+    #     :param rose_type: Whether to plot equal-radius or equal-area rose plot: 'equal-radius' or 'equal-area'
+    #     :type rose_type: str
+    #     :param save: Whether to save
+    #     :type save: bool
+    #     :param savefolder: Folder to save to
+    #     :type savefolder: str
+    #     :param branches: Branches or traces
+    #     :type branches: bool
+    #     :param big_plots: Plotting to a big plot or to an individual one
+    #     :type big_plots: bool
+    #     :param ax: Ax to plot to
+    #     :type ax: matplotlib.projections.polar.PolarAxes
+    #     :param ax_w: Weighted azimuth ax to plot to
+    #     :type ax_w: matplotlib.projections.polar.PolarAxes
+    #     """
+    #     if big_plots:
+    #
+    #         self.plot_azimuth_ax_exp(ax=ax, name=self.name, weights=False, rose_type=rose_type, font_multiplier=0.5)
+    #         self.plot_azimuth_ax_exp(ax=ax_w, name=self.name, weights=True, rose_type=rose_type, font_multiplier=0.5)
+    #
+    #     else:
+    #         # Non-weighted
+    #         fig, ax = plt.subplots(subplot_kw=dict(polar=True), constrained_layout=True, figsize=(6.5, 5.1))
+    #         self.plot_azimuth_ax_exp(ax=ax, name=self.name, weights=False, rose_type=rose_type, font_multiplier=1)
+    #
+    #         if save:
+    #             if branches:
+    #                 savename = Path(savefolder + '/{}_exp_azimuth_branches.png'.format(self.name))
+    #             else:
+    #                 savename = Path(savefolder + '/{}_exp_azimuth_traces.png'.format(self.name))
+    #             plt.savefig(savename, dpi=150)
+    #         # Weighted
+    #         fig, ax_w = plt.subplots(subplot_kw=dict(polar=True), constrained_layout=True, figsize=(6.5, 5.1))
+    #         self.plot_azimuth_ax_exp(ax=ax_w, name=self.name, weights=True, rose_type=rose_type, font_multiplier=1)
+    #         if save:
+    #             if branches:
+    #                 savename = Path(savefolder + '/{}_exp_azimuth_branches_WEIGHTED.png'.format(self.name))
+    #             else:
+    #                 savename = Path(savefolder + '/{}_exp_azimuth_traces_WEIGHTED.png'.format(self.name))
+    #             plt.savefig(savename, dpi=150)
+    #
+    # def plot_azimuth_ax_exp(self, ax, name, weights, rose_type, font_multiplier=1.0):
+    #     """
+    #     EXPERIMENTAL
+    #
+    #     :param ax: Polar axis to plot to.
+    #     :type ax: matplotlib.projections.polar.PolarAxes
+    #     :param name: Name used
+    #     :type name: str
+    #     :param weights: Whether to weight or not
+    #     :type weights: bool
+    #     :param rose_type: Whether to plot equal-radius or equal-area rose plot e.g. 'equal-radius' or 'equal-area'
+    #     :type rose_type: str
+    #     :param font_multiplier: Multiplier for font sizes. Optional, 1.0 is default
+    #     :type font_multiplier: float
+    #     """
+    #
+    #     if rose_type == 'equal-radius':
+    #         number_of_azimuths = self.number_of_azimuths
+    #     elif rose_type == 'equal-area':
+    #         number_of_azimuths = np.sqrt(self.number_of_azimuths)
+    #     else:
+    #         raise Exception('Unknown weighted rose type')
+    #     # if weights:
+    #     #     if rose_type == 'equal-radius':
+    #     #         two_halves = self.two_halves_weighted
+    #     #     elif rose_type == 'equal-area':
+    #     #         two_halves = np.sqrt(self.two_halves_weighted)
+    #     #     else:
+    #     #         raise Exception('Unknown weighted rose type')
+    #     # else:
+    #     #     if rose_type == 'equal-radius':
+    #     #         two_halves = self.two_halves_non_weighted
+    #     #     elif rose_type == 'equal-area':
+    #     #         two_halves = np.sqrt(self.two_halves_non_weighted)
+    #     #     else:
+    #     #         raise Exception('Unknown non-weighted rose type')
+    #     # two_halves = self.two_halves_non_weighted
+    #
+    #     # Plot azimuth rose plot
+    #     ax.bar(np.deg2rad(self.bin_locs), number_of_azimuths, width=np.deg2rad(self.bin_width), bottom=0.0,
+    #            color='#F7CECC',
+    #            edgecolor='r', alpha=0.85, zorder=4)
+    #
+    #     # Plot setup
+    #     ax.set_theta_zero_location('N')
+    #     ax.set_theta_direction(-1)
+    #     ax.set_thetagrids(np.arange(0, 181, 45), fontweight='bold')
+    #     ax.set_thetamin(0)
+    #     ax.set_thetamax(180)
+    #     ax.set_rgrids(np.linspace(np.sqrt(number_of_azimuths).mean(), np.sqrt(number_of_azimuths).max() * 1.05, num=2),
+    #                   angle=0, weight='black', fmt='%d', fontsize=7)
+    #     ax.grid(linewidth=1, color='k')
+    #
+    #     title_props = dict(boxstyle='square', facecolor='white', path_effects=[path_effects.withSimplePatchShadow()])
+    #     font_size = 20
+    #     title_x = 0.18
+    #     title_y = 1.25
+    #     if weights:
+    #         ax.set_title(name + '\nWEIGHTED', x=title_x, y=title_y, fontsize=font_multiplier * font_size,
+    #                      fontweight='heavy'
+    #                      , fontfamily='Times New Roman', bbox=title_props, va='top')
+    #     else:
+    #         ax.set_title(name, x=title_x, y=title_y, fontsize=font_multiplier * font_size, fontweight='heavy'
+    #                      , fontfamily='Times New Roman', bbox=title_props, va='center')
+    #     props = dict(boxstyle='round', facecolor='wheat', path_effects=[path_effects.withSimplePatchShadow()])
+    #
+    #     text_x = 0.55
+    #     text_y = 1.42
+    #     text = 'n = ' + str(len(self.lineframe_main)) + '\n'
+    #     text = text + tools.create_azimuth_set_text(self.lineframe_main)
+    #     ax.text(text_x, text_y, text, transform=ax.transAxes, fontsize=font_multiplier * 9, weight='roman'
+    #             , bbox=props, fontfamily='Times New Roman', va='top')
+    #     # TickLabels
+    #     labels = ax.get_xticklabels()
+    #     for label in labels:
+    #         label._y = -0.05
+    #         label._fontproperties._size = 24
+    #         label._fontproperties._weight = 'bold'
 
     def plot_azimuth_weighted(self, rose_type, set_visualization):
         """
@@ -532,7 +532,7 @@ class TargetAreaLines:
         ax.set_thetamin(0)
         ax.set_thetamax(180)
         ax.set_rgrids(radii=[number_of_azimuths.mean()],
-                                        angle=0, fmt='', fontsize=1, alpha=0.8, ha='left')
+                      angle=0, fmt='', fontsize=1, alpha=0.8, ha='left')
         ax.grid(linewidth=1, color='k', alpha=0.8)
 
         # Title is the name of the target area or group
@@ -647,7 +647,8 @@ class TargetAreaLines:
         tax.scatter(point, marker='X', label=self.name, alpha=1, zorder=4, s=125, color=color_for_plot)
         tools.tern_plot_branch_lines(tax)
         tax.legend(loc='upper center', bbox_to_anchor=(0.1, 1.05),
-                   prop={'family': 'Calibri', 'weight': 'heavy', 'size': 'x-large'}, edgecolor='black', ncol=2, columnspacing=0.7, shadow=True)
+                   prop={'family': 'Calibri', 'weight': 'heavy', 'size': 'x-large'}, edgecolor='black', ncol=2,
+                   columnspacing=0.7, shadow=True)
         if save:
             if unified:
                 savename = Path(savefolder + f'/indiv/{self.name}_group_branch_point.png')
@@ -677,11 +678,6 @@ class TargetAreaLines:
         point = [(ccp, iip, cip)]
         # tax.scatter(point, marker='X', color='black', alpha=1, zorder=3, s=210)
         tax.scatter(point, marker='X', label=self.name, alpha=1, zorder=4, s=125, color=color_for_plot)
-
-    # def calc_ellipse_weights(self, a, b, phi):
-    #     self.lineframe_main = tools.calc_ellipse_weight(self.lineframe_main, a, b, phi)
-    #     self.rep_circle_area = np.pi * b ** 2
-    #     self.rep_circle_r = b
 
     def calc_anisotropy(self):
         """
@@ -755,6 +751,9 @@ class TargetAreaLines:
 
 
 class TargetAreaNodes:
+    """
+    Class for topological nodes. Used in conjunction with TargetAreaLines.
+    """
     def __init__(self, nodeframe, name, group):
         """
         Init of TargetAreaNodes.

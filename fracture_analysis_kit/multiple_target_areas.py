@@ -5,7 +5,6 @@ MultiTargetAreaQGIS-objects are made separately for trace and branch data. Both 
 
 # Python Windows co-operation imports
 from pathlib import Path
-
 # Math and analysis imports
 # Plotting imports
 # DataFrame analysis imports
@@ -16,8 +15,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import shapely
-import ternary
 import sklearn.metrics as sklm
+import ternary
 from qgis.core import QgsMessageLog, Qgis
 
 # Own code imports
@@ -37,10 +36,11 @@ from fracture_analysis_kit import target_area as ta, tools
 
 
 class MultiTargetAreaQGIS:
-    """TODO: DOC"""
 
     def __init__(self, table_df, gnames_cutoffs_df, branches):
         """
+        Class for operations with multiple target areas. Handles grouping, analysis and plotting of both individual
+        target areas and grouped data.
 
         :param table_df: DataFrame with user inputs
         :type table_df: pd.DataFrame
@@ -129,8 +129,6 @@ class MultiTargetAreaQGIS:
                                          , 'nodeframe': nodeframe, 'group': group, 'cut_off_length': cut_off_length},
                                      ignore_index=True)
 
-
-
         self.df['TargetAreaLines'] = self.df.apply(
             lambda x: tools.construct_length_distribution_base(x['lineframe'], x['areaframe'], x['name'], x['group'],
                                                                x['cut_off_length'], self.using_branches),
@@ -147,7 +145,7 @@ class MultiTargetAreaQGIS:
         self.df_lineframe_main_concat = pd.concat([srs.lineframe_main for srs in self.df.TargetAreaLines],
                                                   sort=True)
         self.df_lineframe_main_cut_concat = pd.concat([srs.lineframe_main_cut for srs in self.df.TargetAreaLines],
-                                                  sort=True)
+                                                      sort=True)
 
     def define_sets_for_all(self, set_df):
         """
@@ -171,11 +169,11 @@ class MultiTargetAreaQGIS:
     def unified(self):
         """
         Creates new datasets (TargetAreaLines + TargetAreaNodes for each group) based on groupings by user.
-        TODO: Invalidate inputs when there are groups without any target areas.
 
         :raise ValueError: When there are groups without any target areas.
         """
-        uniframe = pd.DataFrame(columns=['TargetAreaLines', 'TargetAreaNodes', 'group', 'name', 'uni_ld_area', 'cut_off_length'])
+        uniframe = pd.DataFrame(
+            columns=['TargetAreaLines', 'TargetAreaNodes', 'group', 'name', 'uni_ld_area', 'cut_off_length'])
         for idx, group in enumerate(self.groups):
             frame = self.df.loc[self.df['group'] == group]
 
@@ -183,15 +181,18 @@ class MultiTargetAreaQGIS:
                 # Cut-off from user input table.
                 if self.using_branches:
                     cut_off_length = \
-                        self.group_names_cutoffs_df.loc[self.group_names_cutoffs_df.Group == group].CutOffBranches.iloc[0]
+                        self.group_names_cutoffs_df.loc[self.group_names_cutoffs_df.Group == group].CutOffBranches.iloc[
+                            0]
                 else:
                     cut_off_length = \
                         self.group_names_cutoffs_df.loc[self.group_names_cutoffs_df.Group == group].CutOffTraces.iloc[0]
                 # cut_off = frame.cut_off.iloc[0]
 
                 # Hunting possible bugs:
-                assert len(self.group_names_cutoffs_df.loc[self.group_names_cutoffs_df.Group == group].CutOffTraces) == 1
-                assert len(self.group_names_cutoffs_df.loc[self.group_names_cutoffs_df.Group == group].CutOffBranches) == 1
+                assert len(
+                    self.group_names_cutoffs_df.loc[self.group_names_cutoffs_df.Group == group].CutOffTraces) == 1
+                assert len(
+                    self.group_names_cutoffs_df.loc[self.group_names_cutoffs_df.Group == group].CutOffBranches) == 1
 
                 unif_ld_main = tools.unify_lds(frame.TargetAreaLines.tolist(), group, cut_off_length)
                 unif_ld_main.calc_attributes()
@@ -210,8 +211,9 @@ class MultiTargetAreaQGIS:
         # AIDS FOR PLOTTING:
         self.uniframe_lineframe_main_concat = pd.concat([srs.lineframe_main for srs in self.uniframe.TargetAreaLines],
                                                         sort=True)
-        self.uniframe_lineframe_main_cut_concat = pd.concat([srs.lineframe_main_cut for srs in self.uniframe.TargetAreaLines],
-                                                        sort=True)
+        self.uniframe_lineframe_main_cut_concat = pd.concat(
+            [srs.lineframe_main_cut for srs in self.uniframe.TargetAreaLines],
+            sort=True)
         self.uni_left, self.uni_right = tools.calc_xlims(self.uniframe_lineframe_main_concat)
         self.uni_top, self.uni_bottom = tools.calc_ylims(self.uniframe_lineframe_main_concat)
 
@@ -285,12 +287,13 @@ class MultiTargetAreaQGIS:
             m, c = vals[0], vals[1]
         else:
             QgsMessageLog.logMessage(message='Too many values (vals) from np.polyfit, 2 expected.\n'
-                             f'vals: {vals}', tag=__name__, level=Qgis.Critical)
+                                             f'vals: {vals}', tag=__name__, level=Qgis.Critical)
             raise ValueError('Too many values (vals) from np.polyfit, 2 expected.\n'
                              f'vals: {vals}')
         y_fit = np.exp(m * lineframe['logLen'].values + c)  # calculate the fitted values of y
         lineframe['y_fit'] = y_fit
-        lineframe.plot(x='length', y='y_fit', color='k', ax=ax, label='Power Law Fit', linestyle='dashed', linewidth=2, alpha=.8)
+        lineframe.plot(x='length', y='y_fit', color='k', ax=ax, label='Power Law Fit', linestyle='dashed', linewidth=2,
+                       alpha=.8)
         create_text(lineframe, ax)
 
     def plot_lengths(self, unified: bool, save=False, savefolder='', use_sets=False):
@@ -318,7 +321,7 @@ class MultiTargetAreaQGIS:
             color_for_plot = color_dict[srs['TargetAreaLines'].name]
             srs['TargetAreaLines'].plot_length_distribution(unified=unified, color_for_plot=color_for_plot)
         if use_sets:
-            # TODO: reimplement
+            # TODO: reimplement set length distributions
             raise NotImplementedError('use_sets Not implemented')
 
         # Figure setup for FULL LDs
@@ -420,7 +423,6 @@ class MultiTargetAreaQGIS:
             #     if save:
             #         savename = Path(savefolder + '/CUT_LD_SET_{}.png'.format(curr_set))
             #         plt.savefig(savename, dpi=150)
-
 
     def plot_azimuths(self, unified: bool, rose_type: str, save=False, savefolder=''):
         """
@@ -577,115 +579,6 @@ class MultiTargetAreaQGIS:
 
                 plt.savefig(savename, dpi=150, bbox_inches='tight')
 
-    # def plot_all_azimuths(self, save=False, savefolder='', big_plots=True, small_text=False):
-    #     if big_plots:
-    #         plot_count = len(self.df)
-    #         if plot_count < 5:
-    #             plot_count = 5
-    #         cols = 4
-    #         if plot_count % cols == 0:
-    #             rows = plot_count // cols
-    #         else:
-    #             rows = plot_count // cols + 1
-    #         width = 26
-    #         height = (width / cols) * (rows * 1.3)
-    #         fig, ax = plt.subplots(ncols=cols, nrows=rows, subplot_kw=dict(polar=True)
-    #                                , figsize=(width, height))
-    #         fig_w, ax_w = plt.subplots(ncols=cols, nrows=rows, subplot_kw=dict(polar=True)
-    #                                    , figsize=(width, height))
-    #         # if ellipse_weights:
-    #         #     fig_ew, ax_ew = plt.subplots(ncols=cols, nrows=rows, subplot_kw=dict(polar=True)
-    #         #                                  , figsize=(width, height))
-    #         for idx, row in self.df.iterrows():
-    #
-    #             row['TargetAreaLines'].plot_azimuth(rose_type=rose_typesave=False, savefolder=savefolder, branches=self.using_branches
-    #                                                 , big_plots=big_plots
-    #                                                 , ax=ax[idx // cols][idx % cols]
-    #                                                 , ax_w=ax_w[idx // cols][idx % cols]
-    #                                                 , small_text=small_text)
-    #         #         if ellipse_weights:
-    #         #             row['TargetAreaLines'].plot_azimuth(rose_type=rose_typesave=False, savefolder=savefolder, branches=branches
-    #         #                                                    , big_plots=big_plots
-    #         #                                                    , ellipse_weights=ellipse_weights
-    #         #                                                    , ax_ew=ax_ew[idx // cols][idx % cols]
-    #         #                                                    , small_text = small_text)
-    #         top, bottom, left, right, hspace, wspace = 0.93, 0.07, 0.05, 0.95, 0.3, 0.3
-    #         fig.tight_layout()
-    #         fig.subplots_adjust(top=top, bottom=bottom, left=left, right=right, hspace=hspace, wspace=wspace)
-    #         fig_w.tight_layout()
-    #         fig_w.subplots_adjust(top=top, bottom=bottom, left=left, right=right, hspace=hspace, wspace=wspace)
-    #         # if ellipse_weights:
-    #         #     fig_ew.tight_layout()
-    #         #     fig_ew.subplots_adjust(top=top, bottom=bottom, left=left, right=right, hspace=hspace, wspace=wspace)
-    #         if save:
-    #             savename = Path(savefolder + '/azimuths_all.png')
-    #             savename_w = Path(savefolder + '/azimuths_WEIGHTED_all.png')
-    #             fig.savefig(savename, dpi=150)
-    #             fig_w.savefig(savename_w, dpi=150)
-    #             # if ellipse_weights:
-    #             #     savename_ew = Path(savefolder + '/azimuths_ELLIPSE_WEIGHTED_all.png')
-    #             #     fig_ew.savefig(savename_ew, dpi=150)
-    #     # elif ellipse_weights:
-    #     #     for idx, row in self.df.iterrows():
-    #     #         row['TargetAreaLines'].plot_azimuth(rose_type=rose_typesave=save, savefolder=savefolder, branches=branches
-    #     #                                    , ellipse_weights=ellipse_weights, small_text = small_text)
-    #     else:
-    #         for idx, row in self.df.iterrows():
-    #             row['TargetAreaLines'].plot_azimuth(rose_type=rose_typesave=save, savefolder=savefolder, branches=self.using_branches
-    #                                                 , small_text=small_text)
-
-    # def plot_unified_azimuths(self, save=False, savefolder='', big_plots=False):
-    #     branches = self.using_branches
-    #     if big_plots:
-    #         plot_count = len(self.uniframe)
-    #         if plot_count < 5:
-    #             plot_count = 5
-    #         cols = 4
-    #         rows = plot_count // cols + 1
-    #         width = 26
-    #         height = (width / cols) * (rows * 1.3)
-    #         fig, ax = plt.subplots(ncols=cols, nrows=rows, subplot_kw=dict(polar=True)
-    #                                , figsize=(width, height))
-    #         fig_w, ax_w = plt.subplots(ncols=cols, nrows=rows, subplot_kw=dict(polar=True)
-    #                                    , figsize=(width, height))
-    #         # if ellipse_weights:
-    #         #     fig_ew, ax_ew = plt.subplots(ncols=cols, nrows=rows, subplot_kw=dict(polar=True)
-    #         #                                  , figsize=(width, height))
-    #         for idx, row in self.uniframe.iterrows():
-    #             row['TargetAreaLines'].plot_azimuth(rose_type=rose_typesave=False, savefolder=savefolder, branches=branches
-    #                                        , big_plots=big_plots
-    #                                        , ax=ax[idx // cols][idx % cols]
-    #                                        , ax_w=ax_w[idx // cols][idx % cols])
-    #             # if ellipse_weights:
-    #             #     row['TargetAreaLines'].plot_azimuth(rose_type=rose_typesave=False, savefolder=savefolder, branches=branches
-    #             #                                , big_plots=big_plots
-    #             #                                , ellipse_weights=ellipse_weights
-    #             #                                , ax_ew=ax_ew[idx // cols][idx % cols])
-    #
-    #         top, bottom, left, right, hspace, wspace = 0.90, 0.07, 0.05, 0.95, 0.3, 0.3
-    #         fig.tight_layout()
-    #         fig.subplots_adjust(top=top, bottom=bottom, left=left, right=right, hspace=hspace, wspace=wspace)
-    #         fig_w.tight_layout()
-    #         fig_w.subplots_adjust(top=top, bottom=bottom, left=left, right=right, hspace=hspace, wspace=wspace)
-    #         # if ellipse_weights:
-    #         #     fig_ew.tight_layout()
-    #         #     fig_ew.subplots_adjust(top=0.93, bottom=0.07, left=0.08, right=0.92, hspace=0.25, wspace=0.3)
-    #         if save:
-    #             savename = Path(savefolder + '/azimuths_unified_all.png')
-    #             savename_w = Path(savefolder + '/azimuths_unified_WEIGHTED_all.png')
-    #             fig.savefig(savename, dpi=150)
-    #             fig_w.savefig(savename_w, dpi=150)
-    #             # if ellipse_weights:
-    #             #     savename_ew = Path(savefolder + '/azimuths_unified_ELLIPSE_WEIGHTED_all.png')
-    #             #     fig_ew.savefig(savename_ew, dpi=150)
-    #     # elif ellipse_weights:
-    #     #     for idx, row in self.uniframe.iterrows():
-    #     #         row['TargetAreaLines'].plot_azimuth(rose_type=rose_typesave=save, savefolder=savefolder, branches=branches
-    #     #                                    , ellipse_weights=ellipse_weights)
-    #     else:
-    #         for idx, row in self.uniframe.iterrows():
-    #             row['TargetAreaLines'].plot_azimuth(rose_type=rose_typesave=save, savefolder=savefolder, branches=branches)
-
     # noinspection PyArgumentList
     def determine_crosscut_abutting_relationships(self, unified: bool):
         """
@@ -728,7 +621,6 @@ class MultiTargetAreaQGIS:
             sets = self.set_df.Set.tolist()
 
             if len(sets) < 2:
-                # TODO: Move higher, to more abstract level
                 raise ValueError('Only one set defined. Cannot determine cross-cutting and abutting relationships')
             # COLOR CYCLE FOR BARS
 
@@ -745,7 +637,7 @@ class MultiTargetAreaQGIS:
                     #                                  f'\ntraceframe sets {traceframe.set.unique().tolist()}')
 
                     traceframe_two_sets = traceframe.loc[(traceframe['set'] == s) | (traceframe['set'] == c_s)]
-                    # TODO: More stats in age_relations?
+                    # TODO: More stats for cross-cutting and abutting relationships?
 
                     intersecting_nodes_frame = tools.get_nodes_intersecting_sets(xypointsframe, traceframe_two_sets)
 
@@ -767,19 +659,19 @@ class MultiTargetAreaQGIS:
                         if item[0][0] == 'X':
                             x_count = value
                         elif item[0][0] == 'Y':
-                            if item[0][1] == (s, c_s): # it's set s abutting in set c_s
+                            if item[0][1] == (s, c_s):  # it's set s abutting in set c_s
                                 y_count = value
-                            elif item[0][1] == (c_s, s): # it's set c_s abutting in set s
+                            elif item[0][1] == (c_s, s):  # it's set c_s abutting in set s
                                 y_reverse_count = value
                             else:
-                                raise ValueError(f'item[0][1] doesnt equal {(s, c_s)} nor {(c_s, s)}\nitem[0][1]: {item[0][1]}')
+                                raise ValueError(
+                                    f'item[0][1] doesnt equal {(s, c_s)} nor {(c_s, s)}\nitem[0][1]: {item[0][1]}')
                         else:
                             raise ValueError(f'item[0][0] doesnt match "X" or "Y"\nitem[0][0]: {item[0][0]}')
 
                     addition = {'name': name, 'sets': (s, c_s)
                         , 'x': x_count, 'y': y_count, 'y-reverse': y_reverse_count
                         , 'error-count': len(intersectframe.loc[intersectframe.error == True])}
-
 
                     relations_df = relations_df.append(addition, ignore_index=True)
         if unified:
@@ -872,7 +764,8 @@ class MultiTargetAreaQGIS:
                         xtick.set_fontsize(12)
 
                     ax.set_xlabel('Node type', fontweight='bold', fontsize=13, fontstyle='italic', fontfamily='Calibri')
-                    ax.set_ylabel('Node count', fontweight='bold', fontsize=13, fontstyle='italic', fontfamily='Calibri')
+                    ax.set_ylabel('Node count', fontweight='bold', fontsize=13, fontstyle='italic',
+                                  fontfamily='Calibri')
 
                     plt.subplots_adjust(wspace=0.3)
 
@@ -892,7 +785,6 @@ class MultiTargetAreaQGIS:
                 if save:
                     savename = Path(savefolder + f'/{name}_crosscutting_abutting_relationships.png')
                     plt.savefig(savename, dpi=200, bbox_inches='tight')
-
 
     def plot_xyi_ternary(self, unified: bool, save=False, savefolder=''):
         """
@@ -919,7 +811,7 @@ class MultiTargetAreaQGIS:
             color_for_plot = color_dict[row['TargetAreaNodes'].name]
             row['TargetAreaNodes'].plot_xyi_point(tax=tax, color_for_plot=color_for_plot)
         tools.tern_plot_the_fing_lines(tax)
-        tax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.15), title = 'XYI-Nodes', title_fontsize='xx-large',
+        tax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.15), title='XYI-Nodes', title_fontsize='xx-large',
                    prop={'family': 'Calibri', 'weight': 'heavy', 'size': 'x-large'}, edgecolor='black', ncol=2,
                    columnspacing=0.7, shadow=True)
         if save:
@@ -932,37 +824,8 @@ class MultiTargetAreaQGIS:
         # MAKE INDIVIDUAL XYI PLOTS
         for idx, row in frame.iterrows():
             color_for_plot = color_dict[row['TargetAreaNodes'].name]
-            row['TargetAreaNodes'].plot_xyi_plot(unified=unified, color_for_plot=color_for_plot, save=save, savefolder=savefolder)
-
-
-    # def plot_all_xyi(self, save=False, savefolder=''):
-    #     # MAKE INDIVIDUAL PLOTS
-    #     for idx, row in self.df.iterrows():
-    #         nd = row['TargetAreaNodes']
-    #         nd.plot_xyi(save=save, savefolder=savefolder)
-
-    # def plot_all_xyi_unified(self, save=False, savefolder=''):
-    #     for idx, row in self.uniframe.iterrows():
-    #         fig = plt.figure()
-    #         nd = row['TargetAreaNodes']
-    #         nd.plot_xyi(save=save, savefolder=savefolder)
-    #
-    #     fig, ax = plt.subplots(figsize=(8, 8))
-    #     scale = 100
-    #
-    #     fig, tax = ternary.figure(ax=ax, scale=scale)
-    #     tools.initialize_ternary_points(ax, tax)
-    #     for idx, row in self.uniframe.iterrows():
-    #         nd = row['TargetAreaNodes']
-    #         nd.plot_xyi_point(tax=tax)
-    #     tools.tern_plot_the_fing_lines(tax)
-    #     tax.legend(loc=(-0.10, 0.85), fontsize=20,
-    #                prop={'family': 'Times New Roman', 'weight': 'heavy'})
-    #
-    #     fig.subplots_adjust(top=0.8)
-    #     if save:
-    #         savename = Path(savefolder + '/all_xyi_points.png')
-    #         plt.savefig(savename, dpi=150)
+            row['TargetAreaNodes'].plot_xyi_plot(unified=unified, color_for_plot=color_for_plot, save=save,
+                                                 savefolder=savefolder)
 
     def plot_branch_ternary(self, unified: bool, save=False, savefolder=''):
         """
@@ -1004,53 +867,8 @@ class MultiTargetAreaQGIS:
 
         for _, row in frame.iterrows():
             color_for_plot = color_dict[row['TargetAreaLines'].name]
-            row['TargetAreaLines'].plot_branch_ternary_plot(unified=unified, color_for_plot=color_for_plot, save=True, savefolder=savefolder)
-
-
-    # def plot_all_branch_ternary_unified(self, save=False, savefolder=''):
-    #     if not self.using_branches:
-    #         raise Exception('Branch classifications cannot be determined from traces.')
-    #     fig, ax = plt.subplots(figsize=(8, 8))
-    #     scale = 100
-    #     fig, tax = ternary.figure(ax=ax, scale=scale)
-    #     tools.initialize_ternary_branches_points(ax, tax)
-    #     for idx, row in self.uniframe.iterrows():
-    #         ld = row['TargetAreaLines']
-    #         ld.plot_branch_ternary_point(tax=tax)
-    #     tools.tern_plot_branch_lines(tax)
-    #     tax.legend(loc=(-0.10, 0.85), fontsize=11,
-    #                prop={'family': 'Times New Roman', 'weight': 'heavy'})
-    #     plt.subplots_adjust(top=0.8)
-    #     if save:
-    #         savename = Path(savefolder + '/all_branch_points.png')
-    #         plt.savefig(savename, dpi=150)
-
-    # def plot_all_branch_ternary(self, save=False, savefolder=''):
-    #     if not self.using_branches:
-    #         raise Exception('Branch classifications cannot be determined from traces.')
-    #
-    #     scale = 100
-    #     for idx, row in self.df.iterrows():
-    #         fig, ax = plt.subplots(figsize=(8, 8))
-    #         fig, tax = ternary.figure(ax=ax, scale=scale)
-    #         tools.initialize_ternary_branches_points(ax, tax)
-    #         ld = row['TargetAreaLines']
-    #         ld.plot_branch_ternary_point(tax=tax)
-    #         # COUNTS
-    #         text = 'Amount of branches: ' + str(len(ld.lineframe_main)) \
-    #                + '\nC - C count: ' + str(len(ld.lineframe_main.loc[ld.lineframe_main.Connection == 'C - C'])) \
-    #                + '\nC - I count: ' + str(len(ld.lineframe_main.loc[ld.lineframe_main.Connection == 'C - I'])) \
-    #                + '\nI - I count: ' + str(len(ld.lineframe_main.loc[ld.lineframe_main.Connection == 'I - I']))
-    #
-    #         props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
-    #         ax.text(0.65, 1.05, text, transform=ax.transAxes, fontsize=18, weight='roman', verticalalignment='top',
-    #                 bbox=props,
-    #                 fontfamily='Times New Roman')
-    #         ax.legend(loc=(-0.15, 0.9), fontsize=25, prop={'family': 'Times New Roman', 'weight': 'heavy', 'size': 20})
-    #
-    #         if save:
-    #             savename = Path(savefolder + '/{}_branch_class.png'.format(ld.name))
-    #             plt.savefig(savename, dpi=150)
+            row['TargetAreaLines'].plot_branch_ternary_plot(unified=unified, color_for_plot=color_for_plot, save=True,
+                                                            savefolder=savefolder)
 
     def gather_topology_parameters(self, unified: bool):
         """
@@ -1122,116 +940,6 @@ class MultiTargetAreaQGIS:
             self.uniframe_topology_concat = pd.concat(frame.topology.tolist(), ignore_index=True)
         else:
             self.df_topology_concat = pd.concat(frame.topology.tolist(), ignore_index=True)
-
-    # def gather_topology_parameters_all(self):
-    #     branches = self.using_branches
-    #     self.df['topology'] = None
-    #     topology_appends = []
-    #     for idx, row in self.df.iterrows():
-    #         name = row.name
-    #         ld = row.TargetAreaLines
-    #         nd = row.TargetAreaNodes
-    #         params_ld = ld.topology_parameters_2d_branches(branches=branches)
-    #         params_nd = nd.topology_parameters_2d_nodes()
-    #         if branches:
-    #             fracture_intensity, aerial_frequency, characteristic_length \
-    #                 , dimensionless_intensity, number_of_lines, connection_dict = params_ld
-    #         else:
-    #             fracture_intensity, aerial_frequency, characteristic_length \
-    #                 , dimensionless_intensity, number_of_lines = params_ld
-    #
-    #         node_dict = params_nd
-    #
-    #         connections_per_line = 2 * (node_dict['Y'] + node_dict['X']) / number_of_lines
-    #         connections_per_branch = (3 * node_dict['Y'] + 4 * node_dict['X']) / number_of_lines
-    #         if branches:
-    #             topology_dict = {'name': name,
-    #                              'Number of Branches': number_of_lines,
-    #                              'C - C': connection_dict['C - C'],
-    #                              'C - I': connection_dict['C - I'],
-    #                              'I - I': connection_dict['I - I'],
-    #                              'X': node_dict['X'],
-    #                              'Y': node_dict['Y'],
-    #                              'I': node_dict['I'],
-    #                              'Mean Length': characteristic_length,
-    #                              'Connections per Branch': connections_per_branch,
-    #                              'Areal Frequency B20': aerial_frequency,
-    #                              'Fracture Intensity B21': fracture_intensity,
-    #                              'Dimensionless Intensity B22': dimensionless_intensity}
-    #         else:
-    #             topology_dict = {'name': name,
-    #                              'Number of Traces': number_of_lines,
-    #                              'X': node_dict['X'],
-    #                              'Y': node_dict['Y'],
-    #                              'I': node_dict['I'],
-    #                              'Mean Length': characteristic_length,
-    #                              'Connections per Trace': connections_per_line,
-    #                              'Areal Frequency P20': aerial_frequency,
-    #                              'Fracture Intensity P21': fracture_intensity,
-    #                              'Dimensionless Intensity P22': dimensionless_intensity}
-    #         topology_appends.append([idx, topology_dict])
-    #     for topology in topology_appends:
-    #         idx = topology[0]
-    #         topo = topology[1]
-    #         topoframe = pd.DataFrame()
-    #         topoframe = topoframe.append(topo, ignore_index=True)
-    #         self.df.topology[idx] = topoframe
-    #     self.df_topology_concat = pd.concat(self.df.topology.tolist(), ignore_index=True)
-    #
-    # def gather_topology_parameters_unified(self):
-    #     branches = self.using_branches
-    #     self.uniframe['topology'] = None
-    #     topology_appends = []
-    #     for idx, row in self.uniframe.iterrows():
-    #         name = row.name
-    #         ld = row.TargetAreaLines
-    #         nd = row.TargetAreaNodes
-    #         params_ld = ld.topology_parameters_2d_branches(branches=branches)
-    #         params_nd = nd.topology_parameters_2d_nodes()
-    #         if branches:
-    #             fracture_intensity, aerial_frequency, characteristic_length \
-    #                 , dimensionless_intensity, number_of_lines, connection_dict = params_ld
-    #         else:
-    #             fracture_intensity, aerial_frequency, characteristic_length \
-    #                 , dimensionless_intensity, number_of_lines = params_ld
-    #
-    #         node_dict = params_nd
-    #
-    #         connections_per_line = 2 * (node_dict['Y'] + node_dict['X']) / number_of_lines
-    #         connections_per_branch = (3 * node_dict['Y'] + 4 * node_dict['X']) / number_of_lines
-    #         if branches:
-    #             topology_dict = {'name': name,
-    #                              'Number of Branches': number_of_lines,
-    #                              'C - C': connection_dict['C - C'],
-    #                              'C - I': connection_dict['C - I'],
-    #                              'I - I': connection_dict['I - I'],
-    #                              'X': node_dict['X'],
-    #                              'Y': node_dict['Y'],
-    #                              'I': node_dict['I'],
-    #                              'Mean Length': characteristic_length,
-    #                              'Connections per Branch': connections_per_branch,
-    #                              'Areal Frequency B20': aerial_frequency,
-    #                              'Fracture Intensity B21': fracture_intensity,
-    #                              'Dimensionless Intensity B22': dimensionless_intensity}
-    #         else:
-    #             topology_dict = {'name': name,
-    #                              'Number of Traces': number_of_lines,
-    #                              'X': node_dict['X'],
-    #                              'Y': node_dict['Y'],
-    #                              'I': node_dict['I'],
-    #                              'Mean Length': characteristic_length,
-    #                              'Connections per Trace': connections_per_line,
-    #                              'Areal Frequency P20': aerial_frequency,
-    #                              'Fracture Intensity P21': fracture_intensity,
-    #                              'Dimensionless Intensity P22': dimensionless_intensity}
-    #         topology_appends.append([idx, topology_dict])
-    #     for topology in topology_appends:
-    #         idx = topology[0]
-    #         topo = topology[1]
-    #         topoframe = pd.DataFrame()
-    #         topoframe = topoframe.append(topo, ignore_index=True)
-    #         self.uniframe.topology[idx] = topoframe
-    #     self.uniframe_topology_concat = pd.concat(self.uniframe.topology.tolist(), ignore_index=True)
 
     def plot_topology(self, unified: bool, save=False, savefolder=''):
         """
@@ -1324,136 +1032,6 @@ class MultiTargetAreaQGIS:
                 else:
                     savename = Path(savefolder + '/{}_all.png'.format(str(column)))
                 plt.savefig(savename, dpi=150)
-
-    # def plot_topology_all(self, save=False, savefolder=''):
-    #     branches = self.using_branches
-    #     log_scale_columns = ['Mean Length', 'Areal Frequency B20',
-    #                          'Fracture Intensity B21', 'Fracture Intensity P21', 'Areal Frequency P20']
-    #     prop = templates.styled_prop
-    #     units_for_columns = templates.units_for_columns
-    #     topology_concat = self.df_topology_concat
-    #     # topology_concat['color'] = topology_concat.name.apply(tools.find_color_topology_plot)
-    #     # topology_concat['order'] = topology_concat.name.apply(tools.find_order_topology_plot)
-    #     # topology_concat = topology_concat.sort_values(by='order', axis=0)
-    #     if branches:
-    #         columns_to_plot = ['Mean Length', 'Connections per Branch',
-    #                            'Areal Frequency B20', 'Fracture Intensity B21',
-    #                            'Dimensionless Intensity B22']
-    #     else:
-    #         columns_to_plot = ['Mean Length', 'Connections per Trace',
-    #                            'Areal Frequency P20', 'Fracture Intensity P21',
-    #                            'Dimensionless Intensity P22']
-    #
-    #     for column in columns_to_plot:
-    #         fig, ax = plt.subplots(figsize=(9, 9))
-    #         topology_concat.name = topology_concat.name.astype('category')
-    #         topology_concat.plot.bar(x='name', y=column,
-    #                                  zorder=5, alpha=0.9, width=0.6, ax=ax, label='error')
-    #         # PLOT STYLING
-    #         ax.set_xlabel('')
-    #         ax.set_ylabel(column + ' ' + f'({units_for_columns[column]})', fontsize=28, fontfamily='Times New Roman'
-    #                       , style='italic')
-    #         ax.set_title(x=0.5, y=1.1, label=column, fontsize=29,
-    #                      bbox=prop, transform=ax.transAxes)
-    #         legend = ax.legend()
-    #         legend.remove()
-    #         if column in log_scale_columns:
-    #             ax.set_yscale('log')
-    #         fig.subplots_adjust(top=0.85, bottom=0.35, left=0.2, right=0.95, hspace=0.2, wspace=0.2)
-    #         locs, labels = plt.xticks()
-    #         plt.yticks(fontsize=28, c='black')
-    #         for label in labels:
-    #             label._text = label._text.replace('_', '\n')
-    #         plt.xticks(locs, labels, fontsize=28, c='black')
-    #         # MOD xTICKS
-    #         # CHANGE LEGEND HANDLES WITHOUT CHANGEING PLOT
-    #         # for t in xticks:
-    #         #     lh._sizes = [30]
-    #
-    #         # VALUES IN BARS
-    #         rects = ax.patches
-    #         for value, rect in zip(topology_concat[column], rects):
-    #             height = rect.get_height()
-    #             if value > 0.01:
-    #                 value = round(value, 2)
-    #             else:
-    #                 value = '{0:.2e}'.format(value)
-    #             if column in log_scale_columns:
-    #                 height = height + height / 10
-    #             else:
-    #                 max_height = max([r.get_height() for r in rects])
-    #                 height = height + max_height / 100
-    #             ax.text(rect.get_x() + rect.get_width() / 2, height, value,
-    #                     ha='center', va='bottom', zorder=10, fontsize=25)
-    #
-    #         if save:
-    #             savename = Path(savefolder + '/{}_all.png'.format(str(column)))
-    #             plt.savefig(savename, dpi=150)
-
-    # def plot_topology_unified(self, save=False, savefolder=''):
-    #     branches = self.using_branches
-    #     log_scale_columns = ['Mean Length', 'Areal Frequency B20',
-    #                          'Fracture Intensity B21', 'Fracture Intensity P21', 'Areal Frequency P20']
-    #     prop = templates.styled_prop
-    #     units_for_columns = templates.units_for_columns
-    #     topology_concat = self.uniframe_topology_concat
-    #     # topology_concat['color'] = topology_concat.name.apply(tools.find_color_topology_plot)
-    #     # topology_concat['order'] = topology_concat.name.apply(tools.find_order_topology_plot)
-    #     # topology_concat = topology_concat.sort_values(by='order', axis=0)
-    #     if branches:
-    #         columns_to_plot = ['Mean Length', 'Connections per Branch',
-    #                            'Areal Frequency B20', 'Fracture Intensity B21',
-    #                            'Dimensionless Intensity B22']
-    #     else:
-    #         columns_to_plot = ['Mean Length', 'Connections per Trace',
-    #                            'Areal Frequency P20', 'Fracture Intensity P21',
-    #                            'Dimensionless Intensity P22']
-    #
-    #     for column in columns_to_plot:
-    #         fig, ax = plt.subplots(figsize=(9, 9))
-    #         topology_concat.name = topology_concat.name.astype('category')
-    #         topology_concat.plot.bar(x='name', y=column,
-    #                                  zorder=5, alpha=0.9, width=0.6, ax=ax, label='error')
-    #         # PLOT STYLING
-    #         ax.set_xlabel('')
-    #         ax.set_ylabel(column + ' ' + f'({units_for_columns[column]})', fontsize=28, fontfamily='Times New Roman'
-    #                       , style='italic')
-    #         ax.set_title(x=0.5, y=1.1, label=column, fontsize=29,
-    #                      bbox=prop, transform=ax.transAxes)
-    #         legend = ax.legend()
-    #         legend.remove()
-    #         if column in log_scale_columns:
-    #             ax.set_yscale('log')
-    #         fig.subplots_adjust(top=0.85, bottom=0.35, left=0.2, right=0.95, hspace=0.2, wspace=0.2)
-    #         locs, labels = plt.xticks()
-    #         plt.yticks(fontsize=28, c='black')
-    #         for label in labels:
-    #             label._text = label._text.replace('_', '\n')
-    #         plt.xticks(locs, labels, fontsize=28, c='black')
-    #         # MOD xTICKS
-    #         # CHANGE LEGEND HANDLES WITHOUT CHANGEING PLOT
-    #         # for t in xticks:
-    #         #     lh._sizes = [30]
-    #
-    #         # VALUES IN BARS
-    #         rects = ax.patches
-    #         for value, rect in zip(topology_concat[column], rects):
-    #             height = rect.get_height()
-    #             if value > 0.01:
-    #                 value = round(value, 2)
-    #             else:
-    #                 value = '{0:.2e}'.format(value)
-    #             if column in log_scale_columns:
-    #                 height = height + height / 10
-    #             else:
-    #                 max_height = max([r.get_height() for r in rects])
-    #                 height = height + max_height / 100
-    #             ax.text(rect.get_x() + rect.get_width() / 2, height, value,
-    #                     ha='center', va='bottom', zorder=10, fontsize=25)
-    #
-    #         if save:
-    #             savename = Path(savefolder + '/{}_all.png'.format(str(column)))
-    #             plt.savefig(savename, dpi=150)
 
     def plot_hexbin_plot(self, unified: bool, save=False, savefolder=''):
         """

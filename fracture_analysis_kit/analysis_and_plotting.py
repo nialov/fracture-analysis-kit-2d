@@ -3,91 +3,8 @@ Handles analysis and plotting using a MultiTargetAreaAnalysis class. Analysis (i
 and plotting have been separated into two different methods.
 """
 
-
-from fracture_analysis_kit import qgis_tools as qgis_tools, multiple_target_areas as mta
 import config
-
-# from . import fracture_analysis_kit_qgis_tools as qgis_tools
-# from .kit_resources import multiple_target_areas as mta
-# # from .kit_resources import layers_to_pandas as lap
-# from .kit_resources import target_area as ta
-# from .. import config
-
-
-# class TargetAreaAnalysis:
-#     def __init__(
-#             self, plotting_directory, name, trace_layer, branch_layer, node_layer, area_layer
-#     ):
-#         self.plotting_directory = plotting_directory
-#         self.name = name
-#
-#         self.trace_layer = trace_layer
-#         self.branch_layer = branch_layer
-#         self.node_layer = node_layer
-#         self.area_layer = area_layer
-#
-#         # Initialize frames
-#         self.trace_frame = None
-#         self.branch_frame = None
-#         self.node_frame = None
-#         self.area_frame = None
-#         # Initialize target areas
-#         self.trace_ta = None
-#         self.branch_ta = None
-#         self.node_ta = None
-#         self.area_ta = None
-#         # Populate frames and target areas
-#         self.geopandafy()
-#         self.initialize_tas()
-#
-#     def geopandafy(self):
-#         self.trace_frame = qgis_tools.df_to_gdf(df=qgis_tools.layer_to_df(self.trace_layer)[0],
-#                                                 coord_system=qgis_tools.layer_to_df(self.trace_layer)[1])
-#         self.branch_frame = qgis_tools.df_to_gdf(df=qgis_tools.layer_to_df(self.branch_layer)[0],
-#                                                  coord_system=qgis_tools.layer_to_df(self.branch_layer)[1])
-#         self.node_frame = qgis_tools.df_to_gdf(df=qgis_tools.layer_to_df(self.node_layer)[0],
-#                                                coord_system=qgis_tools.layer_to_df(self.node_layer)[1])
-#         self.area_frame = qgis_tools.df_to_gdf(df=qgis_tools.layer_to_df(self.area_layer)[0],
-#                                                coord_system=qgis_tools.layer_to_df(self.area_layer)[1])
-#
-#     def initialize_tas(self):
-#         self.trace_ta = ta.TargetAreaLines(
-#             self.trace_frame,
-#             self.area_frame,
-#             name=self.name,
-#             group=self.name,
-#             cut_off=1.0,
-#             using_branches=False,
-#         )
-#         self.branch_ta = ta.TargetAreaLines(
-#             self.branch_frame,
-#             self.area_frame,
-#             name=self.name,
-#             group=self.name,
-#             cut_off=1.0,
-#             using_branches=True,
-#         )
-#         self.node_ta = ta.TargetAreaNodes(
-#             self.node_frame,
-#             name=self.name,
-#             group=self.name,
-#         )
-#
-#         # Calculates important attributes
-#         self.trace_ta.calc_attributes()
-#         self.branch_ta.calc_attributes()
-#
-#         # Defines sets
-#         self.trace_ta.define_sets()
-#         self.branch_ta.define_sets()
-#
-#     # Create folder structure for plots
-#
-#
-#     def plots(self):
-#         self.trace_ta.plot_length_distribution(save=True, savefolder=self.plotting_directory)
-#         self.branch_ta.calc_anisotropy()
-#         self.branch_ta.plot_anisotropy_styled(for_ax=False, ax=None, save=True, save_folder=self.plotting_directory)
+from fracture_analysis_kit import qgis_tools as qgis_tools, multiple_target_areas as mta
 
 
 class MultiTargetAreaAnalysis:
@@ -123,6 +40,12 @@ class MultiTargetAreaAnalysis:
         self.layer_table_df['Area_frame'] = self.layer_table_df['Area'].apply(qgis_tools.layer_to_gdf)
         self.layer_table_df['Node_frame'] = self.layer_table_df['Node'].apply(qgis_tools.layer_to_gdf)
 
+        # Check if cross-cutting and abutting relationships can be determined
+        if len(self.set_df) < 2:
+            self.determine_relationships = False
+        else:
+            self.determine_relationships = False
+
     def analysis(self):
         """
         Method that runs analysis i.e. heavy calculations for trace, branch and node data.
@@ -133,7 +56,8 @@ class MultiTargetAreaAnalysis:
         self.analysis_traces = mta.MultiTargetAreaQGIS(self.layer_table_df, self.group_names_cutoffs_df, branches=False)
         # Bar at 25
 
-        self.analysis_branches = mta.MultiTargetAreaQGIS(self.layer_table_df, self.group_names_cutoffs_df, branches=True)
+        self.analysis_branches = mta.MultiTargetAreaQGIS(self.layer_table_df, self.group_names_cutoffs_df,
+                                                         branches=True)
         # Bar at 45
 
         # TRACE DATA SETUP
@@ -151,8 +75,9 @@ class MultiTargetAreaAnalysis:
         self.analysis_traces.gather_topology_parameters(unified=True)
 
         # Cross-cutting and abutting relationships
-        self.analysis_traces.determine_crosscut_abutting_relationships(unified=False)
-        self.analysis_traces.determine_crosscut_abutting_relationships(unified=True)
+        if self.determine_relationships:
+            self.analysis_traces.determine_crosscut_abutting_relationships(unified=False)
+            self.analysis_traces.determine_crosscut_abutting_relationships(unified=True)
 
         # BRANCH DATA SETUP
         self.analysis_branches.calc_attributes_for_all()
@@ -194,7 +119,7 @@ class MultiTargetAreaAnalysis:
         # self.analysis_branches.plot_xyi(unified=True, save=True,
         #                                 savefolder=self.plotting_directory + "/xyi")
         self.analysis_branches.plot_xyi_ternary(unified=False, save=True,
-                                        savefolder=self.plotting_directory + "/xyi")
+                                                savefolder=self.plotting_directory + "/xyi")
         self.analysis_branches.plot_xyi_ternary(unified=True, save=True,
                                                 savefolder=self.plotting_directory + "/xyi")
 
@@ -239,9 +164,9 @@ class MultiTargetAreaAnalysis:
 
         # Azimuths
         self.analysis_traces.plot_azimuths_weighted(unified=False, save=True,
-                                                      savefolder=self.plotting_directory + '/azimuths/indiv')
+                                                    savefolder=self.plotting_directory + '/azimuths/indiv')
         self.analysis_traces.plot_azimuths_weighted(unified=True, save=True,
-                                                      savefolder=self.plotting_directory + '/azimuths')
+                                                    savefolder=self.plotting_directory + '/azimuths')
         # self.analysis_traces.plot_azimuths(unified=False, rose_type='equal-radius', save=True
         #                                    , savefolder=self.plotting_directory + '/azimuths/equal_radius/traces')
         # self.analysis_traces.plot_azimuths(unified=True, rose_type='equal-radius', save=True
@@ -262,17 +187,17 @@ class MultiTargetAreaAnalysis:
                                               savefolder=self.plotting_directory + '/hexbinplots')
 
         # ---------------unique for traces-------------------
-        # TODO: Fix for age relations single ax, put data into multiple images?
-        # TODO: Fix whole age analysis
 
         # Cross-cutting and abutting relationships
-        self.analysis_traces.plot_crosscut_abutting_relationships(unified=False, save=True, savefolder=self.plotting_directory + '/age_relations/indiv')
-        self.analysis_traces.plot_crosscut_abutting_relationships(unified=True, save=True, savefolder=self.plotting_directory + '/age_relations')
+        if self.determine_relationships:
+            self.analysis_traces.plot_crosscut_abutting_relationships(unified=False, save=True,
+                                                                      savefolder=self.plotting_directory + '/age_relations/indiv')
+            self.analysis_traces.plot_crosscut_abutting_relationships(unified=True, save=True,
+                                                                      savefolder=self.plotting_directory + '/age_relations')
         #
         # if self.layer_table_df.shape[0] > 1:
         #     self.analysis_traces.plot_xy_age_relations_all(save=True, savefolder=self.plotting_directory + '/age_relations/indiv')
         #     self.analysis_traces.plot_xy_age_relations_unified(save=True, savefolder=self.plotting_directory + '/age_relations')
 
-        # TODO: big plot for violins + legend?
+        # TODO: Curviness
         # self.analysis_traces.plot_curviness_for_unified(violins=True, save=True, savefolder=self.plotting_directory + '/curviness/traces')
-
