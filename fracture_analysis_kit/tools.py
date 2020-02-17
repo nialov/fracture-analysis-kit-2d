@@ -664,7 +664,7 @@ def length_distribution_plot_with_fit(length_distribution):
         raise Exception('Too many values from np.polyfit, 2 expected')
     y_fit = np.exp(m * lineframe['logLen'].values + c)  # calculate the fitted values of y
     lineframe['y_fit'] = y_fit
-    lineframe.plot(x='length', y='y_fit', c='k', ax=ax)
+    lineframe.plot(x='length', y='y_fit', color='k', ax=ax)
 
     ax.set_xlim(ld.left, ld.right)
     ax.set_ylim(ld.bottom, ld.top)
@@ -1326,7 +1326,7 @@ def plot_azimuths_sub_plot(lineframe, ax, filename, weights, striations=False, s
         arrow_len = two_halves.max() - 10
         ax.vlines(np.deg2rad(mean_striation), 0, arrow_len, zorder=5, colors=['blue'], alpha=0.8)
         ax.vlines(np.deg2rad(mean_striation + 180), 0, arrow_len, zorder=5, colors=['blue'], alpha=0.8)
-        ax.scatter(np.deg2rad(mean_striation), arrow_len, marker=(3, 0, arrow_dir), s=500, zorder=6, c='blue')
+        ax.scatter(np.deg2rad(mean_striation), arrow_len, marker=(3, 0, arrow_dir), s=500, zorder=6, color='blue')
 
 
 # Methods for cross.cutting and abutting relationship spatial calculations
@@ -1542,7 +1542,7 @@ def initialize_ternary_points(ax, tax):
     tax.get_axes().axis('off')
     fontsize = 25
     fdict = {'path_effects': [path_effects.withStroke(linewidth=3, foreground='k')]
-        , 'c': 'w', 'family': 'Calibri', 'size': fontsize, 'weight': 'bold'}
+        , 'color': 'white', 'family': 'Calibri', 'size': fontsize, 'weight': 'bold'}
     ax.text(-0.1, -0.03, 'Y', transform=ax.transAxes, fontdict=fdict)
     ax.text(1.03, -0.03, 'X', transform=ax.transAxes, fontdict=fdict)
     ax.text(0.5, 1.07, 'I', transform=ax.transAxes, fontdict=fdict, ha='center')
@@ -1560,7 +1560,7 @@ def initialize_ternary_branches_points(ax, tax):
     tax.get_axes().axis('off')
     fontsize = 20
     fdict = {'path_effects': [path_effects.withStroke(linewidth=3, foreground='k')]
-    , 'c': 'w', 'family': 'Calibri', 'size': fontsize, 'weight': 'bold'}
+    , 'color': 'w', 'family': 'Calibri', 'size': fontsize, 'weight': 'bold'}
     ax.text(-0.1, -0.06, 'I - C', transform=ax.transAxes, fontdict=fdict)
     ax.text(1.0, -0.06, 'C - C', transform=ax.transAxes, fontdict=fdict)
     ax.text(0.5, 1.07, 'I - I', transform=ax.transAxes, fontdict=fdict, ha='center')
@@ -1593,8 +1593,8 @@ def setup_ax_for_ld(ax_for_setup, using_branches):
     ax.set_ylabel('Complementary Cumulative Number '+ccm_unit, fontsize='xx-large', fontfamily='Calibri'
                   , style='italic')
     # TICKS
-    plt.xticks(c='black', fontsize='x-large')
-    plt.yticks(c='black', fontsize='x-large')
+    plt.xticks(color='black', fontsize='x-large')
+    plt.yticks(color='black', fontsize='x-large')
     plt.tick_params(axis='both', width=1.2)
     # LEGEND
     handles, labels = ax.get_legend_handles_labels()

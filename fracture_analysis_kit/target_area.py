@@ -644,7 +644,7 @@ class TargetAreaLines:
         tools.initialize_ternary_branches_points(ax, tax)
         # tax.scatter(point, marker='X', color='black', alpha=1, zorder=3, s=210)
 
-        tax.scatter(point, marker='X', label=self.name, alpha=1, zorder=4, s=125, c=color_for_plot)
+        tax.scatter(point, marker='X', label=self.name, alpha=1, zorder=4, s=125, color=color_for_plot)
         tools.tern_plot_branch_lines(tax)
         tax.legend(loc='upper center', bbox_to_anchor=(0.1, 1.05),
                    prop={'family': 'Calibri', 'weight': 'heavy', 'size': 'x-large'}, edgecolor='black', ncol=2, columnspacing=0.7, shadow=True)
@@ -676,7 +676,7 @@ class TargetAreaLines:
 
         point = [(ccp, iip, cip)]
         # tax.scatter(point, marker='X', color='black', alpha=1, zorder=3, s=210)
-        tax.scatter(point, marker='X', label=self.name, alpha=1, zorder=4, s=125, c=color_for_plot)
+        tax.scatter(point, marker='X', label=self.name, alpha=1, zorder=4, s=125, color=color_for_plot)
 
     # def calc_ellipse_weights(self, a, b, phi):
     #     self.lineframe_main = tools.calc_ellipse_weight(self.lineframe_main, a, b, phi)
@@ -730,7 +730,7 @@ class TargetAreaLines:
             ax.annotate('', xy=(theta, r), xytext=(theta, 0)
                         , arrowprops=dict(edgecolor='black', facecolor='seashell', shrink=0.03, linewidth=1.5))
         ax.scatter([np.deg2rad(angles_value) for angles_value in angles], double_anisotropy
-                   , marker='o', c='black', zorder=9, s=20)
+                   , marker='o', color='black', zorder=9, s=20)
         # NO AXES
         ax.axis('off')
         # CREATE CURVED STRUCTURE AROUND SCATTER AND ARROWS
@@ -810,7 +810,7 @@ class TargetAreaNodes:
                 bbox=prop,
                 fontfamily='Calibri', ha='center')
 
-        tax.scatter(point, s=50, marker='o', label=self.name, alpha=1, zorder=4, c=color_for_plot)
+        tax.scatter(point, s=50, marker='o', label=self.name, alpha=1, zorder=4, color=color_for_plot)
         tax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.15),
                    prop={'family': 'Calibri', 'weight': 'heavy', 'size': 'x-large'}, edgecolor='black', ncol=2,
                    columnspacing=0.7, shadow=True)
@@ -840,7 +840,7 @@ class TargetAreaNodes:
         ip = 100 * icount / sumcount
         point = [(xp, ip, yp)]
         # Plotting
-        tax.scatter(point, marker='o', label=self.name, alpha=1, zorder=4, s=50, c=color_for_plot)
+        tax.scatter(point, marker='o', label=self.name, alpha=1, zorder=4, s=50, color=color_for_plot)
 
     def topology_parameters_2d_nodes(self):
         """

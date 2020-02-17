@@ -290,7 +290,7 @@ class MultiTargetAreaQGIS:
                              f'vals: {vals}')
         y_fit = np.exp(m * lineframe['logLen'].values + c)  # calculate the fitted values of y
         lineframe['y_fit'] = y_fit
-        lineframe.plot(x='length', y='y_fit', c='k', ax=ax, label='Power Law Fit', linestyle='dashed', linewidth=2, alpha=.8)
+        lineframe.plot(x='length', y='y_fit', color='k', ax=ax, label='Power Law Fit', linestyle='dashed', linewidth=2, alpha=.8)
         create_text(lineframe, ax)
 
     def plot_lengths(self, unified: bool, save=False, savefolder='', use_sets=False):
@@ -1295,8 +1295,8 @@ class MultiTargetAreaQGIS:
             fig.subplots_adjust(top=0.85, bottom=0.25, left=0.2)
             locs, labels = plt.xticks()
             labels = ['\n'.join(wrap(l.get_text(), 6)) for l in labels]
-            plt.yticks(fontsize='xx-large', c='black')
-            plt.xticks(locs, labels, fontsize='xx-large', c='black')
+            plt.yticks(fontsize='xx-large', color='black')
+            plt.xticks(locs, labels, fontsize='xx-large', color='black')
             # MOD xTICKS
             # CHANGE LEGEND HANDLES WITHOUT CHANGING PLOT
             # for t in xticks:

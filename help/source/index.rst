@@ -19,27 +19,6 @@ This plugin uses three types of vector data as inputs: *traces*, *branches* and 
 Traces can be manually or automatically digitized GIS polyline features from e.g. 
 Light Detection And Ranging (LiDAR) digital elevation models (DEMs)
 or from drone orthophotography of bedrock outcrop surfaces. 
-The plugin doesn't discriminate between traces extracted using different datasets.
-
-Both branches and nodes are derived from :ref:`ngt`. 
-For their definition along with the definition of the plots and the plotted parameters, 
-I refer you to multiple sources. Sources are in order of importance.
-
-* Nyberg et al., 2018
-
-	* NetworkGT Plugin introduction and guide.
-* Sanderson and Nixon, 2015
-
-	* Trace and branch size, abundance and topological parameter definitions.
-* My Master's Thesis, Ovaskainen, 2020
-
-	* Plots used in my Thesis were done with an older version of the same code used for this plugin.
-* Sanderson and Peacock, 2020
-
-	* Information about rose plots.
-* Bonnet et al., 2001
-
-	* Length distribution modelling.
 
 
 Example plots
@@ -78,6 +57,52 @@ Plugin has **only** been tested on Windows. No functionality on other platforms 
 
 External Python module installation
 -----------------------------------
+First we will install Fiona. Due to QGIS bugs, this cannot be done automatically through pip instead we need to download the module ourselves.
+Go to: https://www.lfd.uci.edu/~gohlke/pythonlibs/#fiona and download either:
+
+* Fiona-1.8.13-cp37-cp37m-win_amd64.whl (64x bit OS)
+* Fiona-1.8.13-cp37-cp37m-win32.whl (32x bit OS)
+
+Next up: Start up OSGeo4W Shell as **administrator** (**Important!**). This should pop up by searching in Windows start up menu 
+(Press windows key on your keyboard and type OSGeo4W Shell). To install the just downloaded file, 
+the OSGeo4W Shell must be in the same directory as the file. Go to where your Fiona-...-.whl file is downloaded and copy the url (Example URL: ).
+Next up, we'll change the OSGeo4W Shell location by typing::
+	
+	cd /D *paste your url here without the asterisks*
+
+Good. The Fiona installation depends on which version of Fiona you downloaded. E.g. if you have the 64x bit version, use this::
+
+	python -m pip install Fiona-1.8.13-cp37-cp37m-win_amd64.whl
+	
+Else if you have the 32x bit version, use this::
+
+	python -m pip install Fiona-1.8.13-cp37-cp37m-win32.whl
+
+Hopefully the installation succeeds without issues. Next up we will install *geopandas*. Type in the OSGeo4W Shell::
+
+	python -m pip install geopandas
+	
+Next, we will install *python-ternary*. Type in the OSGeo4W Shell::
+	
+	python -m pip install python-ternary
+	
+Next, we will install *sklearn*. Type in the OSGeo4W Shell::
+	
+	python -m pip install sklearn
+
+Next, we will install *seaborn*. Type in the OSGeo4W Shell::
+	
+	python -m pip install seaborn
+
+**And we are done!**
+
+
+
+Plugin installation from .zip file
+-----------------------------------
+After installing Python modules, you may install the plugin in QGIS.
+Go to *Plugins* -> *Manage and Install Plugins...* and choose *Install from ZIP*. Find the .zip file with the plugin and install.
+
 
 
 **Help**
@@ -87,6 +112,31 @@ External Python module installation
 
 **Dependencies and References**
 ===============================
+
+References
+----------
+
+Both branches and nodes are derived from :ref:`ngt`. 
+For their definition along with the definition of the plots and the plotted parameters, 
+I refer you to multiple sources. Sources are in order of importance.
+
+* `Nyberg et al., 2018 <https://pubs.geoscienceworld.org/gsa/geosphere/article/531129/networkgt-a-gis-tool-for-geometric-and-topological>`_
+
+	* *NetworkGT Plugin introduction and guide.*
+* `Sanderson and Nixon, 2015 <https://www.sciencedirect.com/science/article/pii/S0191814115000152>`_
+
+	* *Trace and branch size, abundance and topological parameter definitions.*
+* My Master's Thesis, Ovaskainen, 2020
+
+	* *Plots used in my Thesis were done with an older version of the same code used for this plugin.*
+* `Sanderson and Peacock, 2020 <https://www.sciencedirect.com/science/article/abs/pii/S001282521930594X>`_
+
+	* *Information about rose plots.*
+* `Bonnet et al., 2001 <https://agupubs.onlinelibrary.wiley.com/doi/abs/10.1029/1999RG000074>`_
+
+	* *Length distribution modelling.*
+	
+
 
 .. _ngt:
 

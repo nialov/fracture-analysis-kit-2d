@@ -34,7 +34,7 @@ angles_for_examination = np.arange(0, 179, 30)
 
 # Dictionary for styled text
 styled_text_dict = {'path_effects': [patheffects.withStroke(linewidth=3, foreground='k')]
-    , 'c': 'w'}
+    , 'color': 'white'}
 
 # Dictionary for a styled prop
 styled_prop = dict(boxstyle='round', pad=0.6, facecolor='wheat',
