@@ -13,7 +13,6 @@ from two-dimensional GIS polylines along with their topological branches and nod
 The results will be given as graphical plots.
 
 The plugin is **experimental** and installation requires the **manual installation** of a few external python libraries. 
-Installation requirements and guide below.
 
 This plugin uses three types of vector data as inputs: *traces*, *branches* and *nodes*. 
 Traces can be manually or automatically digitized GIS polyline features from e.g. 
@@ -50,62 +49,15 @@ Example plots
 **Installation**
 ==================
 
-Requirements
-------------
+The plugin is **experimental** and installation requires the **manual installation** of a few external Python libraries. 
+Installation requirements and guide below. Start by installing the external Python libraries.
 
-Plugin has **only** been tested on Windows. No functionality on other platforms guaranteed.
+.. toctree::
+   :maxdepth: 2
+   
+   installation
 
-External Python module installation
------------------------------------
-First we will install Fiona. Due to QGIS bugs, this cannot be done automatically through pip instead we need to download the module ourselves.
-Go to: https://www.lfd.uci.edu/~gohlke/pythonlibs/#fiona and download either:
-
-* Fiona-1.8.13-cp37-cp37m-win_amd64.whl (64x bit OS)
-* Fiona-1.8.13-cp37-cp37m-win32.whl (32x bit OS)
-
-Next up: Start up OSGeo4W Shell as **administrator** (**Important!**). This should pop up by searching in Windows start up menu 
-(Press windows key on your keyboard and type OSGeo4W Shell). To install the just downloaded file, 
-the OSGeo4W Shell must be in the same directory as the file. Go to where your Fiona-...-.whl file is downloaded and copy the url (Example URL: ).
-Next up, we'll change the OSGeo4W Shell location by typing::
-	
-	cd /D *paste your url here without the asterisks*
-
-Good. The Fiona installation depends on which version of Fiona you downloaded. E.g. if you have the 64x bit version, use this::
-
-	python -m pip install Fiona-1.8.13-cp37-cp37m-win_amd64.whl
-	
-Else if you have the 32x bit version, use this::
-
-	python -m pip install Fiona-1.8.13-cp37-cp37m-win32.whl
-
-Hopefully the installation succeeds without issues. Next up we will install *geopandas*. Type in the OSGeo4W Shell::
-
-	python -m pip install geopandas
-	
-Next, we will install *python-ternary*. Type in the OSGeo4W Shell::
-	
-	python -m pip install python-ternary
-	
-Next, we will install *sklearn*. Type in the OSGeo4W Shell::
-	
-	python -m pip install sklearn
-
-Next, we will install *seaborn*. Type in the OSGeo4W Shell::
-	
-	python -m pip install seaborn
-
-**And we are done!**
-
-
-
-Plugin installation from .zip file
------------------------------------
-After installing Python modules, you may install the plugin in QGIS.
-Go to *Plugins* -> *Manage and Install Plugins...* and choose *Install from ZIP*. Find the .zip file with the plugin and install.
-
-
-
-**Help**
+**Usage Help**
 ==================
 
 
@@ -157,21 +109,27 @@ and branch and node data from both *should* be valid inputs into this plugin (*a
 .. _Nyberg2018: https://pubs.geoscienceworld.org/gsa/geosphere/article/531129/networkgt-a-gis-tool-for-geometric-and-topological
 __ Nyberg2018_
 
-.. _external_python_modules:
+.. _external_Python_modules:
 
 External Python modules
 -----------------------
 This plugin is dependant on external Python libraries (and their subsequent dependancies) that are not installed by default in QGIS. 
 
+* GDAL_
+* Fiona_
 * geopandas_
-* python-ternary_
-* todo
+* Python-ternary_
+* sklearn_
+* seaborn_
 
 See :ref:`installation` for installation guide.
 
 .. _geopandas: https://geopandas.org/
-.. _python-ternary: https://github.com/marcharper/python-ternary
-
+.. _Python-ternary: https://github.com/marcharper/Python-ternary
+.. _GDAL: https://gdal.org/
+.. _Fiona: https://fiona.readthedocs.io/en/latest/
+.. _sklearn: https://scikit-learn.org/stable/index.html
+.. _seaborn: https://seaborn.pydata.org/index.html
 
 **Doc**
 ==================
