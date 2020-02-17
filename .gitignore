@@ -80,3 +80,11 @@ atlassian-ide-plugin.xml
 /i18n/
 /fracture_analysis_kit/.idea/
 /fracture_analysis_kit/.spyproject/
+/.idea/fracture_analysis_2d.iml
+/help/source/installation.rst
+/.idea/misc.xml
+/.idea/modules.xml
+/.idea/inspectionProfiles/profiles_settings.xml
+/README.html
+/README.txt
+/.idea/vcs.xml

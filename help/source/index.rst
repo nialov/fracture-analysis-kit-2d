@@ -6,6 +6,12 @@
 **Fracture Analysis 2D**
 ================================================
 
+.. toctree::
+   :maxdepth: 2
+   
+   
+	
+
 Description
 -----------
 This QGIS plugin can be used to extract lineament & fracture size, abundance and topological parameters 
