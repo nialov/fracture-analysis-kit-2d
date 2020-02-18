@@ -16,7 +16,7 @@ Light Detection And Ranging (LiDAR) digital elevation models (DEMs)
 or from drone orthophotography of bedrock outcrop surfaces. 
 
 .. image:: images/collage1.png
-	:scale: 25 %
+	:scale: 15 %
 	:align: center
 	
 
