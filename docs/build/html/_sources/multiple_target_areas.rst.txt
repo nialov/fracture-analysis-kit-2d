@@ -1,0 +1,7 @@
+multiple\_target\_areas module
+==============================
+
+.. automodule:: multiple_target_areas
+   :members:
+   :undoc-members:
+   :show-inheritance:

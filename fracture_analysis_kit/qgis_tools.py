@@ -19,7 +19,7 @@ def layer_to_df(layer):
     :param layer: QGIS vector layer.
     :type layer: qgis.core.QgsVectorLayer
     :return: Converted pandas DataFrame and layer coord system.
-    :rtypes: pandas.DataFrame and crs
+    :rtypes: pandas.DataFrame & qgis.core.QgsCoordinateReferenceSystem
     """
     fieldnames = [field.name() for field in layer.fields()]
     fieldnames.append('geometry')

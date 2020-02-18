@@ -1,0 +1,349 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>multiple_target_areas module &#8212; Fracture Analysis 2D 0.1alpha documentation</title>
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Fracture Analysis 2D 0.1alpha documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-multiple_target_areas">
+<span id="multiple-target-areas-module"></span><h1>multiple_target_areas module<a class="headerlink" href="#module-multiple_target_areas" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="multiple_target_areas.MultiTargetAreaQGIS">
+<em class="property">class </em><code class="sig-prename descclassname">multiple_target_areas.</code><code class="sig-name descname">MultiTargetAreaQGIS</code><span class="sig-paren">(</span><em class="sig-param">table_df</em>, <em class="sig-param">gnames_cutoffs_df</em>, <em class="sig-param">branches</em><span class="sig-paren">)</span><a class="headerlink" href="#multiple_target_areas.MultiTargetAreaQGIS" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>TODO: DOC</p>
+<dl class="method">
+<dt id="multiple_target_areas.MultiTargetAreaQGIS.calc_attributes_for_all">
+<code class="sig-name descname">calc_attributes_for_all</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#multiple_target_areas.MultiTargetAreaQGIS.calc_attributes_for_all" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates attributes for all target areas.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="multiple_target_areas.MultiTargetAreaQGIS.calc_curviness_for_all">
+<code class="sig-name descname">calc_curviness_for_all</code><span class="sig-paren">(</span><em class="sig-param">use_branches_anyway=False</em><span class="sig-paren">)</span><a class="headerlink" href="#multiple_target_areas.MultiTargetAreaQGIS.calc_curviness_for_all" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="multiple_target_areas.MultiTargetAreaQGIS.create_setframes_for_all_unified">
+<code class="sig-name descname">create_setframes_for_all_unified</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#multiple_target_areas.MultiTargetAreaQGIS.create_setframes_for_all_unified" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="multiple_target_areas.MultiTargetAreaQGIS.define_sets_for_all">
+<code class="sig-name descname">define_sets_for_all</code><span class="sig-paren">(</span><em class="sig-param">set_df</em><span class="sig-paren">)</span><a class="headerlink" href="#multiple_target_areas.MultiTargetAreaQGIS.define_sets_for_all" title="Permalink to this definition">¶</a></dt>
+<dd><p>Categorizes data based on azimuth to sets.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>set_df</strong> (<em>DataFrame</em>) – DataFrame with sets. Columns: “Set”, “SetLimits”</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="multiple_target_areas.MultiTargetAreaQGIS.determine_crosscut_abutting_relationships">
+<code class="sig-name descname">determine_crosscut_abutting_relationships</code><span class="sig-paren">(</span><em class="sig-param">unified: bool</em><span class="sig-paren">)</span><a class="headerlink" href="#multiple_target_areas.MultiTargetAreaQGIS.determine_crosscut_abutting_relationships" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determines cross-cutting and abutting relationships between all inputted sets by using spatial intersects
+between node and trace data. Sets result as a class parameter self.relations_df that is used for plotting.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>unified</strong> (<em>bool</em>) – Calculate for unified datasets or individual target areas</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>AssertionError</strong> – When attempting to determine cross-cutting and abutting relationships from branch data
+or if self.using_branches is True even though you are using trace data.</p></li>
+<li><p><strong>ValueError</strong> – When there’s only one set defined.
+You cannot determine cross-cutting and abutting relationships from only one set.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="multiple_target_areas.MultiTargetAreaQGIS.gather_topology_parameters">
+<code class="sig-name descname">gather_topology_parameters</code><span class="sig-paren">(</span><em class="sig-param">unified: bool</em><span class="sig-paren">)</span><a class="headerlink" href="#multiple_target_areas.MultiTargetAreaQGIS.gather_topology_parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gathers topological parameters of both traces and branches</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>unified</strong> (<em>bool</em>) – Use unified datasets or individual target areas</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="multiple_target_areas.MultiTargetAreaQGIS.plot_anisotropy">
+<code class="sig-name descname">plot_anisotropy</code><span class="sig-paren">(</span><em class="sig-param">unified: bool</em>, <em class="sig-param">save=False</em>, <em class="sig-param">savefolder=''</em><span class="sig-paren">)</span><a class="headerlink" href="#multiple_target_areas.MultiTargetAreaQGIS.plot_anisotropy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot anisotropy of connectivity</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>unified</strong> (<em>bool</em>) – Plot unified datasets or individual target areas</p></li>
+<li><p><strong>save</strong> (<em>bool</em>) – Whether to save</p></li>
+<li><p><strong>savefolder</strong> (<em>str</em>) – Folder to save to</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="multiple_target_areas.MultiTargetAreaQGIS.plot_azimuths">
+<code class="sig-name descname">plot_azimuths</code><span class="sig-paren">(</span><em class="sig-param">unified: bool</em>, <em class="sig-param">rose_type: str</em>, <em class="sig-param">save=False</em>, <em class="sig-param">savefolder=''</em><span class="sig-paren">)</span><a class="headerlink" href="#multiple_target_areas.MultiTargetAreaQGIS.plot_azimuths" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots azimuths.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>unified</strong> (<em>bool</em>) – Plot unified datasets or individual target areas</p></li>
+<li><p><strong>rose_type</strong> (<em>str</em>) – Whether to plot equal-radius or equal-area rose plot e.g. ‘equal-radius’ or ‘equal-area’</p></li>
+<li><p><strong>save</strong> (<em>bool</em>) – Whether to save</p></li>
+<li><p><strong>savefolder</strong> (<em>str</em>) – Folder to save to</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="multiple_target_areas.MultiTargetAreaQGIS.plot_azimuths_exp">
+<code class="sig-name descname">plot_azimuths_exp</code><span class="sig-paren">(</span><em class="sig-param">unified: bool</em>, <em class="sig-param">rose_type: str</em>, <em class="sig-param">save=False</em>, <em class="sig-param">savefolder=''</em><span class="sig-paren">)</span><a class="headerlink" href="#multiple_target_areas.MultiTargetAreaQGIS.plot_azimuths_exp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots azimuths.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>unified</strong> (<em>bool</em>) – Plot unified datasets or individual target areas</p></li>
+<li><p><strong>rose_type</strong> (<em>str</em>) – Whether to plot equal-radius or equal-area rose plot e.g. ‘equal-radius’ or ‘equal-area’</p></li>
+<li><p><strong>save</strong> (<em>bool</em>) – Whether to save</p></li>
+<li><p><strong>savefolder</strong> (<em>str</em>) – Folder to save to</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="multiple_target_areas.MultiTargetAreaQGIS.plot_azimuths_weighted">
+<code class="sig-name descname">plot_azimuths_weighted</code><span class="sig-paren">(</span><em class="sig-param">unified: bool</em>, <em class="sig-param">save=False</em>, <em class="sig-param">savefolder=''</em><span class="sig-paren">)</span><a class="headerlink" href="#multiple_target_areas.MultiTargetAreaQGIS.plot_azimuths_weighted" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="multiple_target_areas.MultiTargetAreaQGIS.plot_branch_ternary">
+<code class="sig-name descname">plot_branch_ternary</code><span class="sig-paren">(</span><em class="sig-param">unified: bool</em>, <em class="sig-param">save=False</em>, <em class="sig-param">savefolder=''</em><span class="sig-paren">)</span><a class="headerlink" href="#multiple_target_areas.MultiTargetAreaQGIS.plot_branch_ternary" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots Branch classification-ternary plots for target areas or grouped data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>unified</strong> (<em>bool</em>) – Plot unified datasets or individual target areas</p></li>
+<li><p><strong>save</strong> (<em>bool</em>) – Whether to save</p></li>
+<li><p><strong>savefolder</strong> (<em>str</em>) – Folder to save to</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="multiple_target_areas.MultiTargetAreaQGIS.plot_crosscut_abutting_relationships">
+<code class="sig-name descname">plot_crosscut_abutting_relationships</code><span class="sig-paren">(</span><em class="sig-param">unified: bool</em>, <em class="sig-param">save=False</em>, <em class="sig-param">savefolder=''</em><span class="sig-paren">)</span><a class="headerlink" href="#multiple_target_areas.MultiTargetAreaQGIS.plot_crosscut_abutting_relationships" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots cross-cutting and abutting relationships for individual target areas or for grouped data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>unified</strong> (<em>bool</em>) – Calculate for unified datasets or individual target areas</p></li>
+<li><p><strong>save</strong> (<em>bool</em>) – Save plots or not</p></li>
+<li><p><strong>savefolder</strong> (<em>str</em>) – Folder to save plots to</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>AssertionError</strong> – When attempting to determine cross-cutting and abutting relationships from branch data
+or if self.using_branches is True even though you are using trace data.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="multiple_target_areas.MultiTargetAreaQGIS.plot_curviness_for_unified">
+<code class="sig-name descname">plot_curviness_for_unified</code><span class="sig-paren">(</span><em class="sig-param">violins=False</em>, <em class="sig-param">save=False</em>, <em class="sig-param">savefolder=''</em><span class="sig-paren">)</span><a class="headerlink" href="#multiple_target_areas.MultiTargetAreaQGIS.plot_curviness_for_unified" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="multiple_target_areas.MultiTargetAreaQGIS.plot_hexbin_plot">
+<code class="sig-name descname">plot_hexbin_plot</code><span class="sig-paren">(</span><em class="sig-param">unified: bool</em>, <em class="sig-param">save=False</em>, <em class="sig-param">savefolder=''</em><span class="sig-paren">)</span><a class="headerlink" href="#multiple_target_areas.MultiTargetAreaQGIS.plot_hexbin_plot" title="Permalink to this definition">¶</a></dt>
+<dd><blockquote>
+<div><p>Plot a hexbinplot to estimate sample size differences.</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>unified</strong> – Plot unified datasets or individual target areas
+:type unified: bool
+:param save: Whether to save
+:type save: bool
+:param savefolder: Folder to save to
+:type savefolder: str
+:return:
+:rtype:</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="multiple_target_areas.MultiTargetAreaQGIS.plot_length_fit_cut_ax">
+<code class="sig-name descname">plot_length_fit_cut_ax</code><span class="sig-paren">(</span><em class="sig-param">ax</em>, <em class="sig-param">unified: bool</em><span class="sig-paren">)</span><a class="headerlink" href="#multiple_target_areas.MultiTargetAreaQGIS.plot_length_fit_cut_ax" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots the numerical power-law fit to a cut length distribution to a given ax.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ax</strong> (<em>matplotlib.axes.Axes</em>) – ax to plot to.</p></li>
+<li><p><strong>unified</strong> (<em>bool</em>) – Whether to plot for target area or grouped data.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>ValueError</strong> – When there are too many values from np.polyfit i.e. values != 2.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="multiple_target_areas.MultiTargetAreaQGIS.plot_lengths">
+<code class="sig-name descname">plot_lengths</code><span class="sig-paren">(</span><em class="sig-param">unified: bool</em>, <em class="sig-param">save=False</em>, <em class="sig-param">savefolder=''</em>, <em class="sig-param">use_sets=False</em><span class="sig-paren">)</span><a class="headerlink" href="#multiple_target_areas.MultiTargetAreaQGIS.plot_lengths" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots length distributions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>unified</strong> (<em>bool</em>) – Plot unified datasets or individual target areas</p></li>
+<li><p><strong>save</strong> (<em>bool</em>) – Whether to save</p></li>
+<li><p><strong>savefolder</strong> (<em>str</em>) – Folder to save to</p></li>
+<li><p><strong>use_sets</strong> (<em>bool</em>) – Whether to use sets</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="multiple_target_areas.MultiTargetAreaQGIS.plot_topology">
+<code class="sig-name descname">plot_topology</code><span class="sig-paren">(</span><em class="sig-param">unified: bool</em>, <em class="sig-param">save=False</em>, <em class="sig-param">savefolder=''</em><span class="sig-paren">)</span><a class="headerlink" href="#multiple_target_areas.MultiTargetAreaQGIS.plot_topology" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot topological parameters</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>unified</strong> (<em>bool</em>) – Plot unified datasets or individual target areas</p></li>
+<li><p><strong>save</strong> (<em>bool</em>) – Whether to save</p></li>
+<li><p><strong>savefolder</strong> (<em>str</em>) – Folder to save to</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="multiple_target_areas.MultiTargetAreaQGIS.plot_xyi_ternary">
+<code class="sig-name descname">plot_xyi_ternary</code><span class="sig-paren">(</span><em class="sig-param">unified: bool</em>, <em class="sig-param">save=False</em>, <em class="sig-param">savefolder=''</em><span class="sig-paren">)</span><a class="headerlink" href="#multiple_target_areas.MultiTargetAreaQGIS.plot_xyi_ternary" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots XYI-ternary plots for target areas or grouped areas.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>unified</strong> (<em>bool</em>) – Plot unified datasets or individual target areas</p></li>
+<li><p><strong>save</strong> (<em>bool</em>) – Whether to save</p></li>
+<li><p><strong>savefolder</strong> (<em>str</em>) – Folder to save to</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="multiple_target_areas.MultiTargetAreaQGIS.unified">
+<code class="sig-name descname">unified</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#multiple_target_areas.MultiTargetAreaQGIS.unified" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates new datasets (TargetAreaLines + TargetAreaNodes for each group) based on groupings by user.
+TODO: Invalidate inputs when there are groups without any target areas.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><strong>ValueError</strong> – When there are groups without any target areas.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/multiple_target_areas.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Fracture Analysis 2D 0.1alpha documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020, Nikolas Ovaskainen.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.1.
+    </div>
+  </body>
+</html>

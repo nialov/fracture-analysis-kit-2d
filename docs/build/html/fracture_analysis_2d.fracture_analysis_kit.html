@@ -1,0 +1,268 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>fracture_analysis_2d.fracture_analysis_kit package &#8212; Fracture Analysis 2D 0.1alpha documentation</title>
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Fracture Analysis 2D 0.1alpha documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="fracture-analysis-2d-fracture-analysis-kit-package">
+<h1>fracture_analysis_2d.fracture_analysis_kit package<a class="headerlink" href="#fracture-analysis-2d-fracture-analysis-kit-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="fracture_analysis_2d.fracture_analysis_kit.kit_resources.html">fracture_analysis_2d.fracture_analysis_kit.kit_resources package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="fracture_analysis_2d.fracture_analysis_kit.kit_resources.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fracture_analysis_2d.fracture_analysis_kit.kit_resources.html#module-fracture_analysis_2d.fracture_analysis_kit.kit_resources.multiple_target_areas">fracture_analysis_2d.fracture_analysis_kit.kit_resources.multiple_target_areas module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fracture_analysis_2d.fracture_analysis_kit.kit_resources.html#module-fracture_analysis_2d.fracture_analysis_kit.kit_resources.target_area">fracture_analysis_2d.fracture_analysis_kit.kit_resources.target_area module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fracture_analysis_2d.fracture_analysis_kit.kit_resources.html#module-fracture_analysis_2d.fracture_analysis_kit.kit_resources.tools">fracture_analysis_2d.fracture_analysis_kit.kit_resources.tools module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fracture_analysis_2d.fracture_analysis_kit.kit_resources.html#module-fracture_analysis_2d.fracture_analysis_kit.kit_resources">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-fracture_analysis_2d.fracture_analysis_kit.fracture_analysis_kit_qgis_tools">
+<span id="fracture-analysis-2d-fracture-analysis-kit-fracture-analysis-kit-qgis-tools-module"></span><h2>fracture_analysis_2d.fracture_analysis_kit.fracture_analysis_kit_qgis_tools module<a class="headerlink" href="#module-fracture_analysis_2d.fracture_analysis_kit.fracture_analysis_kit_qgis_tools" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="fracture_analysis_2d.fracture_analysis_kit.fracture_analysis_kit_qgis_tools.df_to_gdf">
+<code class="sig-prename descclassname">fracture_analysis_2d.fracture_analysis_kit.fracture_analysis_kit_qgis_tools.</code><code class="sig-name descname">df_to_gdf</code><span class="sig-paren">(</span><em class="sig-param">df</em>, <em class="sig-param">coord_system</em><span class="sig-paren">)</span><a class="headerlink" href="#fracture_analysis_2d.fracture_analysis_kit.fracture_analysis_kit_qgis_tools.df_to_gdf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts pandas DataFrame to a GeoDataFrame along with setting the given coordinate system.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<em>pandas.DataFrame</em>) – Pandas DataFrame with QGIS vector layer data.</p></li>
+<li><p><strong>coord_system</strong> – Given coordinate system.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Converted GeoDataFrame</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>geopandas.GeoDataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="fracture_analysis_2d.fracture_analysis_kit.fracture_analysis_kit_qgis_tools.layer_to_df">
+<code class="sig-prename descclassname">fracture_analysis_2d.fracture_analysis_kit.fracture_analysis_kit_qgis_tools.</code><code class="sig-name descname">layer_to_df</code><span class="sig-paren">(</span><em class="sig-param">layer</em><span class="sig-paren">)</span><a class="headerlink" href="#fracture_analysis_2d.fracture_analysis_kit.fracture_analysis_kit_qgis_tools.layer_to_df" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts QGIS vector layer to a pandas DataFrame and extracts coordinate system from the layer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>layer</strong> (<em>TODO: Why doesnt type</em><em>(</em><em>) </em><em>work?</em>) – QGIS vector layer.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Converted pandas DataFrame and layer coord system.</p>
+</dd>
+<dt class="field-odd">Rtypes</dt>
+<dd class="field-odd"><p>pandas.DataFrame and crs</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="fracture_analysis_2d.fracture_analysis_kit.fracture_analysis_kit_qgis_tools.layer_to_gdf">
+<code class="sig-prename descclassname">fracture_analysis_2d.fracture_analysis_kit.fracture_analysis_kit_qgis_tools.</code><code class="sig-name descname">layer_to_gdf</code><span class="sig-paren">(</span><em class="sig-param">layer</em><span class="sig-paren">)</span><a class="headerlink" href="#fracture_analysis_2d.fracture_analysis_kit.fracture_analysis_kit_qgis_tools.layer_to_gdf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts QGIS vector layer to a GeoDataFrame.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>layer</strong> (<em>TODO: Check scripts in qgis?</em>) – QGIS vector layer</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Converted GeoDataFrame</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>geopandas.GeoDataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="fracture_analysis_2d.fracture_analysis_kit.fracture_analysis_kit_qgis_tools.plotting_directories">
+<code class="sig-prename descclassname">fracture_analysis_2d.fracture_analysis_kit.fracture_analysis_kit_qgis_tools.</code><code class="sig-name descname">plotting_directories</code><span class="sig-paren">(</span><em class="sig-param">results_folder</em>, <em class="sig-param">name</em><span class="sig-paren">)</span><a class="headerlink" href="#fracture_analysis_2d.fracture_analysis_kit.fracture_analysis_kit_qgis_tools.plotting_directories" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates plotting directories and handles FileExistsErrors when raised.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>results_folder</strong> (<em>str</em>) – Base folder to create plots_{name} folder to.</p></li>
+<li><p><strong>name</strong> (<em>str</em>) – Analysis name.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Newly made path to plotting directory where all plots will be saved to.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-fracture_analysis_2d.fracture_analysis_kit.main_target_analysis">
+<span id="fracture-analysis-2d-fracture-analysis-kit-main-target-analysis-module"></span><h2>fracture_analysis_2d.fracture_analysis_kit.main_target_analysis module<a class="headerlink" href="#module-fracture_analysis_2d.fracture_analysis_kit.main_target_analysis" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="fracture_analysis_2d.fracture_analysis_kit.main_target_analysis.main_multi_target_area">
+<code class="sig-prename descclassname">fracture_analysis_2d.fracture_analysis_kit.main_target_analysis.</code><code class="sig-name descname">main_multi_target_area</code><span class="sig-paren">(</span><em class="sig-param">layer_table_df</em>, <em class="sig-param">results_folder</em>, <em class="sig-param">analysis_name</em>, <em class="sig-param">group_names_cutoffs_df</em>, <em class="sig-param">set_df</em><span class="sig-paren">)</span><a class="headerlink" href="#fracture_analysis_2d.fracture_analysis_kit.main_target_analysis.main_multi_target_area" title="Permalink to this definition">¶</a></dt>
+<dd><p>Main method for firstly initializing data analysis, then starting data analysis,
+and then starting plotting of analysis results.
+Also initializes plotting directories, debugging methods and the plotting config parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>layer_table_df</strong> (<em>pandas.DataFrame</em>) – DataFrame with trace, branch, node, etc. vector layer data.</p></li>
+<li><p><strong>results_folder</strong> – Path to folder in which plots_{analysis_name} folder will be built to</p></li>
+</ul>
+</dd>
+</dl>
+<p>and where plots will be saved to.
+:type results_folder: str
+:param analysis_name: Name for the analysis. Will be used in the <a href="#id1"><span class="problematic" id="id2">plots_</span></a> folder name.
+:type analysis_name: str
+:param group_names_cutoffs_df: DataFrame with group name and cut-off data for both traces and branches.
+:type group_names_cutoffs_df: pandas.DataFrame
+:param set_df: DataFrame with set names and ranges.
+:type set_df: pandas.DataFrame
+:return: Returns analysis object.
+:rtype: taaq.MultiTargetAreaAnalysis</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="fracture_analysis_2d.fracture_analysis_kit.main_target_analysis.main_multi_target_area_task">
+<code class="sig-prename descclassname">fracture_analysis_2d.fracture_analysis_kit.main_target_analysis.</code><code class="sig-name descname">main_multi_target_area_task</code><span class="sig-paren">(</span><em class="sig-param">task</em>, <em class="sig-param">table_df</em>, <em class="sig-param">results_folder</em>, <em class="sig-param">analysis_name</em>, <em class="sig-param">gnames_cutoffs_df</em>, <em class="sig-param">set_df</em><span class="sig-paren">)</span><a class="headerlink" href="#fracture_analysis_2d.fracture_analysis_kit.main_target_analysis.main_multi_target_area_task" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="fracture_analysis_2d.fracture_analysis_kit.main_target_analysis.main_single_target_area">
+<code class="sig-prename descclassname">fracture_analysis_2d.fracture_analysis_kit.main_target_analysis.</code><code class="sig-name descname">main_single_target_area</code><span class="sig-paren">(</span><em class="sig-param">results_folder</em>, <em class="sig-param">name</em>, <em class="sig-param">trace_layer</em>, <em class="sig-param">branch_layer</em>, <em class="sig-param">node_layer</em>, <em class="sig-param">area_layer</em><span class="sig-paren">)</span><a class="headerlink" href="#fracture_analysis_2d.fracture_analysis_kit.main_target_analysis.main_single_target_area" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="fracture_analysis_2d.fracture_analysis_kit.main_target_analysis.task_completed">
+<code class="sig-prename descclassname">fracture_analysis_2d.fracture_analysis_kit.main_target_analysis.</code><code class="sig-name descname">task_completed</code><span class="sig-paren">(</span><em class="sig-param">exception</em>, <em class="sig-param">result</em><span class="sig-paren">)</span><a class="headerlink" href="#fracture_analysis_2d.fracture_analysis_kit.main_target_analysis.task_completed" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is called when doSomething is finished.
+Exception is not None if doSomething raises an exception.
+result is the return value of doSomething.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="fracture_analysis_2d.fracture_analysis_kit.main_target_analysis.task_main_multi_target_area">
+<code class="sig-prename descclassname">fracture_analysis_2d.fracture_analysis_kit.main_target_analysis.</code><code class="sig-name descname">task_main_multi_target_area</code><span class="sig-paren">(</span><em class="sig-param">table_df</em>, <em class="sig-param">results_folder</em>, <em class="sig-param">analysis_name</em>, <em class="sig-param">gnames_cutoffs_df</em>, <em class="sig-param">set_df</em><span class="sig-paren">)</span><a class="headerlink" href="#fracture_analysis_2d.fracture_analysis_kit.main_target_analysis.task_main_multi_target_area" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-fracture_analysis_2d.fracture_analysis_kit.target_area_analysis_qgis">
+<span id="fracture-analysis-2d-fracture-analysis-kit-target-area-analysis-qgis-module"></span><h2>fracture_analysis_2d.fracture_analysis_kit.target_area_analysis_qgis module<a class="headerlink" href="#module-fracture_analysis_2d.fracture_analysis_kit.target_area_analysis_qgis" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="fracture_analysis_2d.fracture_analysis_kit.target_area_analysis_qgis.MultiTargetAreaAnalysis">
+<em class="property">class </em><code class="sig-prename descclassname">fracture_analysis_2d.fracture_analysis_kit.target_area_analysis_qgis.</code><code class="sig-name descname">MultiTargetAreaAnalysis</code><span class="sig-paren">(</span><em class="sig-param">layer_table_df</em>, <em class="sig-param">plotting_directory</em>, <em class="sig-param">analysis_name</em>, <em class="sig-param">group_names_cutoffs_df</em>, <em class="sig-param">set_df</em><span class="sig-paren">)</span><a class="headerlink" href="#fracture_analysis_2d.fracture_analysis_kit.target_area_analysis_qgis.MultiTargetAreaAnalysis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="fracture_analysis_2d.fracture_analysis_kit.target_area_analysis_qgis.MultiTargetAreaAnalysis.analysis">
+<code class="sig-name descname">analysis</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#fracture_analysis_2d.fracture_analysis_kit.target_area_analysis_qgis.MultiTargetAreaAnalysis.analysis" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fracture_analysis_2d.fracture_analysis_kit.target_area_analysis_qgis.MultiTargetAreaAnalysis.plot_results">
+<code class="sig-name descname">plot_results</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#fracture_analysis_2d.fracture_analysis_kit.target_area_analysis_qgis.MultiTargetAreaAnalysis.plot_results" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-fracture_analysis_2d.fracture_analysis_kit">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-fracture_analysis_2d.fracture_analysis_kit" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">fracture_analysis_2d.fracture_analysis_kit package</a><ul>
+<li><a class="reference internal" href="#subpackages">Subpackages</a></li>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-fracture_analysis_2d.fracture_analysis_kit.fracture_analysis_kit_qgis_tools">fracture_analysis_2d.fracture_analysis_kit.fracture_analysis_kit_qgis_tools module</a></li>
+<li><a class="reference internal" href="#module-fracture_analysis_2d.fracture_analysis_kit.main_target_analysis">fracture_analysis_2d.fracture_analysis_kit.main_target_analysis module</a></li>
+<li><a class="reference internal" href="#module-fracture_analysis_2d.fracture_analysis_kit.target_area_analysis_qgis">fracture_analysis_2d.fracture_analysis_kit.target_area_analysis_qgis module</a></li>
+<li><a class="reference internal" href="#module-fracture_analysis_2d.fracture_analysis_kit">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/fracture_analysis_2d.fracture_analysis_kit.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Fracture Analysis 2D 0.1alpha documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020, Nikolas Ovaskainen.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.1.
+    </div>
+  </body>
+</html>

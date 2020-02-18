@@ -65,3 +65,5 @@ html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
 
 doctest_test_doctest_blocks = 'yes'
+
+

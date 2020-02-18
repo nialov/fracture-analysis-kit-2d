@@ -3,14 +3,13 @@
 /help/build
 /.idea/
 /compile.bat
-/zip_build/
 /scripts/
 /i18n/
 /fracture_analysis_kit/.idea/
 /fracture_analysis_kit/.spyproject/
 /README.html
 /README.txt
-
 /resources.py
 /help/
-/docs/build/
+/zip_build/fracture_analysis_2d/
+/zip_build/!README.txt

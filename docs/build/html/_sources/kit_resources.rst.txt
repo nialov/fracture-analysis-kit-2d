@@ -1,0 +1,38 @@
+kit\_resources package
+======================
+
+Submodules
+----------
+
+kit\_resources.multiple\_target\_areas module
+---------------------------------------------
+
+.. automodule:: kit_resources.multiple_target_areas
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+kit\_resources.target\_area module
+----------------------------------
+
+.. automodule:: kit_resources.target_area
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+kit\_resources.tools module
+---------------------------
+
+.. automodule:: kit_resources.tools
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: kit_resources
+   :members:
+   :undoc-members:
+   :show-inheritance:
