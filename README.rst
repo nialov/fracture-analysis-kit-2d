@@ -10,15 +10,20 @@ The results will be given as graphical plots.
 
 The plugin is **experimental** and installation requires the **manual installation** of a few external python libraries.
 
-This plugin uses three types of vector data as inputs: *traces*, *branches* and *nodes*.
-Traces can be manually or automatically digitized GIS polyline features from e.g.
+This plugin uses four types of vector data as inputs:
+*traces* (Polylines), *branches* (Polylines), *nodes* (Points) and *areas* (Polygons).
+
+*Traces* can be manually or automatically digitized GIS polyline features from e.g.
 Light Detection And Ranging (LiDAR) digital elevation models (DEMs)
 or from drone orthophotography of bedrock outcrop surfaces.
+*Branches* and *nodes* are derived from `ngt`_.
+*Areas* are the interpretation boundaries of the traces and branches.
 
 .. image:: images/collage1.png
 	:scale: 5 %
 	:align: center
 
+.. _ngt:
 
 NetworkGT
 -------------
@@ -39,8 +44,20 @@ __ Nyberg2018_
 
 Help Documentation
 ------------------
-**Help Documentation Download** `Here <zip_build/help.zip>`_
+**Help Documentation Download** `Here <zip_build/help.zip>`_ *(Click download inside)*
 
 Download the .zip-file and unzip the file to a folder of your choosing.
 
 Then open index.html in the folder. It should open in your native browser.
+
+Plugin Download
+---------------
+
+**Plugin Download** `Here as a .zip file <zip_build/fracture_analysis_2d.zip>`_ *(Click download inside)*
+
+Plugin Installation
+-------------------
+
+Download the `Help Documentation`_ and follow the instructions there.
+
+
