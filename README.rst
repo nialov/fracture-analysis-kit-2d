@@ -47,7 +47,7 @@ Help Documentation
 
 Download the .zip-file and unzip the file to a folder of your choosing.
 
-Then open index.html in the folder. It should open in your native browser.
+Then open index.html in the folder. It should open the Help Documentation in your native browser.
 
 Plugin Download
 ---------------
@@ -59,4 +59,8 @@ Plugin Installation
 
 Download the `Help Documentation`_ and follow the instructions there.
 
+Sample Data
+-----------
+
+Sample data from an island in SE-Finland is included. Contains an orthomosaic of an island outcrop (*.tif*), manually digitized traces (*Shapefile*), branches (*Shapefile*) and nodes (*Shapefile*) extracted from `NetworkGT`_ and the interpretation boundary polygon (*Shapefile*).
 
