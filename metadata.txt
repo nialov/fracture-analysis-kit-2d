@@ -6,15 +6,17 @@
 [general]
 name=2D Fracture Analysis Kit
 qgisMinimumVersion=3.0
-description=Analysis of lineament & fracture traces, branches and nodes.
+description=Analysis of 2D lineament & fracture traces, branches and nodes.
 version=0.1
 author=Nikolas Ovaskainen
 email=nikolasovaskainen@hotmail.com
 
-about=Analysis of lineament & fracture traces, branches and nodes.
+about=This QGIS plugin can be used to extract lineament & fracture size, abundance and topological parameters
+ from two-dimensional GIS polylines along with their topological branches and nodes.
+ The results will be given as graphical plots.
 
-tracker=http://bugs
-repository=http://repo
+tracker=https://github.com/nialov/fracture-analysis-kit-2d/issues
+repository=https://github.com/nialov/fracture-analysis-kit-2d
 # End of mandatory metadata
 
 # Recommended items:
@@ -26,7 +28,7 @@ hasProcessingProvider=no
 # Tags are comma separated with spaces allowed
 tags=python, fracture, fracture network, lineament, lineament network, topology, rose diagram, sets
 
-homepage=http://homepage
+homepage=https://github.com/nialov/fracture-analysis-kit-2d
 icon=icon.png
 # experimental flag
 experimental=True
