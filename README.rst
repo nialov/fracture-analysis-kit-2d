@@ -37,4 +37,6 @@ and branch and node data from both *should* be valid inputs into this plugin (*a
 .. _Nyberg2018: https://pubs.geoscienceworld.org/gsa/geosphere/article/531129/networkgt-a-gis-tool-for-geometric-and-topological
 __ Nyberg2018_
 
-Help Documentation Download: :download:`Download <docs/build/html>`.
+Help Documentation Download: :download:`Here <zip_build/help.zip>`
+
+Unzip the file to a folder of your choosing and open index.html. It should open in your native browser.
