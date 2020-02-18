@@ -27,7 +27,7 @@ or from drone orthophotography of bedrock outcrop surfaces.
 NetworkGT
 -------------
 
-This plugin has been built to **only** work with data extracted using another QGIS-plugin, `NetworkGT (Homepage) <https://github.com/BjornNyberg/NetworkGT>`_ (Also see: `Nyberg et al., 2018`__):
+This plugin has been built to **only** work with data extracted using another QGIS-plugin, NetworkGT `(Homepage) <https://github.com/BjornNyberg/NetworkGT>`_ (Also see: `Nyberg et al., 2018`__):
 
 	*The NetworkGT (Network Geometry and Topology) Toolbox is a set of tools designed for
 	the geometric and topological analysis of fracture networks.*
