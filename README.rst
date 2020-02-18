@@ -8,7 +8,7 @@ This QGIS plugin can be used to extract lineament & fracture size, abundance and
 from two-dimensional GIS polylines along with their topological branches and nodes.
 The results will be given as graphical plots.
 
-The plugin is **experimental** and installation requires the **manual installation** of a few external python libraries.
+The plugin is **experimental** **and a work-in-progress** and installation requires the **manual installation** of a few external python libraries. **Installation at this stage is not recommended though it is possible.**
 
 This plugin uses four types of vector data as inputs:
 *traces* (Polylines), *branches* (Polylines), *nodes* (Points) and *areas* (Polygons).
