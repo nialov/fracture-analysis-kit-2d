@@ -118,7 +118,7 @@ in range
            <string>E.g. 45</string>
           </property>
           <property name="text">
-           <string>90</string>
+           <string/>
           </property>
          </widget>
         </item>
@@ -128,7 +128,7 @@ in range
            <string>E.g. 15</string>
           </property>
           <property name="text">
-           <string>45</string>
+           <string/>
           </property>
          </widget>
         </item>
@@ -247,7 +247,7 @@ in range
     <item row="1" column="1">
      <widget class="QLineEdit" name="lineEdit_tab2_folder">
       <property name="text">
-       <string>D:\QGIS_Files\test_plots</string>
+       <string/>
       </property>
      </widget>
     </item>
@@ -272,7 +272,7 @@ in range
        <string>E.g. Loviisa_analysis</string>
       </property>
       <property name="text">
-       <string>test_</string>
+       <string/>
       </property>
      </widget>
     </item>
@@ -360,7 +360,7 @@ in range
        <string/>
       </property>
       <property name="text">
-       <string>KB_20m</string>
+       <string/>
       </property>
      </widget>
     </item>
@@ -391,7 +391,7 @@ in range
        <string/>
       </property>
       <property name="text">
-       <string>1.8</string>
+       <string/>
       </property>
      </widget>
     </item>
@@ -422,7 +422,7 @@ in range
        <string/>
       </property>
       <property name="text">
-       <string>1.6</string>
+       <string/>
       </property>
      </widget>
     </item>
@@ -568,7 +568,7 @@ in range
        <string>E.g. KB11.</string>
       </property>
       <property name="text">
-       <string>KB10</string>
+       <string/>
       </property>
      </widget>
     </item>
