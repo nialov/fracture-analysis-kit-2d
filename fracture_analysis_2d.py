@@ -202,6 +202,8 @@ class FractureAnalysis2D:
         """
         Clear Group name and Cut Off table along with the complementary DataFrame.
         """
+        for i in range(self.dlg.tableWidget_tab2_gnames.rowCount(), -1, -1):
+            self.dlg.tableWidget_tab2_gnames.removeRow(i)
         self.dlg.tableWidget_tab2_gnames.clearContents()
         self.group_names_cutoffs_df = self.group_names_cutoffs_df.iloc[0:0]
 
@@ -502,7 +504,7 @@ class FractureAnalysis2D:
         Opens help documentation when ? is clicked.
         """
         current_dir = os.path.dirname(__file__)
-        webbrowser.open(url=f'{current_dir}\help\index.html', new=2)
+        webbrowser.open(url=fr'{current_dir}\docs\index.html', new=2)
 
     def run(self):
         """

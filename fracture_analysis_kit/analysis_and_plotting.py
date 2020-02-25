@@ -44,7 +44,7 @@ class MultiTargetAreaAnalysis:
         if len(self.set_df) < 2:
             self.determine_relationships = False
         else:
-            self.determine_relationships = False
+            self.determine_relationships = True
 
     def analysis(self):
         """
