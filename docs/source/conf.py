@@ -18,7 +18,7 @@ sys.path.insert(0, os.path.abspath('../../fracture_analysis_kit'))
 
 
 # -- Matplotlib backend setup ------------------------------------------------
-# Required for sphinx to succesfully autodoc plugin modules. 
+# Required for sphinx to succesfully autodoc plugin modules.
 
 import matplotlib
 # IMPORTANT! Change this to your own path if remaking docs is required.
@@ -66,4 +66,5 @@ html_static_path = ['_static']
 
 doctest_test_doctest_blocks = 'yes'
 
-
+# Mock QGIS imports
+autodoc_mock_imports = ["qgis"]

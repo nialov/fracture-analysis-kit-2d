@@ -12,14 +12,21 @@ from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction, QFileDialog, QTableWidgetItem, QMessageBox, QProgressBar, QProgressDialog
 from qgis.core import QgsProject, Qgis, QgsVectorLayer, QgsMessageLog
+from qgis.PyQt import uic
 
 # Initialize Qt resources from file resources.py
 from .resources import *
 
 # Import the code for the dialog
-from .fracture_analysis_2d_dialog import FractureAnalysis2DDialog
+from .fracture_analysis_2d_dialog import get_FractureAnalysis2DDialog
 from .fracture_analysis_kit import main
 
+# FORM_CLASS setup
+# This loads your .ui file so that PyQt can populate your plugin with the elements from Qt Designer
+def load_FORM_CLASS():
+    FORM_CLASS, _ = uic.loadUiType(os.path.join(
+        os.path.dirname(__file__), 'fracture_analysis_2d_dialog_base.ui'))
+    return FORM_CLASS
 
 class FractureAnalysis2D:
     """QGIS Plugin Implementation."""
@@ -178,6 +185,8 @@ class FractureAnalysis2D:
                 self.tr("&2D Fracture Analysis Kit"), action
             )
             self.iface.removeToolBarIcon(action)
+
+
 
     def select_output_folder(self, tab: int):
         """
@@ -515,7 +524,8 @@ class FractureAnalysis2D:
         # Only create GUI ONCE in callback, so that it will only load when the plugin is started
         if self.first_start == True:
             self.first_start = False
-            self.dlg = FractureAnalysis2DDialog()
+            self.dlg = get_FractureAnalysis2DDialog()
+            # self.dlg = FractureAnalysis2DDialog()
             # self.dlg.pushButton.clicked.connect(lambda: self.select_output_folder(1))
             '''-------------Multi Target Area----------------'''
             # Select output folder for Multi Target Area
