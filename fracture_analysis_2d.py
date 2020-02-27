@@ -18,8 +18,8 @@ from qgis.PyQt import uic
 from .resources import *
 
 # Import the code for the dialog
-from .fracture_analysis_2d_dialog import get_FractureAnalysis2DDialog
-from .fracture_analysis_kit import main
+from fracture_analysis_2d_dialog import get_FractureAnalysis2DDialog
+from fracture_analysis_kit import main
 
 # FORM_CLASS setup
 # This loads your .ui file so that PyQt can populate your plugin with the elements from Qt Designer

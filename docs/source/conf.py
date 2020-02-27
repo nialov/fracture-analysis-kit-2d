@@ -67,4 +67,4 @@ html_static_path = ['_static']
 doctest_test_doctest_blocks = 'yes'
 
 # Mock QGIS imports
-autodoc_mock_imports = ["qgis"]
+autodoc_mock_imports = ["qgis", "geopandas"]
