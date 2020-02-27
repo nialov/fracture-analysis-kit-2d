@@ -1,7 +1,0 @@
-main\_target\_analysis module
-=============================
-
-.. automodule:: main_target_analysis
-   :members:
-   :undoc-members:
-   :show-inheritance:

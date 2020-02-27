@@ -12,18 +12,18 @@
 #
 import os
 import sys
-sys.path.insert(0, os.path.abspath('../..'))
-sys.path.insert(0, os.path.abspath('../../..'))
-sys.path.insert(0, os.path.abspath('../../fracture_analysis_kit'))
+sys.path.insert(0, os.path.abspath(r'..\..'))
+sys.path.insert(0, os.path.abspath(r'..\..\..'))
+sys.path.insert(0, os.path.abspath(r'..\..\fracture_analysis_kit'))
 
 
 # -- Matplotlib backend setup ------------------------------------------------
 # Required for sphinx to succesfully autodoc plugin modules.
 
-import matplotlib
-# IMPORTANT! Change this to your own path if remaking docs is required.
-os.environ['QT_QPA_PLATFORM_PLUGIN_PATH'] = r'F:\Program Files\QGIS 3.10\apps\Qt5\plugins'
-matplotlib.use('Qt5Agg')
+# import matplotlib
+# # IMPORTANT! Change this to your own path if remaking docs is required.
+# os.environ['QT_QPA_PLATFORM_PLUGIN_PATH'] = r'F:\Program Files\QGIS 3.10\apps\Qt5\plugins'
+# matplotlib.use('Qt5Agg')
 
 # -- Project information -----------------------------------------------------
 
@@ -67,4 +67,4 @@ html_static_path = ['_static']
 doctest_test_doctest_blocks = 'yes'
 
 # Mock QGIS imports
-autodoc_mock_imports = ["qgis", "geopandas"]
+autodoc_mock_imports = ["qgis", "geopandas", "ternary", "matplotlib", "seaborn", "pandas"]

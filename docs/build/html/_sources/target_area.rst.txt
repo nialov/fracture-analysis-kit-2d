@@ -1,7 +1,0 @@
-target\_area module
-===================
-
-.. automodule:: target_area
-   :members:
-   :undoc-members:
-   :show-inheritance:

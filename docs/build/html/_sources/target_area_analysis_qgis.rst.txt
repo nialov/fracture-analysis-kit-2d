@@ -1,7 +1,0 @@
-target\_area\_analysis\_qgis module
-===================================
-
-.. automodule:: target_area_analysis_qgis
-   :members:
-   :undoc-members:
-   :show-inheritance:

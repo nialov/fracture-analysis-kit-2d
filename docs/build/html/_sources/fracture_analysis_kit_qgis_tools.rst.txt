@@ -1,7 +1,0 @@
-fracture\_analysis\_kit\_qgis\_tools module
-===========================================
-
-.. automodule:: fracture_analysis_kit_qgis_tools
-   :members:
-   :undoc-members:
-   :show-inheritance:
