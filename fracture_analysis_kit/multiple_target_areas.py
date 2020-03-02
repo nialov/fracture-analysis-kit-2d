@@ -11,12 +11,14 @@ from pathlib import Path
 from textwrap import wrap
 
 import geopandas as gpd
+import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import shapely
 import sklearn.metrics as sklm
 import ternary
+import itertools
 from qgis.core import QgsMessageLog, Qgis
 
 # Own code imports
@@ -689,7 +691,7 @@ class MultiTargetAreaQGIS:
         :type save: bool
         :param savefolder: Folder to save plots to
         :type savefolder: str
-        :raise AssertionError: When attempting to determine cross-cutting and abutting relationships from branch data
+        :raise TypeError: When attempting to determine cross-cutting and abutting relationships from branch data
             or if self.using_branches is True even though you are using trace data.
         """
         if unified:
@@ -700,11 +702,14 @@ class MultiTargetAreaQGIS:
             rel_frame = self.relations_df
 
         if self.using_branches:
-            raise AssertionError('Cross-cutting and abutting relationships cannot be determined from BRANCH data.')
+            raise TypeError('Cross-cutting and abutting relationships cannot be determined from BRANCH data.')
 
         # SUBPLOTS, FIGURE SETUP
-        cols = len(self.set_df)
-        width = 12
+        cols = len(list(itertools.combinations(self.set_df["Set"].tolist(), r=2)))
+        QgsMessageLog.logMessage(message=f"cols: {cols}", tag=__name__, level=Qgis.Warning)
+        if cols == 2:
+            cols = 1
+        width = 12 / 3 * cols
         height = (width / cols) * 0.75
         names = set(rel_frame.name.tolist())
         with plt.style.context('default'):
@@ -721,6 +726,8 @@ class MultiTargetAreaQGIS:
                     set_counts.append(len(lineframe.loc[lineframe.set == set_name]))
 
                 fig, axes = plt.subplots(ncols=cols, nrows=1, figsize=(width, height))
+                if not isinstance(axes, np.ndarray):
+                    axes = [axes]
 
                 prop_title = dict(boxstyle='square', facecolor='linen', alpha=1, linewidth=2)
 
@@ -729,6 +736,7 @@ class MultiTargetAreaQGIS:
                              , va='center', bbox=prop_title)
 
                 for ax, idx_row in zip(axes, rel_frame_with_name.iterrows()):
+                    ax: matplotlib.axes._subplots.AxesSubplot
                     row = idx_row[1]
                     # TODO: More colors? change brightness or some other parameter?
                     bars = ax.bar(x=[0.3, 0.55, 0.65]

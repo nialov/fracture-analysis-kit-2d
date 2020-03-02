@@ -70,7 +70,6 @@ class FractureAnalysis2D:
         self.group_names_cutoffs_df = pd.DataFrame(columns=['Group', 'CutOffTraces', 'CutOffBranches'])
         self.set_df = pd.DataFrame(columns=['Set', 'SetLimits'])
 
-
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
         """Get the translation for a string using Qt translation API.
