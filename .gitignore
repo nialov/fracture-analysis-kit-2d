@@ -16,3 +16,5 @@
 /fracture_analysis_kit/requirements.txt
 /docs/test/
 /docs/backup/
+/.hypothesis/
+/.test/

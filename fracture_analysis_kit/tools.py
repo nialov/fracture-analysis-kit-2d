@@ -936,6 +936,8 @@ def aniso_get_class_as_value(c):
     :return: Value for classification
     :rtype: float
     """
+    if c not in ('C - C', 'C - I', 'I - I'):
+        return 0
     if c == 'C - C':
         return 1
     elif c == 'C - I':
@@ -972,7 +974,7 @@ def aniso_calc_anisotropy(halved, c, length):
     :return: Result is given for every angle of study (angles_of_study array from config.py-file)
     :rtype: np.ndarray
     """
-    angles_of_study = np.arange(0, 179, 30)
+    angles_of_study = config.angles_for_examination
     # print(angles_of_study)
     c_value = aniso_get_class_as_value(c)
     # CALCULATION
@@ -1482,7 +1484,7 @@ def get_intersect_frame(intersecting_nodes_frame, traceframe, set_tuple):
     """
     Does spatial intersects to determine how abutments and crosscuts occur between two sets
 
-    E.g. where Set 2 ends in set 1 and Set 2 crosscuts set 1
+    E.g. where Set 2 ends in set 1 and Set 2 crosscuts set 1 (TODO: DECREPID)
 
     >>> nodes = gpd.GeoDataFrame({'geometry': [Point(0, 0), Point(1, 1)], 'c': ['Y', 'X']})
     >>> traces = gpd.GeoDataFrame(data={'geometry': [
@@ -1493,7 +1495,7 @@ def get_intersect_frame(intersecting_nodes_frame, traceframe, set_tuple):
     >>> sets = (1, 2)
     >>> intersect_frame = get_intersect_frame(nodes, traces, sets)
     >>> intersect_frame
-              node nodeclass sets error setpair
+              node nodeclass sets error sets
     0  POINT (0 0)         Y  NaN   NaN  (2, 1)
     1  POINT (1 1)         X  NaN   NaN  (1, 2)
 
