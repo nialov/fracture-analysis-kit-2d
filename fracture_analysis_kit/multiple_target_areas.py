@@ -1108,6 +1108,16 @@ class MultiTargetAreaQGIS:
                     savename = Path(savefolder + '/all_hexbinplot_traces_with_histo.png')
             plt.savefig(savename, dpi=200)
 
+    def calc_anisotropy(self, unified: bool):
+        if not self.using_branches:
+            raise Exception('Anisotropy cannot be determined from traces.')
+        if unified:
+            frame = self.uniframe
+        else:
+            frame = self.df
+        for idx, row in frame.iterrows():
+            row.TargetAreaLines.calc_anisotropy()
+
     def plot_anisotropy(self, unified: bool, save=False, savefolder=''):
         """
         Plot anisotropy of connectivity
@@ -1130,15 +1140,14 @@ class MultiTargetAreaQGIS:
             frame = self.df
 
         for idx, row in frame.iterrows():
-            row.TargetAreaLines.calc_anisotropy()
             row.TargetAreaLines.plot_anisotropy_styled()
             style = config.styled_text_dict
             prop = config.styled_prop
-            plt.title(row.TargetAreaLines.name, loc='left', fontdict=style, fontsize=25, bbox=prop)
+            plt.title(row.TargetAreaLines.name, loc='center', fontdict=style, fontsize=25, bbox=prop)
             if save:
                 if unified:
                     savename = Path(savefolder + '/{}_anisotropy_unified.png'.format(row.TargetAreaLines.name))
                 else:
                     savename = Path(savefolder + '/{}_anisotropy.png'.format(row.TargetAreaLines.name))
 
-                plt.savefig(savename, dpi=200)
+                plt.savefig(savename, dpi=200, bbox_inches="tight")

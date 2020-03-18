@@ -696,7 +696,7 @@ class TargetAreaLines:
 
     def plot_anisotropy_styled(self, for_ax=False, ax=None, save=False, save_folder=None):
         """
-        Plots a styled anisotropy of connectivity figure
+        Plots a styled anisotropy of connectivity figure.
 
         :param for_ax: Whether plotting to a ready-made ax or not
         :type for_ax: bool
@@ -723,10 +723,11 @@ class TargetAreaLines:
 
         for theta, r in zip(angles, double_anisotropy):
             theta = np.deg2rad(theta)
+            arrowstyle = patches.ArrowStyle.CurveB(head_length=1, head_width=.5)
             ax.annotate('', xy=(theta, r), xytext=(theta, 0)
-                        , arrowprops=dict(edgecolor='black', facecolor='seashell', shrink=0.03, linewidth=1.5))
-        ax.scatter([np.deg2rad(angles_value) for angles_value in angles], double_anisotropy
-                   , marker='o', color='black', zorder=9, s=20)
+                        , arrowprops=dict(edgecolor='black', facecolor='seashell', arrowstyle=arrowstyle))
+        # ax.scatter([np.deg2rad(angles_value) for angles_value in angles], double_anisotropy
+        #            , marker='o', color='black', zorder=9, s=20)
         # NO AXES
         ax.axis('off')
         # CREATE CURVED STRUCTURE AROUND SCATTER AND ARROWS
@@ -739,15 +740,10 @@ class TargetAreaLines:
         xnew = np.linspace(angles.min(), angles.max(), 300)
         spl = make_interp_spline(angles, double_anisotropy, k=3)
         power_smooth = spl(xnew)
-        ax.plot(np.deg2rad(xnew), power_smooth, linewidth=1.5)
-        circle = patches.Circle((0, 0), 0.05 * max_aniso, transform=ax.transData._b, edgecolor='black',
+        ax.plot(np.deg2rad(xnew), power_smooth, linewidth=1.5, color='black')
+        circle = patches.Circle((0, 0), 0.0025 * max_aniso, transform=ax.transData._b, edgecolor='black',
                                 facecolor='gray', zorder=10)
         ax.add_artist(circle)
-        if not for_ax:
-            if save:
-                name = self.name
-                savename = Path(save_folder + '/{}_anisotropy_indiv.png'.format(name))
-                plt.savefig(savename, dpi=150)
 
 
 class TargetAreaNodes:

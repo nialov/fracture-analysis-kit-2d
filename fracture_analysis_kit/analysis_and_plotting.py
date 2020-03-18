@@ -89,7 +89,9 @@ class MultiTargetAreaAnalysis:
         self.analysis_branches.gather_topology_parameters(unified=False)
         self.analysis_branches.gather_topology_parameters(unified=True)
 
-        # Bar at 85
+        # Anisotropy
+        self.analysis_branches.calc_anisotropy(unified=False)
+        self.analysis_branches.calc_anisotropy(unified=True)
 
     def plot_results(self):
         """
