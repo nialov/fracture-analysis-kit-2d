@@ -116,10 +116,7 @@ class MultiTargetAreaAnalysis:
         self.analysis_branches.plot_azimuths_weighted(unified=True, save=True,
                                                       savefolder=self.plotting_directory + '/azimuths')
         # XYI
-        # self.analysis_branches.plot_xyi(unified=False, save=True,
-        #                                 savefolder=self.plotting_directory + "/xyi/individual")
-        # self.analysis_branches.plot_xyi(unified=True, save=True,
-        #                                 savefolder=self.plotting_directory + "/xyi")
+
         self.analysis_branches.plot_xyi_ternary(unified=False, save=True,
                                                 savefolder=self.plotting_directory + "/xyi")
         self.analysis_branches.plot_xyi_ternary(unified=True, save=True,
@@ -191,6 +188,9 @@ class MultiTargetAreaAnalysis:
         # ---------------unique for traces-------------------
 
         # Cross-cutting and abutting relationships
+        # TODO: Implement Markov chain analysis?
+        # Fracture overprinting history using Markov chain analysis:
+        # Windsor-Kennetcook subbasin, Maritimes Basin, Canada
         if self.determine_relationships:
             self.analysis_traces.plot_crosscut_abutting_relationships(unified=False, save=True,
                                                                       savefolder=self.plotting_directory + '/age_relations/indiv')
