@@ -706,7 +706,7 @@ class MultiTargetAreaQGIS:
 
         # SUBPLOTS, FIGURE SETUP
         cols = len(list(itertools.combinations(self.set_df["Set"].tolist(), r=2)))
-        QgsMessageLog.logMessage(message=f"cols: {cols}", tag=__name__, level=Qgis.Warning)
+        # QgsMessageLog.logMessage(message=f"cols: {cols}", tag=__name__, level=Qgis.Warning)
         if cols == 2:
             cols = 1
         width = 12 / 3 * cols
@@ -1128,8 +1128,6 @@ class MultiTargetAreaQGIS:
         :type save: bool
         :param savefolder: Folder to save to
         :type savefolder: str
-        :return:
-        :rtype:
         """
         if not self.using_branches:
             raise Exception('Anisotropy cannot be determined from traces.')
