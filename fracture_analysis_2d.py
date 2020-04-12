@@ -482,14 +482,15 @@ class FractureAnalysis2D:
                 vector_layers.append(layer)
                 layer_features_iter = layer.getFeatures()
                 # Find feature type by checking the geometry of the first item in the geometry column of the layer
+                # Added 12.4.2020: layer.geometryType() returns an integer denoting the geometry type for the layer.
                 for feature in layer_features_iter:
-                    if 'String' in str(feature.geometry()):
+                    if 'String' in str(feature.geometry()) or layer.geometryType() == 1:
                         line_layers.append(layer)
                         break
-                    elif 'PointZ' in str(feature.geometry()):
+                    elif 'PointZ' in str(feature.geometry()) or layer.geometryType() == 0:
                         point_layers.append(layer)
                         break
-                    elif 'Polygon' in str(feature.geometry()):
+                    elif 'Polygon' in str(feature.geometry()) or layer.geometryType() == 2:
                         polygon_layers.append(layer)
                         break
         # Save as class attributes
@@ -652,6 +653,12 @@ class FractureAnalysis2D:
         # Push finish message
         QMessageBox.information(None, "Success!"
                                 , f'Plots of {analysis_name} were made into {results_folder}.')
+        # Clear tables
+        self.clear_group_name_cut_off_table()
+        self.clear_set_table()
+        self.clear_layer_table()
+
+
         # self.iface.messageBar().pushMessage(
         #     "Success",
         #     f"Plots were of {analysis_name} made into {results_folder}",
