@@ -31,6 +31,7 @@ def main_multi_target_area(layer_table_df, results_folder, analysis_name, group_
     """
 
     # SETUP PLOTTING DIRECTORIES
+    QgsMessageLog.logMessage(message="Setting up plotting directories.", tag=f'{__name__}', level=Qgis.Info)
     plotting_directory = qgis_tools.plotting_directories(results_folder, analysis_name)
 
     # SETUP CONFIG PARAMETERS
@@ -40,13 +41,21 @@ def main_multi_target_area(layer_table_df, results_folder, analysis_name, group_
     config.g_list = group_names_cutoffs_df.Group.tolist()
 
     # START __init__
+    QgsMessageLog.logMessage(message="Initializing MultiTargetAnalysis.", tag=f'{__name__}', level=Qgis.Info)
+
     mta_analysis = taaq.MultiTargetAreaAnalysis(layer_table_df, plotting_directory, analysis_name,
                                                 group_names_cutoffs_df, set_df)
 
+
     # Start analysis
+    QgsMessageLog.logMessage(
+        message="MultiTargetAnalysis analysis method started.", tag=f'{__name__}', level=Qgis.Info)
+
     mta_analysis.analysis()
 
     # Start plotting
+    QgsMessageLog.logMessage(message="Multi Target Analysis plotting started.", tag=f'{__name__}', level=Qgis.Info)
+
     mta_analysis.plot_results()
 
     # Return analysis object
