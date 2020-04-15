@@ -182,3 +182,37 @@ class TestMultipleTargetAreas:
         plotting_directory = qgis_tools.plotting_directories(str(tmp_path), "TEST")
         dummy.plotting_directory = plotting_directory
         dummy.plot_results()
+
+class TestQgisTools:
+
+    def create_qgis_layer(self, type, wkt):
+        from qgis.core import QgsVectorLayer, QgsFeature, QgsGeometry
+        layer = QgsVectorLayer(f"{type}?crs=epsg:3067", "test_layer", "memory")
+        pr = layer.dataProvider()
+        line = QgsFeature()
+        geom = QgsGeometry.fromWkt(wkt)
+        line.setGeometry(geom)
+        pr.addFeatures([line])
+        layer.updateExtents()
+        return layer
+
+    def test_layer_to_df(self):
+        line_layer = self.create_qgis_layer("linestring", "LINESTRING (30 10, 10 30, 40 40)")
+        area_layer = self.create_qgis_layer("polygon", "POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))")
+        point_layer = self.create_qgis_layer("point", "POINT (30 10)")
+        for l in (line_layer, area_layer, point_layer):
+            df, crs = qgis_tools.layer_to_df(l)
+            assert isinstance(df, pd.DataFrame)
+            assert len(df) > 0
+
+
+    def test_layer_to_gdf(self):
+        line_layer = self.create_qgis_layer("linestring", "LINESTRING (30 10, 10 30, 40 40)")
+        area_layer = self.create_qgis_layer("polygon", "POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))")
+        point_layer = self.create_qgis_layer("point", "POINT (30 10)")
+        for l in (line_layer, area_layer, point_layer):
+            gdf = qgis_tools.layer_to_gdf(l)
+            assert isinstance(gdf, gpd.GeoDataFrame)
+            assert len(gdf) > 0
+        assert isinstance(gdf.loc[0, "geometry"], shapely.geometry.Point)
+
