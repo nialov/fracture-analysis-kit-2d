@@ -226,12 +226,14 @@ class MultiTargetAreaQGIS:
                 if save:
                     savename = Path(savefolder + '/{}_curviness_violin'.format(row['name']))
                     plt.savefig(savename, dpi=150)
+                    plt.close()
         else:
             for idx, row in self.uniframe.iterrows():
                 row['TargetAreaLines'].plot_curviness()
                 if save:
                     savename = Path(savefolder + '/{}_curviness_box'.format(row['name']))
                     plt.savefig(savename, dpi=150)
+                    plt.close()
 
     def create_setframes_for_all_unified(self):
         for idx, row in self.uniframe.iterrows():
@@ -347,6 +349,7 @@ class MultiTargetAreaQGIS:
             else:
                 savename = Path(savefolder + '/ALL_FULL_LD.png')
             plt.savefig(savename, dpi=150, bbox_inches='tight')
+            plt.close()
 
         # Figure setup for CUT LDs
         fig, ax = plt.subplots(figsize=figure_size)
@@ -388,6 +391,7 @@ class MultiTargetAreaQGIS:
             else:
                 savename = Path(savefolder + '/ALL_CUT_LD_WITH_FIT.png')
             plt.savefig(savename, dpi=150, bbox_inches='tight')
+            plt.close()
 
         if use_sets:
             raise NotImplementedError('Not implemented. Yet.')
@@ -486,7 +490,9 @@ class MultiTargetAreaQGIS:
                 savename_w = Path(savefolder + '/azimuths_WEIGHTED_all.png')
 
             fig.savefig(savename, dpi=150)
+            plt.close(fig=fig)
             fig_w.savefig(savename_w, dpi=150)
+            plt.close(fig=fig_w)
 
     def plot_azimuths_exp(self, unified: bool, rose_type: str, save=False, savefolder=''):
         """
@@ -548,7 +554,9 @@ class MultiTargetAreaQGIS:
                 savename_w = Path(savefolder + '/azimuths_WEIGHTED_all.png')
 
             fig.savefig(savename, dpi=150)
+            plt.close(fig=fig)
             fig_w.savefig(savename_w, dpi=150)
+            plt.close(fig=fig_w)
 
     def plot_azimuths_weighted(self, unified: bool, save=False, savefolder=''):
         branches = self.using_branches
@@ -571,6 +579,7 @@ class MultiTargetAreaQGIS:
                     savename = Path(savefolder + f'/equal_radius/{fold}/{name}_{ph}_weighted_azimuths.png')
 
                 plt.savefig(savename, dpi=150, bbox_inches='tight')
+                plt.close()
 
             row['TargetAreaLines'].plot_azimuth_weighted(rose_type='equal-area', set_visualization=False)
             if save:
@@ -580,6 +589,7 @@ class MultiTargetAreaQGIS:
                     savename = Path(savefolder + f'/equal_area/{fold}/{name}_{ph}_weighted_azimuths.png')
 
                 plt.savefig(savename, dpi=150, bbox_inches='tight')
+                plt.close()
 
     # noinspection PyArgumentList
     def determine_crosscut_abutting_relationships(self, unified: bool):
@@ -793,6 +803,7 @@ class MultiTargetAreaQGIS:
                 if save:
                     savename = Path(savefolder + f'/{name}_crosscutting_abutting_relationships.png')
                     plt.savefig(savename, dpi=200, bbox_inches='tight')
+                    plt.close()
 
     def plot_xyi_ternary(self, unified: bool, save=False, savefolder=''):
         """
@@ -828,6 +839,7 @@ class MultiTargetAreaQGIS:
             else:
                 savename = Path(savefolder + '/all_xyi_points.png')
             plt.savefig(savename, dpi=150, bbox_inches='tight')
+            plt.close()
 
         # MAKE INDIVIDUAL XYI PLOTS
         for idx, row in frame.iterrows():
@@ -872,6 +884,7 @@ class MultiTargetAreaQGIS:
             else:
                 savename = Path(savefolder + '/all_branch_points.png')
             plt.savefig(savename, dpi=150, bbox_inches='tight')
+            plt.close()
 
         for _, row in frame.iterrows():
             color_for_plot = color_dict[row['TargetAreaLines'].name]
@@ -1040,6 +1053,7 @@ class MultiTargetAreaQGIS:
                 else:
                     savename = Path(savefolder + '/{}_all.png'.format(str(column)))
                 plt.savefig(savename, dpi=150)
+                plt.close()
 
     def plot_hexbin_plot(self, unified: bool, save=False, savefolder=''):
         """
@@ -1101,12 +1115,14 @@ class MultiTargetAreaQGIS:
                 else:
                     savename = Path(savefolder + '/unified_hexbinplot_traces_with_histo.png')
                 plt.savefig(savename, dpi=200)
+                plt.close()
             else:
                 if branches:
                     savename = Path(savefolder + '/all_hexbinplot_branches_with_histo.png')
                 else:
                     savename = Path(savefolder + '/all_hexbinplot_traces_with_histo.png')
             plt.savefig(savename, dpi=200)
+            plt.close()
 
     def calc_anisotropy(self, unified: bool):
         if not self.using_branches:
@@ -1149,3 +1165,4 @@ class MultiTargetAreaQGIS:
                     savename = Path(savefolder + '/{}_anisotropy.png'.format(row.TargetAreaLines.name))
 
                 plt.savefig(savename, dpi=200, bbox_inches="tight")
+                plt.close()

@@ -171,6 +171,7 @@ class TargetAreaLines:
             else:
                 savename = Path(savefolder + f'/{name}_area_indiv_full.png')
             plt.savefig(savename, dpi=150, bbox_inches='tight')
+            plt.close()
 
     def plot_length_distribution_ax(self, ax, cut=False, color_for_plot='black'):
         """
@@ -655,6 +656,7 @@ class TargetAreaLines:
             else:
                 savename = Path(savefolder + f'/indiv/{self.name}_area_branch_point.png')
             plt.savefig(savename, dpi=150, bbox_inches='tight')
+            plt.close()
 
     def plot_branch_ternary_point(self, tax, color_for_plot='black'):
 
@@ -815,6 +817,7 @@ class TargetAreaNodes:
             else:
                 savename = Path(savefolder + f'/indiv/{self.name}_area_xyi_point.png')
             plt.savefig(savename, dpi=150, bbox_inches='tight')
+            plt.close()
 
     def plot_xyi_point(self, tax, color_for_plot='black'):
         """
