@@ -56,9 +56,9 @@ def df_to_gdf(df, coord_system):
     :return: Converted GeoDataFrame
     :rtype: geopandas.GeoDataFrame
     """
-    proj4_rep = coord_system.toProj4()
+    proj_rep = coord_system.toProj()
     gdf = gpd.GeoDataFrame(df)
-    gdf.crs = proj4_rep
+    gdf.crs = proj_rep
     return gdf
 
 
