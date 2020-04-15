@@ -266,12 +266,12 @@ class FractureAnalysis2D:
             return
         if name in self.layer_table_df.Name.tolist():
             QMessageBox.critical(None, "Error"
-                                 , f'Given Target Area Name ({name}) is already in the layer table.'
+                                 , f'Given Target Area Name ({name}) is already in the layer table.\n'
                                    f'Duplicate names are not allowed.')
             return
         if name in self.group_names_cutoffs_df.Group.tolist():
             QMessageBox.critical(None, "Error"
-                                 , f'Given Target Area Name ({name}) is already in the group names table.'
+                                 , f'Given Target Area Name ({name}) is already in the group names table.\n'
                                    f'Duplicate names are not allowed between target areas and groups.')
             return
         # Current row count
