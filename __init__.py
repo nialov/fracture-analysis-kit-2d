@@ -16,8 +16,12 @@ def classFactory(iface):  # pylint: disable=invalid-name
     install_dir = str((Path(__file__) / Path("install_dir")).resolve())
     sys.path.append(os.path.abspath(currentPath))
 
-    # Setup Pythonpath for when user has no administrator access and modules are in user Python folder
+    # Setup Pythonpath for when user has no administrator access and installed modules are in user Python folder.
     roaming_folder = os.environ['APPDATA']
+
+    # Add custom pyproj proj.db installation to PROJ_LIB to avoid conflicts and issues with not found proj.db.
+    # TODO: Implement better PROJ_LIB if needed?...............
+
     try:
         os.environ['PYTHONPATH'] += rf';{roaming_folder}\Python\Python37\site-packages;{install_dir}'
     except KeyError:
