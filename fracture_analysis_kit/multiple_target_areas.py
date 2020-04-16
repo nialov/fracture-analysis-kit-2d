@@ -255,7 +255,7 @@ class MultiTargetAreaQGIS:
             Sub-method to create Texts based on the length distribution DataFrame to a given ax.'
 
             :param lineframe_for_text: Length distribution.
-            :type lineframe_for_text: pandas.DataFrame | geopandas.GeoDataFrame
+            :type lineframe_for_text: pd.DataFrame | gpd.GeoDataFrame
             :param ax_for_text: Ax to create texts to.
             :type ax_for_text: matplotlib.axes.Axes
             """

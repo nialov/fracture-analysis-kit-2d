@@ -36,19 +36,31 @@ class MultiTargetAreaAnalysis:
 
         # Convert QGIS-layers to GeoDataFrames
         # and drop unused columns to free memory
+
+        QgsMessageLog.logMessage(message=f"Converting QGIS trace layers to GeoDataFrames"
+                                 , tag=f'{__name__}', level=Qgis.Info)
         self.layer_table_df['Trace_frame'] = self.layer_table_df['Trace'].apply(qgis_tools.layer_to_gdf)
         self.layer_table_df = self.layer_table_df.drop("Trace", 1)
 
+        QgsMessageLog.logMessage(message=f"Converting QGIS branch layers to GeoDataFrames"
+                                 , tag=f'{__name__}', level=Qgis.Info)
         self.layer_table_df['Branch_frame'] = self.layer_table_df['Branch'].apply(qgis_tools.layer_to_gdf)
         self.layer_table_df = self.layer_table_df.drop("Branch", 1)
+
+        QgsMessageLog.logMessage(message=f"Converting QGIS area layers to GeoDataFrames"
+                                 , tag=f'{__name__}', level=Qgis.Info)
 
         self.layer_table_df['Area_frame'] = self.layer_table_df['Area'].apply(qgis_tools.layer_to_gdf)
         self.layer_table_df = self.layer_table_df.drop("Area", 1)
 
+        QgsMessageLog.logMessage(message=f"Converting QGIS node layers to GeoDataFrames"
+                                 , tag=f'{__name__}', level=Qgis.Info)
+
         self.layer_table_df['Node_frame'] = self.layer_table_df['Node'].apply(qgis_tools.layer_to_gdf)
         self.layer_table_df = self.layer_table_df.drop("Node", 1)
 
-
+        QgsMessageLog.logMessage(message=f"Checking if cross-cutting and abutting relationships are determined."
+                                 , tag=f'{__name__}', level=Qgis.Info)
         # Check if cross-cutting and abutting relationships can be determined
         if len(self.set_df) < 2:
             self.determine_relationships = False
