@@ -10,6 +10,11 @@ import matplotlib
 own_path = Path(r'F:\OSGeo4W64\apps\Qt5\plugins')
 qt5_path = Path(r'F:\OSGeo4W64\apps\Qt5')
 qgis_apps_path = Path(r'F:\OSGeo4W64\apps')
+os.environ["PROJ_LIB"] += r";F:\OSGeo4W64\apps\Python37\lib\site-packages\pyproj\proj_dir\share\proj"
+
+# own_path = Path(os.environ["OSGEO4W_ROOT"]) / Path(r'apps\Qt5\plugins')
+# qt5_path = Path(os.environ["OSGEO4W_ROOT"]) / Path(r'apps\Qt5')
+# qgis_apps_path = Path(os.environ["OSGEO4W_ROOT"]) / Path(r'apps')
 
 if own_path.exists() and qt5_path.exists() and qgis_apps_path.exists():
     pass
@@ -19,7 +24,9 @@ else:
                              rf"Setup the variables to the correct folders.")
 
 os.environ['QT_QPA_PLATFORM_PLUGIN_PATH'] = str(own_path)
+
 matplotlib.use('Qt5Agg')
 
 sys.path.insert(0, str(qt5_path))
 sys.path.insert(0, str(qgis_apps_path))
+
