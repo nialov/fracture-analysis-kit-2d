@@ -133,7 +133,7 @@ class TargetAreaLines:
         Categorizes both non-cut and cut DataFrames with set limits.
 
         :param set_df: DataFrame with set limits and set names.
-        :type set_df: pandas.DataFrame
+        :type set_df: pd.DataFrame
         """
 
         self.lineframe_main['set'] = self.lineframe_main.apply(lambda x: tools.define_set(x['halved'], set_df)
