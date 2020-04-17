@@ -266,12 +266,12 @@ class FractureAnalysis2D:
             return
         if name in self.layer_table_df.Name.tolist():
             QMessageBox.critical(None, "Error"
-                                 , f'Given Target Area Name ({name}) is already in the layer table.'
+                                 , f'Given Target Area Name ({name}) is already in the layer table.\n'
                                    f'Duplicate names are not allowed.')
             return
         if name in self.group_names_cutoffs_df.Group.tolist():
             QMessageBox.critical(None, "Error"
-                                 , f'Given Target Area Name ({name}) is already in the group names table.'
+                                 , f'Given Target Area Name ({name}) is already in the group names table.\n'
                                    f'Duplicate names are not allowed between target areas and groups.')
             return
         # Current row count
@@ -483,13 +483,13 @@ class FractureAnalysis2D:
                 layer_features_iter = layer.getFeatures()
                 # Find feature type by checking the geometry of the first item in the geometry column of the layer
                 for feature in layer_features_iter:
-                    if 'String' in str(feature.geometry()):
+                    if 'String' in str(feature.geometry()) or layer.geometryType() == 1:
                         line_layers.append(layer)
                         break
-                    elif 'PointZ' in str(feature.geometry()):
+                    elif 'PointZ' in str(feature.geometry()) or layer.geometryType() == 0:
                         point_layers.append(layer)
                         break
-                    elif 'Polygon' in str(feature.geometry()):
+                    elif 'Polygon' in str(feature.geometry()) or layer.geometryType() == 2:
                         polygon_layers.append(layer)
                         break
         # Save as class attributes
@@ -652,6 +652,12 @@ class FractureAnalysis2D:
         # Push finish message
         QMessageBox.information(None, "Success!"
                                 , f'Plots of {analysis_name} were made into {results_folder}.')
+        # Clear tables
+        self.clear_group_name_cut_off_table()
+        self.clear_set_table()
+        self.clear_layer_table()
+
+
         # self.iface.messageBar().pushMessage(
         #     "Success",
         #     f"Plots were of {analysis_name} made into {results_folder}",
