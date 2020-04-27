@@ -167,9 +167,9 @@ class TargetAreaLines:
         if save:
             name = self.name
             if unified:
-                savename = Path(savefolder + f'/{name}_group_indiv_full.png')
+                savename = Path(savefolder + f'/{name}_group_indiv_full.svg')
             else:
-                savename = Path(savefolder + f'/{name}_area_indiv_full.png')
+                savename = Path(savefolder + f'/{name}_area_indiv_full.svg')
             plt.savefig(savename, dpi=150, bbox_inches='tight')
 
     def plot_length_distribution_ax(self, ax, cut=False, color_for_plot='black'):
@@ -651,9 +651,9 @@ class TargetAreaLines:
                    columnspacing=0.7, shadow=True)
         if save:
             if unified:
-                savename = Path(savefolder + f'/indiv/{self.name}_group_branch_point.png')
+                savename = Path(savefolder + f'/indiv/{self.name}_group_branch_point.svg')
             else:
-                savename = Path(savefolder + f'/indiv/{self.name}_area_branch_point.png')
+                savename = Path(savefolder + f'/indiv/{self.name}_area_branch_point.svg')
             plt.savefig(savename, dpi=150, bbox_inches='tight')
 
     def plot_branch_ternary_point(self, tax, color_for_plot='black'):
@@ -746,7 +746,7 @@ class TargetAreaLines:
         if not for_ax:
             if save:
                 name = self.name
-                savename = Path(save_folder + '/{}_anisotropy_indiv.png'.format(name))
+                savename = Path(save_folder + '/{}_anisotropy_indiv.svg'.format(name))
                 plt.savefig(savename, dpi=150)
 
 
@@ -815,9 +815,9 @@ class TargetAreaNodes:
                    columnspacing=0.7, shadow=True)
         if save:
             if unified:
-                savename = Path(savefolder + f'/indiv/{self.name}_group_xyi_point.png')
+                savename = Path(savefolder + f'/indiv/{self.name}_group_xyi_point.svg')
             else:
-                savename = Path(savefolder + f'/indiv/{self.name}_area_xyi_point.png')
+                savename = Path(savefolder + f'/indiv/{self.name}_area_xyi_point.svg')
             plt.savefig(savename, dpi=150, bbox_inches='tight')
 
     def plot_xyi_point(self, tax, color_for_plot='black'):
