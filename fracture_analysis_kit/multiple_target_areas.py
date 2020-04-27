@@ -345,9 +345,9 @@ class MultiTargetAreaQGIS:
         # Save figure
         if save:
             if unified:
-                savename = Path(savefolder + '/UNIFIED_FULL_LD.png')
+                savename = Path(savefolder + '/UNIFIED_FULL_LD.svg')
             else:
-                savename = Path(savefolder + '/ALL_FULL_LD.png')
+                savename = Path(savefolder + '/ALL_FULL_LD.svg')
             plt.savefig(savename, dpi=150, bbox_inches='tight')
             plt.close()
 
@@ -387,9 +387,9 @@ class MultiTargetAreaQGIS:
         # Save figure
         if save:
             if unified:
-                savename = Path(savefolder + '/UNIFIED_CUT_LD_WITH_FIT.png')
+                savename = Path(savefolder + '/UNIFIED_CUT_LD_WITH_FIT.svg')
             else:
-                savename = Path(savefolder + '/ALL_CUT_LD_WITH_FIT.png')
+                savename = Path(savefolder + '/ALL_CUT_LD_WITH_FIT.svg')
             plt.savefig(savename, dpi=150, bbox_inches='tight')
             plt.close()
 
@@ -483,11 +483,11 @@ class MultiTargetAreaQGIS:
 
         if save:
             if unified:
-                savename = Path(savefolder + '/azimuths_unified_all.png')
-                savename_w = Path(savefolder + '/azimuths_unified_WEIGHTED_all.png')
+                savename = Path(savefolder + '/azimuths_unified_all.svg')
+                savename_w = Path(savefolder + '/azimuths_unified_WEIGHTED_all.svg')
             else:
-                savename = Path(savefolder + '/azimuths_all.png')
-                savename_w = Path(savefolder + '/azimuths_WEIGHTED_all.png')
+                savename = Path(savefolder + '/azimuths_all.svg')
+                savename_w = Path(savefolder + '/azimuths_WEIGHTED_all.svg')
 
             fig.savefig(savename, dpi=150)
             plt.close(fig=fig)
@@ -547,11 +547,11 @@ class MultiTargetAreaQGIS:
 
         if save:
             if unified:
-                savename = Path(savefolder + '/azimuths_unified_all.png')
-                savename_w = Path(savefolder + '/azimuths_unified_WEIGHTED_all.png')
+                savename = Path(savefolder + '/azimuths_unified_all.svg')
+                savename_w = Path(savefolder + '/azimuths_unified_WEIGHTED_all.svg')
             else:
-                savename = Path(savefolder + '/azimuths_all.png')
-                savename_w = Path(savefolder + '/azimuths_WEIGHTED_all.png')
+                savename = Path(savefolder + '/azimuths_all.svg')
+                savename_w = Path(savefolder + '/azimuths_WEIGHTED_all.svg')
 
             fig.savefig(savename, dpi=150)
             plt.close(fig=fig)
@@ -574,9 +574,9 @@ class MultiTargetAreaQGIS:
             row['TargetAreaLines'].plot_azimuth_weighted(rose_type='equal-radius', set_visualization=False)
             if save:
                 if unified:
-                    savename = Path(savefolder + f'/equal_radius/{fold}/{name}_{ph}_weighted_azimuths.png')
+                    savename = Path(savefolder + f'/equal_radius/{fold}/{name}_{ph}_weighted_azimuths.svg')
                 else:
-                    savename = Path(savefolder + f'/equal_radius/{fold}/{name}_{ph}_weighted_azimuths.png')
+                    savename = Path(savefolder + f'/equal_radius/{fold}/{name}_{ph}_weighted_azimuths.svg')
 
                 plt.savefig(savename, dpi=150, bbox_inches='tight')
                 plt.close()
@@ -584,9 +584,9 @@ class MultiTargetAreaQGIS:
             row['TargetAreaLines'].plot_azimuth_weighted(rose_type='equal-area', set_visualization=False)
             if save:
                 if unified:
-                    savename = Path(savefolder + f'/equal_area/{fold}/{name}_{ph}_weighted_azimuths.png')
+                    savename = Path(savefolder + f'/equal_area/{fold}/{name}_{ph}_weighted_azimuths.svg')
                 else:
-                    savename = Path(savefolder + f'/equal_area/{fold}/{name}_{ph}_weighted_azimuths.png')
+                    savename = Path(savefolder + f'/equal_area/{fold}/{name}_{ph}_weighted_azimuths.svg')
 
                 plt.savefig(savename, dpi=150, bbox_inches='tight')
                 plt.close()
@@ -801,7 +801,7 @@ class MultiTargetAreaQGIS:
                                 , bbox=prop
                                 , fontfamily='Calibri')
                 if save:
-                    savename = Path(savefolder + f'/{name}_crosscutting_abutting_relationships.png')
+                    savename = Path(savefolder + f'/{name}_crosscutting_abutting_relationships.svg')
                     plt.savefig(savename, dpi=200, bbox_inches='tight')
                     plt.close()
 
@@ -835,9 +835,9 @@ class MultiTargetAreaQGIS:
                    columnspacing=0.7, shadow=True)
         if save:
             if unified:
-                savename = Path(savefolder + '/unified_xyi_points.png')
+                savename = Path(savefolder + '/unified_xyi_points.svg')
             else:
-                savename = Path(savefolder + '/all_xyi_points.png')
+                savename = Path(savefolder + '/all_xyi_points.svg')
             plt.savefig(savename, dpi=150, bbox_inches='tight')
             plt.close()
 
@@ -880,9 +880,9 @@ class MultiTargetAreaQGIS:
         # plt.subplots_adjust(top=0.8)
         if save:
             if unified:
-                savename = Path(savefolder + '/unified_branch_points.png')
+                savename = Path(savefolder + '/unified_branch_points.svg')
             else:
-                savename = Path(savefolder + '/all_branch_points.png')
+                savename = Path(savefolder + '/all_branch_points.svg')
             plt.savefig(savename, dpi=150, bbox_inches='tight')
             plt.close()
 
@@ -1049,9 +1049,9 @@ class MultiTargetAreaQGIS:
 
             if save:
                 if unified:
-                    savename = Path(savefolder + '/{}_unified.png'.format(str(column)))
+                    savename = Path(savefolder + '/{}_unified.svg'.format(str(column)))
                 else:
-                    savename = Path(savefolder + '/{}_all.png'.format(str(column)))
+                    savename = Path(savefolder + '/{}_all.svg'.format(str(column)))
                 plt.savefig(savename, dpi=150)
                 plt.close()
 
@@ -1111,16 +1111,16 @@ class MultiTargetAreaQGIS:
         if save:
             if unified:
                 if branches:
-                    savename = Path(savefolder + '/unified_hexbinplot_branches_with_histo.png')
+                    savename = Path(savefolder + '/unified_hexbinplot_branches_with_histo.svg')
                 else:
-                    savename = Path(savefolder + '/unified_hexbinplot_traces_with_histo.png')
+                    savename = Path(savefolder + '/unified_hexbinplot_traces_with_histo.svg')
                 plt.savefig(savename, dpi=200)
                 plt.close()
             else:
                 if branches:
-                    savename = Path(savefolder + '/all_hexbinplot_branches_with_histo.png')
+                    savename = Path(savefolder + '/all_hexbinplot_branches_with_histo.svg')
                 else:
-                    savename = Path(savefolder + '/all_hexbinplot_traces_with_histo.png')
+                    savename = Path(savefolder + '/all_hexbinplot_traces_with_histo.svg')
             plt.savefig(savename, dpi=200)
             plt.close()
 
@@ -1160,9 +1160,9 @@ class MultiTargetAreaQGIS:
             plt.title(row.TargetAreaLines.name, loc='center', fontdict=style, fontsize=25, bbox=prop)
             if save:
                 if unified:
-                    savename = Path(savefolder + '/{}_anisotropy_unified.png'.format(row.TargetAreaLines.name))
+                    savename = Path(savefolder + '/{}_anisotropy_unified.svg'.format(row.TargetAreaLines.name))
                 else:
-                    savename = Path(savefolder + '/{}_anisotropy.png'.format(row.TargetAreaLines.name))
+                    savename = Path(savefolder + '/{}_anisotropy.svg'.format(row.TargetAreaLines.name))
 
                 plt.savefig(savename, dpi=200, bbox_inches="tight")
                 plt.close()

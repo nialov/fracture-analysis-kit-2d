@@ -167,9 +167,9 @@ class TargetAreaLines:
         if save:
             name = self.name
             if unified:
-                savename = Path(savefolder + f'/{name}_group_indiv_full.png')
+                savename = Path(savefolder + f'/{name}_group_indiv_full.svg')
             else:
-                savename = Path(savefolder + f'/{name}_area_indiv_full.png')
+                savename = Path(savefolder + f'/{name}_area_indiv_full.svg')
             plt.savefig(savename, dpi=150, bbox_inches='tight')
             plt.close()
 
@@ -652,9 +652,9 @@ class TargetAreaLines:
                    columnspacing=0.7, shadow=True)
         if save:
             if unified:
-                savename = Path(savefolder + f'/indiv/{self.name}_group_branch_point.png')
+                savename = Path(savefolder + f'/indiv/{self.name}_group_branch_point.svg')
             else:
-                savename = Path(savefolder + f'/indiv/{self.name}_area_branch_point.png')
+                savename = Path(savefolder + f'/indiv/{self.name}_area_branch_point.svg')
             plt.savefig(savename, dpi=150, bbox_inches='tight')
             plt.close()
 
@@ -813,9 +813,9 @@ class TargetAreaNodes:
                    columnspacing=0.7, shadow=True)
         if save:
             if unified:
-                savename = Path(savefolder + f'/indiv/{self.name}_group_xyi_point.png')
+                savename = Path(savefolder + f'/indiv/{self.name}_group_xyi_point.svg')
             else:
-                savename = Path(savefolder + f'/indiv/{self.name}_area_xyi_point.png')
+                savename = Path(savefolder + f'/indiv/{self.name}_area_xyi_point.svg')
             plt.savefig(savename, dpi=150, bbox_inches='tight')
             plt.close()
 
