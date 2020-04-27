@@ -32,9 +32,11 @@ def classFactory(iface):  # pylint: disable=invalid-name
     try:
         check_installations()
     except ModuleNotFoundError as e:
+        plug_dir = Path(__file__).parent
         QMessageBox.critical(None, "ModuleNotFoundError. One of more of the required Python modules are not found.\n"
                                    "Open OSGeo4WShell as administrator. Run:\npy3_env\n "
                                    "Then cd to this plugin's directory:\n"
+                                   f"{plug_dir.absolute()}\n"
                                    "cd 'input plugin directory' \n"
                                    "and then, run:\n"
                                    "python install_script.py\n"

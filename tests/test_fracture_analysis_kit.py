@@ -197,8 +197,6 @@ class TestQgisTools:
         return layer
 
     def test_layer_to_df(self):
-        # TODO: Implement somehow...
-
         line_layer = self.create_qgis_layer("linestring", "LINESTRING (30 10, 10 30, 40 40)")
         area_layer = self.create_qgis_layer("polygon", "POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))")
         point_layer = self.create_qgis_layer("point", "POINT (30 10)")
@@ -211,8 +209,6 @@ class TestQgisTools:
 
 
     def test_layer_to_gdf(self):
-        # TODO: Implement somehow...
-
         line_layer = self.create_qgis_layer("linestring", "LINESTRING (30 10, 10 30, 40 40)")
         area_layer = self.create_qgis_layer("polygon", "POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))")
         point_layer = self.create_qgis_layer("point", "POINT (30 10)")
