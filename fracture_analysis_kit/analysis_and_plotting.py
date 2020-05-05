@@ -62,6 +62,7 @@ class MultiTargetAreaAnalysis:
         QgsMessageLog.logMessage(message=f"Checking if cross-cutting and abutting relationships are determined."
                                  , tag=f'{__name__}', level=Qgis.Info)
         # Check if cross-cutting and abutting relationships can be determined
+        # TODO: Also check if sets actually exist in lines...
         if len(self.set_df) < 2:
             self.determine_relationships = False
         else:

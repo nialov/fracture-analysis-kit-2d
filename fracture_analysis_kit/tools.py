@@ -1462,6 +1462,7 @@ def get_nodes_intersecting_sets(xypointsframe, traceframe):
 
     sets = traceframe.set.unique().tolist()
     if len(sets) != 2:
+        return xypointsframe.iloc[0:0]
         raise Exception('get_nodes_intersecting_sets function received traceframe without exactly two sets.')
     set_1_frame = traceframe.loc[traceframe.set == sets[0]]
     set_2_frame = traceframe.loc[traceframe.set == sets[1]]
@@ -1525,6 +1526,10 @@ def get_intersect_frame(intersecting_nodes_frame, traceframe, set_tuple):
     # Creates a rtree from all start- and endpoints of set 1
     # Used in deducting in which set a trace abuts (Y-node)
     set1pointtree = make_point_tree(set1frame)
+
+    if len(intersecting_nodes_frame) == 0:
+        # No intersections between sets
+        return intersectframe
 
     for idx, row in intersecting_nodes_frame.iterrows():
         node = row.geometry
