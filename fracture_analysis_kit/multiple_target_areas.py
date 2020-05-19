@@ -1054,6 +1054,13 @@ class MultiTargetAreaQGIS:
                     savename = Path(savefolder + '/{}_all.svg'.format(str(column)))
                 plt.savefig(savename, dpi=150)
                 plt.close()
+        if save:
+            # Save the topology results into .csv file
+            if unified:
+                filename = Path(savefolder + '/_unified.csv')
+            else:
+                filename = Path(savefolder + '/_all.csv')
+            topology_concat.to_csv(filename)
 
     def plot_hexbin_plot(self, unified: bool, save=False, savefolder=''):
         """
