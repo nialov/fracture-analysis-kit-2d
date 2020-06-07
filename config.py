@@ -7,7 +7,17 @@ import matplotlib.pyplot as plt
 import matplotlib.patheffects as patheffects
 import seaborn as sns
 
-
+# Switch to 'False' to disable the analysis from running
+choose_your_analyses = {
+    "LengthDistributions": True,
+    "Azimuths": True,
+    "XYI": True,
+    "BranchClassification": True,
+    "Topology": True,
+    "Cross-cuttingAbutting": True,
+    "Anisotropy": True,
+    "Hexbin": True
+}
 
 
 # ---------------------------------------------------------
@@ -56,6 +66,10 @@ ta_list = []
 # Group name list
 g_list = []
 
+# Half the bin width in azimuth plots
+# Applicable when sample size low and lines have preferred orientations
+# i.e. discrete fracture sets.
+half_the_bin_width = True
 
 def get_color_dict(unified: bool) -> dict:
     """
