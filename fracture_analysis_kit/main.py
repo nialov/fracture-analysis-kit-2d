@@ -9,7 +9,7 @@ from fracture_analysis_kit import analysis_and_plotting as taaq
 from fracture_analysis_kit import qgis_tools as qgis_tools
 
 
-def main_multi_target_area(layer_table_df, results_folder, analysis_name, group_names_cutoffs_df, set_df):
+def main_multi_target_area(layer_table_df, results_folder, analysis_name, group_names_cutoffs_df, set_df, choose_your_analyses):
     """
     Main method for firstly initializing data analysis, then starting data analysis,
     and then starting plotting of analysis results.
@@ -44,7 +44,7 @@ def main_multi_target_area(layer_table_df, results_folder, analysis_name, group_
     QgsMessageLog.logMessage(message="Initializing MultiTargetAnalysis.", tag=f'{__name__}', level=Qgis.Info)
 
     mta_analysis = taaq.MultiTargetAreaAnalysis(layer_table_df, plotting_directory, analysis_name,
-                                                group_names_cutoffs_df, set_df)
+                                                group_names_cutoffs_df, set_df, choose_your_analyses)
 
 
     # Start analysis
