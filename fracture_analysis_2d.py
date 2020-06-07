@@ -6,8 +6,11 @@ to start analysis and plotting.
 
 import os.path
 import webbrowser
-
+import subprocess
 import pandas as pd
+from pathlib import Path
+import glob
+
 from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction, QFileDialog, QTableWidgetItem, QMessageBox, QProgressBar, QProgressDialog
@@ -69,6 +72,7 @@ class FractureAnalysis2D:
         self.layer_table_df = pd.DataFrame(columns=['Trace', 'Branch', 'Node', 'Area', 'Name', 'Group'])
         self.group_names_cutoffs_df = pd.DataFrame(columns=['Group', 'CutOffTraces', 'CutOffBranches'])
         self.set_df = pd.DataFrame(columns=['Set', 'SetLimits'])
+        self.choose_your_analyses = None
 
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
@@ -184,8 +188,6 @@ class FractureAnalysis2D:
                 self.tr("&2D Fracture Analysis Kit"), action
             )
             self.iface.removeToolBarIcon(action)
-
-
 
     def select_output_folder(self, tab: int):
         """
@@ -451,8 +453,8 @@ class FractureAnalysis2D:
         # Clear name and limits text boxes
         self.dlg.lineEdit_tab2_set_start.clear()
         self.dlg.lineEdit_tab2_set_end.clear()
-        self.dlg.lineEdit_tab2_set_start.setText('125')
-        self.dlg.lineEdit_tab2_set_end.setText('170')
+        # self.dlg.lineEdit_tab2_set_start.setText('125')
+        # self.dlg.lineEdit_tab2_set_end.setText('170')
 
     def clear_set_table(self):
         """
@@ -515,6 +517,17 @@ class FractureAnalysis2D:
         current_dir = os.path.dirname(__file__)
         webbrowser.open(url=fr'{current_dir}\docs\index.html', new=2)
 
+    def open_config(self):
+        """
+        Show config filepath when Advanced is clicked.
+        """
+        current_dir = os.path.dirname(__file__)
+        config_path = os.path.normpath(os.path.join(current_dir, "config.py"))
+        QMessageBox.information(None, "Plugin custom config"
+                             , f'Plugin config available at:\n{config_path}\n'
+                               f'Modify at your own risk and keep backups!'
+                               f'Changes will take into effect ONLY after restarting QGIS')
+
     def run(self):
         """
         Run method that performs the dialog event loop.
@@ -548,6 +561,8 @@ class FractureAnalysis2D:
             self.dlg.pushButton_tab2_set_clear.clicked.connect(self.clear_set_table)
             # Open Help Documentation
             self.dlg.pushButton_help.clicked.connect(self.open_help_doc)
+            # Show config.py filepath when "Advanced" is pressed
+            self.dlg.pushButton_advanced.clicked.connect(self.open_config)
 
 
             QgsMessageLog.logMessage(message="Plugin initialized.", tag=f'{__name__}', level=Qgis.Info)
@@ -639,11 +654,13 @@ class FractureAnalysis2D:
             QMessageBox.critical(None, "Error"
                                  , f'Group names without target areas are not allowed.')
             return
-
+        # Get current config info
+        import config
+        self.choose_your_analyses = config.choose_your_analyses
         # Run analysis
         main.main_multi_target_area(self.layer_table_df, results_folder, analysis_name,
                                     self.group_names_cutoffs_df,
-                                    self.set_df)
+                                    self.set_df, self.choose_your_analyses)
         # TODO: Implement tasks (traces and branches)?
         # Run as task
         # main_target_analysis.task_main_multi_target_area(self.layer_table_df, results_folder, analysis_name,

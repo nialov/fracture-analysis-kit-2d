@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>959</width>
-    <height>665</height>
+    <height>670</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -801,6 +801,19 @@ in range
    </property>
    <property name="text">
     <string>?</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="pushButton_advanced">
+   <property name="geometry">
+    <rect>
+     <x>440</x>
+     <y>10</y>
+     <width>75</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Advanced</string>
    </property>
   </widget>
  </widget>
