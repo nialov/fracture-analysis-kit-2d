@@ -18,3 +18,4 @@
 /docs/backup/
 /.hypothesis/
 /.test/
+/.mypy_cache/
