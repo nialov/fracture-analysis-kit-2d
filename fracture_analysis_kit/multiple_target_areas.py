@@ -285,8 +285,17 @@ class MultiTargetAreaQGIS:
         lineframe['logLen'] = lineframe.length.apply(np.log)
         lineframe['logY'] = lineframe.y.apply(np.log)
 
-        # log(y) = m*log(x) + c fitted     y = c*x^m
-        vals = np.polyfit(lineframe['logLen'].values, lineframe['logY'].values, 1)
+        # Equation: log(y) = m*log(x) + c fitted     y = c*x^m
+        # Make sure no NaN get into polyfit
+        finite_value_indexes = np.isfinite(lineframe['logLen'].values) & np.isfinite(lineframe['logY'].values)
+        # Check to make sure there are at least some valid values.
+        if not len(lineframe['logLen'].values) + len(lineframe['logY'].values) == 0:
+            if len(finite_value_indexes) == 0:
+                raise ValueError(f"No valid values in lineframe in length distribution modelling.\n"
+                                 f"lineframe['logLen'].values: {lineframe['logLen'].values}")
+        vals = np.polyfit(lineframe['logLen'].values[finite_value_indexes]
+                          , lineframe['logY'].values[finite_value_indexes]
+                          , 1)
         if len(vals) == 2:
             m, c = vals[0], vals[1]
         else:
