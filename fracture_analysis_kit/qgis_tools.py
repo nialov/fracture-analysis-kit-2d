@@ -136,7 +136,7 @@ def plotting_directories(results_folder, name):
             os.mkdir(Path(plotting_directory))
         except FileExistsError:
             print("Earlier plots exist. Overwriting old ones.")
-            return
+            return plotting_directory
         os.mkdir(Path(f"{plotting_directory}/age_relations"))
         os.mkdir(Path(f"{plotting_directory}/age_relations/indiv"))
         os.mkdir(Path(f"{plotting_directory}/anisotropy"))
