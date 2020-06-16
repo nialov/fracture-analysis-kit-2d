@@ -19,3 +19,4 @@
 /.hypothesis/
 /.test/
 /.mypy_cache/
+/fracture_analysis_kit/saved_run_jsons/

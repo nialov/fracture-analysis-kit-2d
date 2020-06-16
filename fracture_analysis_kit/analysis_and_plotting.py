@@ -10,7 +10,7 @@ from fracture_analysis_kit import qgis_tools as qgis_tools, multiple_target_area
 class MultiTargetAreaAnalysis:
 
     def __init__(
-            self, layer_table_df, plotting_directory, analysis_name, group_names_cutoffs_df, set_df
+            self, layer_table_df, plotting_directory, analysis_name, group_names_cutoffs_df, set_df, choose_your_analyses
     ):
         """
         Initializes data and user inputs for the analysis and plotting. Converts QGIS-layers to geopandas GeoDataFrames.
@@ -66,7 +66,16 @@ class MultiTargetAreaAnalysis:
         if len(self.set_df) < 2:
             self.determine_relationships = False
         else:
-            self.determine_relationships = True
+            self.determine_relationships = choose_your_analyses["Cross-cuttingAbutting"]
+        # Check which analyses to perform
+        self.determine_branches = choose_your_analyses["Branches"]
+        self.determine_length_distributions = choose_your_analyses["LengthDistributions"]
+        self.determine_azimuths = choose_your_analyses["Azimuths"]
+        self.determine_xyi = choose_your_analyses["XYI"]
+        self.determine_branch_classification = choose_your_analyses["BranchClassification"]
+        self.determine_topology = choose_your_analyses["Topology"]
+        self.determine_anisotropy = choose_your_analyses["Anisotropy"]
+        self.determine_hexbin = choose_your_analyses["Hexbin"]
 
     def analysis(self):
         """
@@ -81,9 +90,9 @@ class MultiTargetAreaAnalysis:
 
         self.analysis_traces = mta.MultiTargetAreaQGIS(self.layer_table_df, self.group_names_cutoffs_df, branches=False)
         # Bar at 25
-
-        self.analysis_branches = mta.MultiTargetAreaQGIS(self.layer_table_df, self.group_names_cutoffs_df,
-                                                         branches=True)
+        if self.determine_branches:
+            self.analysis_branches = mta.MultiTargetAreaQGIS(self.layer_table_df, self.group_names_cutoffs_df,
+                                                             branches=True)
         # Bar at 45
         QgsMessageLog.logMessage(
             message="Calculating attributes for traces.", tag=f'{__name__}', level=Qgis.Info)
@@ -107,9 +116,9 @@ class MultiTargetAreaAnalysis:
         QgsMessageLog.logMessage(
             message="Gathering topological parameters for traces."
             , tag=f'{__name__}', level=Qgis.Info)
-
-        self.analysis_traces.gather_topology_parameters(unified=False)
-        self.analysis_traces.gather_topology_parameters(unified=True)
+        if self.determine_topology:
+            self.analysis_traces.gather_topology_parameters(unified=False)
+            self.analysis_traces.gather_topology_parameters(unified=True)
 
         # Cross-cutting and abutting relationships
         QgsMessageLog.logMessage(
@@ -119,133 +128,145 @@ class MultiTargetAreaAnalysis:
             self.analysis_traces.determine_crosscut_abutting_relationships(unified=False)
             self.analysis_traces.determine_crosscut_abutting_relationships(unified=True)
 
-        # BRANCH DATA SETUP
-        QgsMessageLog.logMessage(
-            message="Calculating attributes for branches.", tag=f'{__name__}', level=Qgis.Info)
-        self.analysis_branches.calc_attributes_for_all()
+        if self.determine_branches:
+            # BRANCH DATA SETUP
+            QgsMessageLog.logMessage(
+                message="Calculating attributes for branches.", tag=f'{__name__}', level=Qgis.Info)
+            self.analysis_branches.calc_attributes_for_all()
 
-        QgsMessageLog.logMessage(
-            message="Defining sets for branches.", tag=f'{__name__}', level=Qgis.Info)
-        self.analysis_branches.define_sets_for_all(self.set_df)
+            QgsMessageLog.logMessage(
+                message="Defining sets for branches.", tag=f'{__name__}', level=Qgis.Info)
+            self.analysis_branches.define_sets_for_all(self.set_df)
 
-        QgsMessageLog.logMessage(
-            message="Defining grouping for branches.", tag=f'{__name__}', level=Qgis.Info)
-        self.analysis_branches.unified()
+            QgsMessageLog.logMessage(
+                message="Defining grouping for branches.", tag=f'{__name__}', level=Qgis.Info)
+            self.analysis_branches.unified()
 
-        QgsMessageLog.logMessage(
-            message="Gathering topological parameters for branches."
-            , tag=f'{__name__}', level=Qgis.Info)
+            QgsMessageLog.logMessage(
+                message="Gathering topological parameters for branches."
+                , tag=f'{__name__}', level=Qgis.Info)
+            if self.determine_topology:
+                self.analysis_branches.gather_topology_parameters(unified=False)
+                self.analysis_branches.gather_topology_parameters(unified=True)
 
-        self.analysis_branches.gather_topology_parameters(unified=False)
-        self.analysis_branches.gather_topology_parameters(unified=True)
+            QgsMessageLog.logMessage(
+                message="Defining anisotropy of connectivity for branches."
+                , tag=f'{__name__}', level=Qgis.Info)
 
-        QgsMessageLog.logMessage(
-            message="Defining anisotropy of connectivity for branches."
-            , tag=f'{__name__}', level=Qgis.Info)
-
-        # Anisotropy
-        self.analysis_branches.calc_anisotropy(unified=False)
-        self.analysis_branches.calc_anisotropy(unified=True)
+            # Anisotropy
+            if self.determine_anisotropy:
+                self.analysis_branches.calc_anisotropy(unified=False)
+                self.analysis_branches.calc_anisotropy(unified=True)
 
     def plot_results(self):
         """
         Method that runs plotting based on analysis results for trace, branch and node data.
         """
-        # ___________________BRANCH DATA_______________________
-        config.styling_plots("branches")
-        # Length distributions
-        QgsMessageLog.logMessage(
-            message="Plotting branch length distributions."
-            , tag=f'{__name__}', level=Qgis.Info)
-        self.analysis_branches.plot_lengths(unified=False, save=True,
-                                            savefolder=self.plotting_directory + '/length_distributions/indiv/branches')
-        self.analysis_branches.plot_lengths(unified=True, save=True,
-                                            savefolder=self.plotting_directory + '/length_distributions/branches')
+        if self.determine_branches:
+            # ___________________BRANCH DATA_______________________
+            config.styling_plots("branches")
+            # Length distributions
+            if self.determine_length_distributions:
+                QgsMessageLog.logMessage(
+                    message="Plotting branch length distributions."
+                , tag=f'{__name__}', level=Qgis.Info)
+                self.analysis_branches.plot_lengths(unified=False, save=True,
+                                                    savefolder=self.plotting_directory + '/length_distributions/indiv/branches')
+                self.analysis_branches.plot_lengths(unified=True, save=True,
+                                                    savefolder=self.plotting_directory + '/length_distributions/branches')
 
-        # TODO: Length distribution predictions
-        # for p in predict_with:
-        #     self.analysis_branches.plot_lengths_unified_combined_predictions(
-        #         save=True, savefolder=self.plotting_directory + '/length_distributions/branches/predictions', predict_with=p)
+            # TODO: Length distribution predictions
+            # for p in predict_with:
+            #     self.analysis_branches.plot_lengths_unified_combined_predictions(
+            #         save=True, savefolder=self.plotting_directory + '/length_distributions/branches/predictions', predict_with=p)
 
-        # Azimuths
-        QgsMessageLog.logMessage(
-            message="Plotting azimuths for branches."
-            , tag=f'{__name__}', level=Qgis.Info)
-        self.analysis_branches.plot_azimuths_weighted(unified=False, save=True,
-                                                      savefolder=self.plotting_directory + '/azimuths/indiv')
-        self.analysis_branches.plot_azimuths_weighted(unified=True, save=True,
-                                                      savefolder=self.plotting_directory + '/azimuths')
-        # XYI
-        QgsMessageLog.logMessage(
-            message="Plotting XYI for branches."
-            , tag=f'{__name__}', level=Qgis.Info)
-        self.analysis_branches.plot_xyi_ternary(unified=False, save=True,
-                                                savefolder=self.plotting_directory + "/xyi")
-        self.analysis_branches.plot_xyi_ternary(unified=True, save=True,
-                                                savefolder=self.plotting_directory + "/xyi")
+            # Azimuths
+            if self.determine_azimuths:
+                QgsMessageLog.logMessage(
+                    message="Plotting azimuths for branches."
+                    , tag=f'{__name__}', level=Qgis.Info)
+                self.analysis_branches.plot_azimuths_weighted(unified=False, save=True,
+                                                              savefolder=self.plotting_directory + '/azimuths/indiv')
+                self.analysis_branches.plot_azimuths_weighted(unified=True, save=True,
+                                                              savefolder=self.plotting_directory + '/azimuths')
+            # XYI
+            if self.determine_xyi:
+                QgsMessageLog.logMessage(
+                    message="Plotting XYI for branches."
+                    , tag=f'{__name__}', level=Qgis.Info)
+                self.analysis_branches.plot_xyi_ternary(unified=False, save=True,
+                                                        savefolder=self.plotting_directory + "/xyi")
+                self.analysis_branches.plot_xyi_ternary(unified=True, save=True,
+                                                        savefolder=self.plotting_directory + "/xyi")
 
-        # Topo parameters
-        QgsMessageLog.logMessage(
-            message="Plotting topology for branches."
-            , tag=f'{__name__}', level=Qgis.Info)
-        self.analysis_branches.plot_topology(unified=False, save=True,
-                                             savefolder=self.plotting_directory + '/topology/branches')
-        self.analysis_branches.plot_topology(unified=True, save=True,
-                                             savefolder=self.plotting_directory + '/topology/branches')
-        # Hexbinplots
-        QgsMessageLog.logMessage(
-            message="Plotting hexbinplots for branches."
-            , tag=f'{__name__}', level=Qgis.Info)
-        self.analysis_branches.plot_hexbin_plot(unified=False, save=True,
-                                                savefolder=self.plotting_directory + '/hexbinplots')
-        self.analysis_branches.plot_hexbin_plot(unified=True, save=True,
-                                                savefolder=self.plotting_directory + '/hexbinplots')
+            # Topo parameters
+            if self.determine_topology:
+                QgsMessageLog.logMessage(
+                    message="Plotting topology for branches."
+                    , tag=f'{__name__}', level=Qgis.Info)
+                self.analysis_branches.plot_topology(unified=False, save=True,
+                                                     savefolder=self.plotting_directory + '/topology/branches')
+                self.analysis_branches.plot_topology(unified=True, save=True,
+                                                     savefolder=self.plotting_directory + '/topology/branches')
+            # Hexbinplots
+            if self.determine_hexbin:
+                QgsMessageLog.logMessage(
+                    message="Plotting hexbinplots for branches."
+                    , tag=f'{__name__}', level=Qgis.Info)
+                self.analysis_branches.plot_hexbin_plot(unified=False, save=True,
+                                                        savefolder=self.plotting_directory + '/hexbinplots')
+                self.analysis_branches.plot_hexbin_plot(unified=True, save=True,
+                                                        savefolder=self.plotting_directory + '/hexbinplots')
 
-        # ----------------unique for branches-------------------
-        # Branch Classification ternary plot
-        QgsMessageLog.logMessage(
-            message="Plotting branch classification plot for branches."
-            , tag=f'{__name__}', level=Qgis.Info)
-        self.analysis_branches.plot_branch_ternary(unified=False,
-                                                   save=True, savefolder=self.plotting_directory + "/branch_class"
-                                                   )
-        self.analysis_branches.plot_branch_ternary(unified=True,
-                                                   save=True, savefolder=self.plotting_directory + "/branch_class"
-                                                   )
+            # ----------------unique for branches-------------------
+            # Branch Classification ternary plot
+            if self.determine_branch_classification:
+                QgsMessageLog.logMessage(
+                    message="Plotting branch classification plot for branches."
+                    , tag=f'{__name__}', level=Qgis.Info)
+                self.analysis_branches.plot_branch_ternary(unified=False,
+                                                           save=True, savefolder=self.plotting_directory + "/branch_class"
+                                                           )
+                self.analysis_branches.plot_branch_ternary(unified=True,
+                                                           save=True, savefolder=self.plotting_directory + "/branch_class"
+                                                           )
 
-        # Anisotropy
-        QgsMessageLog.logMessage(
-            message="Plotting anisotropy of connectivity for branches."
-            , tag=f'{__name__}', level=Qgis.Info)
-        self.analysis_branches.plot_anisotropy(unified=False, save=True,
-                                               savefolder=self.plotting_directory + '/anisotropy/indiv')
-        self.analysis_branches.plot_anisotropy(unified=True, save=True,
-                                               savefolder=self.plotting_directory + '/anisotropy')
+            # Anisotropy
+            if self.determine_anisotropy:
+                QgsMessageLog.logMessage(
+                    message="Plotting anisotropy of connectivity for branches."
+                    , tag=f'{__name__}', level=Qgis.Info)
+                self.analysis_branches.plot_anisotropy(unified=False, save=True,
+                                                       savefolder=self.plotting_directory + '/anisotropy/indiv')
+                self.analysis_branches.plot_anisotropy(unified=True, save=True,
+                                                       savefolder=self.plotting_directory + '/anisotropy')
 
         # __________________TRACE DATA______________________
         config.styling_plots('traces')
-        QgsMessageLog.logMessage(
-            message="Plotting trace length distributions."
-            , tag=f'{__name__}', level=Qgis.Info)
-        self.analysis_traces.plot_lengths(unified=False, save=True,
-                                          savefolder=self.plotting_directory + '/length_distributions/indiv/traces')
-        self.analysis_traces.plot_lengths(unified=True, save=True,
-                                          savefolder=self.plotting_directory + '/length_distributions/traces')
+        if self.determine_length_distributions:
+            QgsMessageLog.logMessage(
+                message="Plotting trace length distributions."
+                , tag=f'{__name__}', level=Qgis.Info)
+            self.analysis_traces.plot_lengths(unified=False, save=True,
+                                              savefolder=self.plotting_directory + '/length_distributions/indiv/traces')
+            self.analysis_traces.plot_lengths(unified=True, save=True,
+                                              savefolder=self.plotting_directory + '/length_distributions/traces')
 
-        # Length distribution predictions
+            # Length distribution predictions
         # for p in predict_with:
         #     self.analysis_traces.plot_lengths_unified_combined_predictions(
         #         save=True, savefolder=self.plotting_directory + '/length_distributions/traces/predictions', predict_with=p)
 
         # Azimuths
-        QgsMessageLog.logMessage(
-            message="Plotting azimuths for traces."
-            , tag=f'{__name__}', level=Qgis.Info)
-        self.analysis_traces.plot_azimuths_weighted(unified=False, save=True,
-                                                    savefolder=self.plotting_directory + '/azimuths/indiv')
-        self.analysis_traces.plot_azimuths_weighted(unified=True, save=True,
-                                                    savefolder=self.plotting_directory + '/azimuths')
-        # self.analysis_traces.plot_azimuths(unified=False, rose_type='equal-radius', save=True
+        if self.determine_azimuths:
+            QgsMessageLog.logMessage(
+                message="Plotting azimuths for traces."
+                , tag=f'{__name__}', level=Qgis.Info)
+            self.analysis_traces.plot_azimuths_weighted(unified=False, save=True,
+                                                        savefolder=self.plotting_directory + '/azimuths/indiv')
+            self.analysis_traces.plot_azimuths_weighted(unified=True, save=True,
+                                                        savefolder=self.plotting_directory + '/azimuths')
+            # self.analysis_traces.plot_azimuths(unified=False, rose_type='equal-radius', save=True
         #                                    , savefolder=self.plotting_directory + '/azimuths/equal_radius/traces')
         # self.analysis_traces.plot_azimuths(unified=True, rose_type='equal-radius', save=True
         #                                    , savefolder=self.plotting_directory + '/azimuths/equal_radius/traces')
@@ -254,21 +275,23 @@ class MultiTargetAreaAnalysis:
         # self.analysis_traces.plot_azimuths(unified=True, rose_type='equal-area', save=True
         #                                    , savefolder=self.plotting_directory + '/azimuths/equal_area/traces')
         # Topo parameters
-        QgsMessageLog.logMessage(
-            message="Plotting topology for traces."
-            , tag=f'{__name__}', level=Qgis.Info)
-        self.analysis_traces.plot_topology(unified=False, save=True,
-                                           savefolder=self.plotting_directory + '/topology/traces')
-        self.analysis_traces.plot_topology(unified=True, save=True,
-                                           savefolder=self.plotting_directory + '/topology/traces')
+        if self.determine_topology:
+            QgsMessageLog.logMessage(
+                message="Plotting topology for traces."
+                , tag=f'{__name__}', level=Qgis.Info)
+            self.analysis_traces.plot_topology(unified=False, save=True,
+                                               savefolder=self.plotting_directory + '/topology/traces')
+            self.analysis_traces.plot_topology(unified=True, save=True,
+                                               savefolder=self.plotting_directory + '/topology/traces')
         # Hexbinplots
-        QgsMessageLog.logMessage(
-            message="Plotting hexbinplots for traces."
-            , tag=f'{__name__}', level=Qgis.Info)
-        self.analysis_traces.plot_hexbin_plot(unified=False, save=True,
-                                              savefolder=self.plotting_directory + '/hexbinplots')
-        self.analysis_traces.plot_hexbin_plot(unified=True, save=True,
-                                              savefolder=self.plotting_directory + '/hexbinplots')
+        if self.determine_hexbin:
+            QgsMessageLog.logMessage(
+                message="Plotting hexbinplots for traces."
+                , tag=f'{__name__}', level=Qgis.Info)
+            self.analysis_traces.plot_hexbin_plot(unified=False, save=True,
+                                                  savefolder=self.plotting_directory + '/hexbinplots')
+            self.analysis_traces.plot_hexbin_plot(unified=True, save=True,
+                                                  savefolder=self.plotting_directory + '/hexbinplots')
 
         # ---------------unique for traces-------------------
 

@@ -605,6 +605,25 @@ class FractureAnalysis2D:
             #     level=Qgis.Success,
             #     duration=10,
             # )
+    def read_multi_target_json(self):
+        """
+        Reads a json with specs for running multi target analysis.
+        Needs:(self.layer_table_df, results_folder, analysis_name, self.group_names_cutoffs_df, self.set_df, self.choose_your_analyses)
+
+        self.layer_table_df:
+            in json will represented by a list
+            list items: [t, b, n, a, name, group] all strs
+            layers need to be identified from self.line_layers, etc. (line.name() == layer name)
+        results_folder:
+            str
+        analysis_name:
+            str
+        self.group_names_cutoffs_df:
+            list[str, float, float]
+        self.set_df:
+            list[str/int, str]
+        """
+
 
     def run_multi_target_analysis(self):
         """

@@ -9,6 +9,7 @@ import seaborn as sns
 
 # Switch to 'False' to disable the analysis from running
 choose_your_analyses = {
+    "Branches": True,
     "LengthDistributions": True,
     "Azimuths": True,
     "XYI": True,
@@ -19,6 +20,10 @@ choose_your_analyses = {
     "Hexbin": True
 }
 
+# Half the bin width in azimuth plots
+# Applicable when sample size low and lines have preferred orientations
+# i.e. discrete fracture sets.
+half_the_bin_width = False
 
 # ---------------------------------------------------------
 # Plot colors
@@ -65,11 +70,6 @@ n_g = -1
 ta_list = []
 # Group name list
 g_list = []
-
-# Half the bin width in azimuth plots
-# Applicable when sample size low and lines have preferred orientations
-# i.e. discrete fracture sets.
-half_the_bin_width = True
 
 def get_color_dict(unified: bool) -> dict:
     """

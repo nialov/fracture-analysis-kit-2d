@@ -116,12 +116,12 @@ class TargetAreaLines:
         self.lineframe_main = self.lineframe_main.dropna(subset=['azimu'])
         self.lineframe_main['halved'] = self.lineframe_main.azimu.apply(tools.azimu_half)
 
-        # Allows plotting of azimuth
-        self.two_halves_non_weighted = tools.azimuth_plot_attributes(self.lineframe_main, weights=False)
-        self.two_halves_weighted = tools.azimuth_plot_attributes(self.lineframe_main, weights=True)
+        # Allows plotting of azimuth TODO: Decrepid rose plotting method
+        # self.two_halves_non_weighted = tools.azimuth_plot_attributes(self.lineframe_main, weights=False)
+        # self.two_halves_weighted = tools.azimuth_plot_attributes(self.lineframe_main, weights=True)
         # Experimental azimuth
         self.bin_width, self.bin_locs, self.number_of_azimuths = tools.azimuth_plot_attributes_experimental(
-            lineframe=self.lineframe_main, weights=False)
+            lineframe=self.lineframe_main, weights=True)
         # Length distribution plot limits
         self.left, self.right = tools.calc_xlims(self.lineframe_main)
         self.top, self.bottom = tools.calc_ylims(self.lineframe_main)
@@ -519,7 +519,7 @@ class TargetAreaLines:
         elif rose_type == 'equal-area':
             number_of_azimuths = np.sqrt(self.number_of_azimuths)
         else:
-            raise ValueError(f'Unknown weighted rose type: {rose_type}')
+            raise ValueError(f'Unknown weighted rose type string: {rose_type}')
 
         # Plot azimuth rose plot
         ax.bar(np.deg2rad(self.bin_locs), number_of_azimuths, width=np.deg2rad(self.bin_width), bottom=0.0,
@@ -532,8 +532,14 @@ class TargetAreaLines:
         ax.set_thetagrids(np.arange(0, 181, 45), fontweight='bold', fontfamily='Calibri', fontsize=11, alpha=0.95)
         ax.set_thetamin(0)
         ax.set_thetamax(180)
-        ax.set_rgrids(radii=[number_of_azimuths.mean()],
+        # The average of number_of_azimuths is displayed as a radial grid-line.
+        rlines, _ = ax.set_rgrids(radii=[number_of_azimuths.mean()],
                       angle=0, fmt='', fontsize=1, alpha=0.8, ha='left')
+        if isinstance(rlines, list):
+            rline: plt.Line2D
+            for rline in rlines:
+                rline.set_linestyle("dashed")
+
         ax.grid(linewidth=1, color='k', alpha=0.8)
 
         # Title is the name of the target area or group
@@ -543,14 +549,14 @@ class TargetAreaLines:
                      fontsize=20, fontweight='bold', fontfamily='Calibri'
                      , va='top', bbox=prop_title, transform=ax.transAxes, ha='center')
 
-        # Fractions of length for each set
+        # Fractions of length for each set in a separate box
         prop = dict(boxstyle='square', facecolor='linen', alpha=1, pad=0.45)
         text = 'n = ' + str(len(self.lineframe_main)) + '\n'
         text = text + tools.create_azimuth_set_text(self.lineframe_main)
         ax.text(0.94, 0.3, text, transform=ax.transAxes, fontsize=12, weight='roman'
                 , bbox=prop, fontfamily='Calibri', va='top', ha='center')
 
-        # TickLabels
+        # Tick labels
         labels = ax.get_xticklabels()
         for label in labels:
             label._y = -0.01

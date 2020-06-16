@@ -282,8 +282,18 @@ class MultiTargetAreaQGIS:
 
         lineframe = frame_lineframe_main_cut_concat
         lineframe = pd.DataFrame(lineframe)
+
+        # TODO: Debugging length distributions....
+        lineframe.sort_values(by="length", inplace=True)
+
         lineframe['logLen'] = lineframe.length.apply(np.log)
         lineframe['logY'] = lineframe.y.apply(np.log)
+
+        # TODO: Debugging length distributions....
+        lineframe.to_csv(
+            r"F:\Users\nikke\Documents\projects\Academic_projects\skytta_orrengrund\GIS\set_length_distribution_analysis\lineframe.csv",
+            mode="w+"
+        )
 
         # Equation: log(y) = m*log(x) + c fitted     y = c*x^m
         # Make sure no NaN get into polyfit

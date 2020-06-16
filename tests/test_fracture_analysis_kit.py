@@ -166,7 +166,15 @@ class TestMultipleTargetAreas:
 
         group_names_cutoffs_df = pd.DataFrame({'Group': [group], 'CutOffTraces': [0], 'CutOffBranches': [0]})
 
+        dummy.determine_branches = True
         dummy.determine_relationships = False
+        dummy.determine_length_distributions = True
+        dummy.determine_azimuths = True
+        dummy.determine_xyi = True
+        dummy.determine_branch_classification = True
+        dummy.determine_topology = True
+        dummy.determine_anisotropy = True
+        dummy.determine_hexbin = True
         dummy.layer_table_df = layer_table_df
         dummy.group_names_cutoffs_df = group_names_cutoffs_df
         dummy.set_df = set_df

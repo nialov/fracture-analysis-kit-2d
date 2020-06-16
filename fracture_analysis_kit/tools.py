@@ -494,7 +494,7 @@ def azimuth_plot_attributes_experimental(lineframe, weights=False):
         >>> calc_ideal_bin_width(30)
         28.964681538168897
 
-        >>>calc_ideal_bin_width(90)
+        >>> calc_ideal_bin_width(90)
         20.08298850246509
 
         :param n: Sample size
@@ -554,6 +554,9 @@ def azimuth_plot_attributes_experimental(lineframe, weights=False):
     # stats = get_statistics(lineframe)
     azimuths = lineframe.loc[:, 'halved'].values
     ideal_bin_width = calc_ideal_bin_width(lineframe.shape[0])
+    # Half the bin width if set so in config.py
+    if config.half_the_bin_width:
+        ideal_bin_width = ideal_bin_width / 2
     bin_edges, bin_width = calc_bins(ideal_bin_width)
     bin_locs = calc_locs(bin_width)
 
