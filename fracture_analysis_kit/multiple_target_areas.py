@@ -305,7 +305,7 @@ class MultiTargetAreaQGIS:
                                  f"lineframe['logLen'].values: {lineframe['logLen'].values}")
         vals = np.polyfit(lineframe['logLen'].values[finite_value_indexes]
                           , lineframe['logY'].values[finite_value_indexes]
-                          , 1)
+                          , deg=1)
         if len(vals) == 2:
             m, c = vals[0], vals[1]
         else:
