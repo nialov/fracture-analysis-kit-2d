@@ -236,9 +236,9 @@ class MultiTargetAreaAnalysis:
                 QgsMessageLog.logMessage(
                     message="Plotting anisotropy of connectivity for branches."
                     , tag=f'{__name__}', level=Qgis.Info)
-                self.analysis_branches.plot_anisotropy(unified=False, save=True,
+                self.analysis_branches.plot_anisotropy(frame=self.analysis_branches.df, using_branches=True, unified=False, save=True,
                                                        savefolder=self.plotting_directory + '/anisotropy/indiv')
-                self.analysis_branches.plot_anisotropy(unified=True, save=True,
+                self.analysis_branches.plot_anisotropy(frame=self.analysis_branches.uniframe, using_branches=True, unified=True, save=True,
                                                        savefolder=self.plotting_directory + '/anisotropy')
 
         # __________________TRACE DATA______________________
