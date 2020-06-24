@@ -11,7 +11,31 @@ import config
 from fracture_analysis_kit import tools \
     , multiple_target_areas \
     , analysis_and_plotting \
-    , qgis_tools
+    , qgis_tools \
+    , target_area
+
+
+class Helpers:
+    line_1 = LineString([(0, 0), (0.5, 0.5)])
+    line_2 = LineString([(0, 0), (0.5, -0.5)])
+    line_3 = LineString([(0, 0), (1, 0)])
+    halved_azimuths = []
+    for line in [line_1, line_2, line_2]:
+        halved_azimuths.append(tools.azimu_half(tools.calc_azimu(line)))
+        assert all([180.1 > halv > -0.001 for halv in halved_azimuths])
+    branch_frame = gpd.GeoDataFrame({"geometry": [line_1, line_2, line_3]
+                                        , "Connection": ["C - C", "C - I", "I - I"]
+                                        , "Class": ["X - I", "Y - Y", "I - I"]
+                                     , "halved": halved_azimuths
+                                     , "length": [line.length for line in [line_1, line_2, line_3]]})
+
+    trace_frame = gpd.GeoDataFrame({"geometry": [line_1, line_2]})
+    point_1 = Point(0.5, 0.5)
+    point_2 = Point(1, 1)
+    point_3 = Point(10, 10)
+    node_frame = gpd.GeoDataFrame({"geometry": [point_1, point_2, point_3], "Class": ["X", "Y", "I"]})
+    area_1 = Polygon([(0, 0), (1, 1), (1, 0)])
+    area_frame = gpd.GeoDataFrame({"geometry": [area_1]})
 
 
 class TestTools:
@@ -226,3 +250,10 @@ class TestQgisTools:
             assert len(gdf) > 0
         assert isinstance(gdf.loc[0, "geometry"], shapely.geometry.Point)
 
+    class TestTargetArea:
+
+        def test_calc_anisotropy(self):
+
+            result = target_area.TargetAreaLines.calc_anisotropy(Helpers.branch_frame)
+
+            assert isinstance(result, np.ndarray)
