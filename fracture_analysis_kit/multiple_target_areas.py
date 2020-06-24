@@ -17,6 +17,7 @@ import numpy as np
 import pandas as pd
 import shapely
 import sklearn.metrics as sklm
+import scipy
 import ternary
 import itertools
 from qgis.core import QgsMessageLog, Qgis
@@ -264,7 +265,7 @@ class MultiTargetAreaQGIS:
 
             text = f'$Exponent = {str(np.round(m, 2))}$' \
                    + f'\n$Constant = {str(np.round(c, 2))}$' \
-                   + f'\n$MSLE = {str(np.round(msle, 3))}$' \
+                   + f'\n$MSLE = {str(np.round(msle, 5))}$' \
                    + f'\n$R^2 = {str(np.round(r2score, 5))}$'
 
             props = dict(boxstyle='square', facecolor='linen', alpha=1, pad=0.4)
@@ -283,9 +284,6 @@ class MultiTargetAreaQGIS:
         lineframe = frame_lineframe_main_cut_concat
         lineframe = pd.DataFrame(lineframe)
 
-        # TODO: Debugging length distributions....
-        lineframe.sort_values(by="length", inplace=True)
-
         lineframe['logLen'] = lineframe.length.apply(np.log)
         lineframe['logY'] = lineframe.y.apply(np.log)
 
@@ -303,9 +301,27 @@ class MultiTargetAreaQGIS:
             if len(finite_value_indexes) == 0:
                 raise ValueError(f"No valid values in lineframe in length distribution modelling.\n"
                                  f"lineframe['logLen'].values: {lineframe['logLen'].values}")
-        vals = np.polyfit(lineframe['logLen'].values[finite_value_indexes]
-                          , lineframe['logY'].values[finite_value_indexes]
-                          , deg=1)
+        try:
+            QgsMessageLog.logMessage(message='Trying to use np.polyfit\n'
+                                     , tag=__name__, level=Qgis.Info)
+            vals = np.polyfit(lineframe['logLen'].values[finite_value_indexes]
+                              , lineframe['logY'].values[finite_value_indexes]
+                              , deg=1)
+        except:
+            try:
+                QgsMessageLog.logMessage(message='Trying to use np.polynomial.polynomial.polyfit\n'
+                                                 , tag=__name__, level=Qgis.Warning)
+                vals_not_in_order = np.polynomial.polynomial.polyfit(lineframe['logLen'].values[finite_value_indexes]
+                              , lineframe['logY'].values[finite_value_indexes]
+                              , deg=1)
+                vals = list(reversed(vals_not_in_order))
+            except:
+                QgsMessageLog.logMessage(message='Trying to use np.polynomial.polynomial.Polynomial.fit\n'
+                                                 , tag=__name__, level=Qgis.Warning)
+                polynom_val = np.polynomial.polynomial.Polynomial.fit(lineframe['logLen'].values[finite_value_indexes]
+                              , lineframe['logY'].values[finite_value_indexes]
+                              , deg=1)
+                vals = list(reversed([coef for coef in polynom_val.identity()]))
         if len(vals) == 2:
             m, c = vals[0], vals[1]
         else:
@@ -1158,29 +1174,29 @@ class MultiTargetAreaQGIS:
         else:
             frame = self.df
         for idx, row in frame.iterrows():
-            row.TargetAreaLines.calc_anisotropy()
+            row.TargetAreaLines.anisotropy = row.TargetAreaLines.calc_anisotropy(row.TargetAreaLines.lineframe_main)
 
-    def plot_anisotropy(self, unified: bool, save=False, savefolder=''):
+    @staticmethod
+    def plot_anisotropy(using_branches: bool, unified: bool, frame, save=False, savefolder=''):
         """
         Plot anisotropy of connectivity
 
+        :param using_branches: Check to make sure branch data is used
+        :type using_branches: bool
         :param unified: Plot unified datasets or individual target areas
         :type unified: bool
+        :param frame: GeoDataFrame with data
+        :type unified: gpd.GeoDataFrame
         :param save: Whether to save
         :type save: bool
         :param savefolder: Folder to save to
         :type savefolder: str
         """
-        if not self.using_branches:
+        if not using_branches:
             raise Exception('Anisotropy cannot be determined from traces.')
 
-        if unified:
-            frame = self.uniframe
-        else:
-            frame = self.df
-
         for idx, row in frame.iterrows():
-            row.TargetAreaLines.plot_anisotropy_styled()
+            row.TargetAreaLines.plot_anisotropy_styled(anisotropy=row.TargetAreaLines.anisotropy)
             style = config.styled_text_dict
             prop = config.styled_prop
             plt.title(row.TargetAreaLines.name, loc='center', fontdict=style, fontsize=25, bbox=prop)
