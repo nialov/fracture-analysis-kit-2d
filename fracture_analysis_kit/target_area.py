@@ -19,7 +19,7 @@ import pandas as pd
 import seaborn as sns
 import ternary
 from qgis.core import QgsMessageLog, Qgis
-from scipy.interpolate import make_interp_spline
+from scipy.interpolate import make_interp_spline, splrep, splev, CubicSpline
 
 import config
 # Own code imports
@@ -687,35 +687,36 @@ class TargetAreaLines:
         # tax.scatter(point, marker='X', color='black', alpha=1, zorder=3, s=210)
         tax.scatter(point, marker='X', label=self.name, alpha=1, zorder=4, s=125, color=color_for_plot)
 
-    def calc_anisotropy(self):
+    @staticmethod
+    def calc_anisotropy(lineframe_main):
         """
         Calculates annisotropy of connectivity for branch DataFrame
 
         """
-        branchframe = self.lineframe_main
+        branchframe = lineframe_main
 
         branchframe['anisotropy'] = branchframe.apply(
             lambda row: tools.aniso_calc_anisotropy(row['halved'], row['Connection'], row['length']),
             axis=1)
         arr_sum = branchframe.anisotropy.sum()
 
-        self.anisotropy = arr_sum
+        return arr_sum
         # self.anisotropy_div_area = arr_sum / self.rep_circle_area
 
-    def plot_anisotropy_styled(self, for_ax=False, ax=None, save=False, save_folder=None):
+    @staticmethod
+    def plot_anisotropy_styled(anisotropy, for_ax=False, ax=None):
         """
         Plots a styled anisotropy of connectivity figure.
+
+        Spline done with:
+        https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.CubicSpline.html
 
         :param for_ax: Whether plotting to a ready-made ax or not
         :type for_ax: bool
         :param ax: ax to plot to (optional)
         :type ax: matplotlib.axes.Axes
-        :param save: Whether to save
-        :type save: bool
-        :param save_folder: Folder to save to
-        :type save_folder: str
         """
-        double_anisotropy = list(self.anisotropy) + list(self.anisotropy)
+        double_anisotropy = np.concatenate([anisotropy, anisotropy])
         angles_of_study = config.angles_for_examination
         opp_angles = [i + 180 for i in angles_of_study]
         angles = list(angles_of_study) + opp_angles
@@ -727,7 +728,7 @@ class TargetAreaLines:
         # PLOT SETUP
         ax.set_theta_zero_location('N')
         ax.set_theta_direction(-1)
-        max_aniso = max(self.anisotropy)
+        max_aniso = max(anisotropy)
 
         for theta, r in zip(angles, double_anisotropy):
             theta = np.deg2rad(theta)
@@ -740,15 +741,30 @@ class TargetAreaLines:
         ax.axis('off')
         # CREATE CURVED STRUCTURE AROUND SCATTER AND ARROWS
         angles.append(359.999)
-        double_anisotropy.append((double_anisotropy[0]))
+        double_anisotropy = np.concatenate([double_anisotropy, double_anisotropy[0:1]])
         angles = np.array(angles)
-        double_anisotropy = np.array(double_anisotropy)
+
+        # TODO: testing CubicSpline
+        # And it works!?
+        # https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.CubicSpline.html
+        theta = np.deg2rad(angles)
+        cs = CubicSpline(theta, double_anisotropy, bc_type="periodic")
+        xnew = np.linspace(theta.min(), theta.max(), 300)
+        power_smooth = cs(xnew)
+        ax.plot(xnew, power_smooth, linewidth=1.5, color='black')
+
         # INTERPOLATE BETWEEN CALCULATED POINTS
         # noinspection PyArgumentList
-        xnew = np.linspace(angles.min(), angles.max(), 300)
-        spl = make_interp_spline(angles, double_anisotropy, k=3)
-        power_smooth = spl(xnew)
-        ax.plot(np.deg2rad(xnew), power_smooth, linewidth=1.5, color='black')
+        # spl = make_interp_spline(angles, double_anisotropy, k=3)
+        # xnew = np.linspace(angles.min(), angles.max(), 300)
+        # power_smooth = spl(xnew)
+        # power_smooth = np.concatenate([power_smooth, power_smooth[-1:] + 0.001 * power_smooth[-1]])
+        # xnew = np.concatenate([xnew, xnew[0:1] + 0.5])
+
+        # ax.plot(np.deg2rad(xnew), power_smooth, linewidth=1.5, color='black')
+        # TODO: testing splrep
+        # ax.plot(x, y, linewidth=1.5, color='black')
+        # Center circle for visualization purposes
         circle = patches.Circle((0, 0), 0.0025 * max_aniso, transform=ax.transData._b, edgecolor='black',
                                 facecolor='gray', zorder=10)
         ax.add_artist(circle)
