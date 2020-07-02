@@ -158,7 +158,7 @@ def verify_external_downloads(is_64, gdal_needed):
 
 def install():
     """
-    Main installation method. Prints messages to user.
+    Main installation method. Prints messages to stdout.
     """
     print("Installation setup beginning.")
     needed = is_installation_needed()
