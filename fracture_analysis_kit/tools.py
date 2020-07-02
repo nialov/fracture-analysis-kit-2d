@@ -1466,7 +1466,7 @@ def get_nodes_intersecting_sets(xypointsframe, traceframe):
     sets = traceframe.set.unique().tolist()
     if len(sets) != 2:
         return xypointsframe.iloc[0:0]
-        raise Exception('get_nodes_intersecting_sets function received traceframe without exactly two sets.')
+        # raise Exception('get_nodes_intersecting_sets function received traceframe without exactly two sets.')
     set_1_frame = traceframe.loc[traceframe.set == sets[0]]
     set_2_frame = traceframe.loc[traceframe.set == sets[1]]
 
