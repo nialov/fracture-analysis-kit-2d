@@ -287,11 +287,11 @@ class MultiTargetAreaQGIS:
         lineframe['logLen'] = lineframe.length.apply(np.log)
         lineframe['logY'] = lineframe.y.apply(np.log)
 
-        # TODO: Debugging length distributions....
-        lineframe.to_csv(
-            r"F:\Users\nikke\Documents\projects\Academic_projects\skytta_orrengrund\GIS\set_length_distribution_analysis\lineframe.csv",
-            mode="w+"
-        )
+        # Debugging length distributions....
+        # lineframe.to_csv(
+        #     r"F:\Users\nikke\Documents\projects\Academic_projects\skytta_orrengrund\GIS\set_length_distribution_analysis\lineframe.csv",
+        #     mode="w+"
+        # )
 
         # Equation: log(y) = m*log(x) + c fitted     y = c*x^m
         # Make sure no NaN get into polyfit
@@ -301,6 +301,7 @@ class MultiTargetAreaQGIS:
             if len(finite_value_indexes) == 0:
                 raise ValueError(f"No valid values in lineframe in length distribution modelling.\n"
                                  f"lineframe['logLen'].values: {lineframe['logLen'].values}")
+        # TODO: Fix this polyfit mess.
         try:
             QgsMessageLog.logMessage(message='Trying to use np.polyfit\n'
                                      , tag=__name__, level=Qgis.Info)
@@ -325,9 +326,9 @@ class MultiTargetAreaQGIS:
         if len(vals) == 2:
             m, c = vals[0], vals[1]
         else:
-            QgsMessageLog.logMessage(message='Too many values (vals) from np.polyfit, 2 expected.\n'
+            QgsMessageLog.logMessage(message='Too many values from np.polyfit, 2 expected.\n'
                                              f'vals: {vals}', tag=__name__, level=Qgis.Critical)
-            raise ValueError('Too many values (vals) from np.polyfit, 2 expected.\n'
+            raise ValueError('Too many values from np.polyfit, 2 expected.\n'
                              f'vals: {vals}')
         y_fit = np.exp(m * lineframe['logLen'].values + c)  # calculate the fitted values of y
         lineframe['y_fit'] = y_fit
@@ -374,7 +375,11 @@ class MultiTargetAreaQGIS:
         for idx, srs in frame.iterrows():
             color_for_plot = color_dict[srs['TargetAreaLines'].name]
             srs['TargetAreaLines']: ta.TargetAreaLines
-            srs['TargetAreaLines'].plot_length_distribution_ax(ax=ax, cut=False, color_for_plot=color_for_plot)
+            lineframe_main = srs['TargetAreaLines'].lineframe_main
+            name = srs['TargetAreaLines'].name
+            srs['TargetAreaLines'].plot_length_distribution_ax(
+                lineframe_main, name, ax=ax, color_for_plot=color_for_plot
+            )
 
         tools.setup_ax_for_ld(ax, self.using_branches)
         # Save figure
@@ -395,8 +400,12 @@ class MultiTargetAreaQGIS:
         length_text = ''
         for idx, srs in frame.iterrows():
             color_for_plot = color_dict[srs['TargetAreaLines'].name]
-            srs['TargetAreaLines'].plot_length_distribution_ax(ax=ax, cut=True, color_for_plot=color_for_plot)
-            min_length = srs['TargetAreaLines'].lineframe_main_cut.length.min()
+            lineframe_main_cut = srs['TargetAreaLines'].lineframe_main_cut
+            name = srs['TargetAreaLines'].name
+            srs['TargetAreaLines'].plot_length_distribution_ax(
+                lineframe_main_cut, name, ax=ax, color_for_plot=color_for_plot
+            )
+            min_length = lineframe_main_cut.length.min()
             name = srs['group']
             # Text for cut-off lengths
             length_text += f'{name} Cut Off (m) = {str(round(min_length, 2))}'
@@ -781,7 +790,6 @@ class MultiTargetAreaQGIS:
                              , va='center', bbox=prop_title)
 
                 for ax, idx_row in zip(axes, rel_frame_with_name.iterrows()):
-                    ax: matplotlib.axes._subplots.AxesSubplot
                     row = idx_row[1]
                     # TODO: More colors? change brightness or some other parameter?
                     bars = ax.bar(x=[0.3, 0.55, 0.65]

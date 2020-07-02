@@ -162,10 +162,11 @@ class TargetAreaLines:
         :type savefolder: str
         """
         fig, ax = plt.subplots(figsize=(7, 7))
-        self.plot_length_distribution_ax(ax, color_for_plot=color_for_plot)
+        name = self.name
+        lineframe_main = self.lineframe_main
+        self.plot_length_distribution_ax(lineframe_main, name, ax, color_for_plot=color_for_plot)
         tools.setup_ax_for_ld(ax, unified)
         if save:
-            name = self.name
             if unified:
                 savename = Path(savefolder + f'/{name}_group_indiv_full.svg')
             else:
@@ -173,31 +174,22 @@ class TargetAreaLines:
             plt.savefig(savename, dpi=150, bbox_inches='tight')
             plt.close()
 
-    def plot_length_distribution_ax(self, ax, cut=False, color_for_plot='black'):
+    @staticmethod
+    def plot_length_distribution_ax(lineframe, name, ax, color_for_plot='black'):
         """
         Plots a length distribution to a given ax.
 
         :param ax: Ax to plot to
         :type ax: matplotlib.axes.Axes
-        :param cut: Whether to plot length distribution using cut-off
-        :type cut: bool
         :param color_for_plot: Color for scatter plot points.
         :type color_for_plot: str or tuple
         """
 
-        # Cut length distribution
-        if cut:
-            lineframe_cut = self.lineframe_main_cut
-            lineframe_cut = pd.DataFrame(lineframe_cut)
-            lineframe_cut.plot.scatter(x='length', y='y', s=50
-                                       , logx=True, logy=True, label=self.name, ax=ax, color=color_for_plot)
-
-        # Full length distribution
-        else:
-            lineframe_main = self.lineframe_main
-            lineframe_main = pd.DataFrame(lineframe_main)
-            lineframe_main.plot.scatter(x='length', y='y', s=50
-                                        , logx=True, logy=True, label=self.name, ax=ax, color=color_for_plot)
+        # Plot length distribution
+        # Transformed to pandas DataFrame to allow direct plotting through df class method.
+        lineframe = pd.DataFrame(lineframe)
+        lineframe.plot.scatter(x='length', y='y', s=50
+                                   , logx=True, logy=True, label=name, ax=ax, color=color_for_plot)
 
     # def plot_curviness(self, cut_data=False):
     #     fig = plt.figure()
@@ -762,9 +754,6 @@ class TargetAreaLines:
         # xnew = np.concatenate([xnew, xnew[0:1] + 0.5])
 
         # ax.plot(np.deg2rad(xnew), power_smooth, linewidth=1.5, color='black')
-        # TODO: testing splrep
-        # ax.plot(x, y, linewidth=1.5, color='black')
-        # Center circle for visualization purposes
         circle = patches.Circle((0, 0), 0.0025 * max_aniso, transform=ax.transData._b, edgecolor='black',
                                 facecolor='gray', zorder=10)
         ax.add_artist(circle)
