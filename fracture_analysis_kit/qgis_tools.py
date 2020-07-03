@@ -88,17 +88,8 @@ def df_to_gdf(df, coord_system):
     QgsMessageLog.logMessage(message=f"Converting coord_system ({coord_system}) to proj"
                              , tag=f'{__name__}', level=Qgis.Info)
     proj_rep = coord_system.toProj()
-
-    # QgsMessageLog.logMessage(message=f"Converting df:\n{df.columns}\n{df.head()}\n{df}\n to GeoDataFrame"
-    #                          , tag=f'{__name__}', level=Qgis.Info)
     gdf = gpd.GeoDataFrame(df, crs=proj_rep)
-
-    # QgsMessageLog.logMessage(message=f"Setting GeoDataFrame crs {proj_rep}"
-    #                          , tag=f'{__name__}', level=Qgis.Info)
     gdf.crs = proj_rep
-
-    # QgsMessageLog.logMessage(message=f"Returning GeoDataFrame"
-    #                          , tag=f'{__name__}', level=Qgis.Info)
     return gdf
 
 
