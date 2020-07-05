@@ -1,0 +1,356 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Fracture Analysis 2D &mdash; Fracture Analysis 2D 0.1alpha documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Installation Guide" href="installation.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="#" class="icon icon-home"> Fracture Analysis 2D
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html"><strong>Installation Guide</strong></a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="fracture_analysis_2d.html">fracture_analysis_2d package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">Fracture Analysis 2D</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="#">Docs</a> &raquo;</li>
+        
+      <li><strong>Fracture Analysis 2D</strong></li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="fracture-analysis-2d">
+<h1><strong>Fracture Analysis 2D</strong><a class="headerlink" href="#fracture-analysis-2d" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+</div>
+<div class="section" id="description">
+<h2>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
+<p>This QGIS plugin can be used to extract lineament &amp; fracture size, abundance and topological parameters
+from two-dimensional GIS polylines along with their topological branches and nodes.
+The results will be given as graphical plots.</p>
+<p>The plugin is <strong>experimental</strong> and installation requires the <strong>manual installation</strong> of a few external python libraries.</p>
+<p>This plugin uses four types of vector data as inputs:
+<em>traces</em> (Polylines), <em>branches</em> (Polylines), <em>nodes</em> (Points) and <em>areas</em> (Polygons).</p>
+<p><em>Traces</em> can be manually or automatically digitized GIS polyline features from e.g.
+Light Detection And Ranging (LiDAR) digital elevation models (DEMs)
+or from drone orthophotography of bedrock outcrop surfaces.
+<em>Branches</em> and <em>nodes</em> are derived from <a class="reference internal" href="#ngt"><span class="std std-ref">NetworkGT</span></a>.
+<em>Areas</em> are the interpretation boundaries of the traces and branches.</p>
+</div>
+<div class="section" id="example-plots">
+<h2>Example plots<a class="headerlink" href="#example-plots" title="Permalink to this headline">¶</a></h2>
+<a class="reference internal image-reference" href="_images/collage1.png"><img alt="_images/collage1.png" class="align-center" src="_images/collage1.png" style="width: 625.0px; height: 523.0px;" /></a>
+</div>
+</div>
+<div class="section" id="installation">
+<span id="id1"></span><h1><strong>Installation</strong><a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
+<p>The plugin is <strong>experimental</strong> and installation requires the <strong>manual installation</strong> of a few external Python libraries.
+Installation requirements and guide below. Start by installing the external Python libraries.
+Installing with administrator privileges is recommended to avoid collisions with other user Python installations.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html"><strong>Installation Guide</strong></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#requirements">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#external-python-module-installation-with-administrator-access">External Python module installation with administrator access</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#external-python-module-installation-without-administrator-access">External Python module installation without administrator access</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#plugin-installation-from-zip-file">Plugin installation from .zip file</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="usage-help">
+<h1><strong>Usage Help</strong><a class="headerlink" href="#usage-help" title="Permalink to this headline">¶</a></h1>
+</div>
+<div class="section" id="dependencies-and-references">
+<h1><strong>Dependencies and References</strong><a class="headerlink" href="#dependencies-and-references" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="references">
+<h2>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h2>
+<p>Both branches and nodes are derived from <a class="reference internal" href="#ngt"><span class="std std-ref">NetworkGT</span></a>.
+For their definition along with the definition of the plots and the plotted parameters,
+I refer you to multiple sources. Sources are in order of importance.</p>
+<ul>
+<li><p><a class="reference external" href="https://pubs.geoscienceworld.org/gsa/geosphere/article/531129/networkgt-a-gis-tool-for-geometric-and-topological">Nyberg et al., 2018</a></p>
+<blockquote>
+<div><ul class="simple">
+<li><p><em>NetworkGT Plugin introduction and guide.</em></p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p><a class="reference external" href="https://www.sciencedirect.com/science/article/pii/S0191814115000152">Sanderson and Nixon, 2015</a></p>
+<blockquote>
+<div><ul class="simple">
+<li><p><em>Trace and branch size, abundance and topological parameter definitions.</em></p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>My Master’s Thesis, Ovaskainen, 2020</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><em>Plots used in my Thesis were done with an older version of the same code used for this plugin.</em></p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p><a class="reference external" href="https://www.sciencedirect.com/science/article/abs/pii/S001282521930594X">Sanderson and Peacock, 2020</a></p>
+<blockquote>
+<div><ul class="simple">
+<li><p><em>Information about rose plots.</em></p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p><a class="reference external" href="https://agupubs.onlinelibrary.wiley.com/doi/abs/10.1029/1999RG000074">Bonnet et al., 2001</a></p>
+<blockquote>
+<div><ul class="simple">
+<li><p><em>Length distribution modelling.</em></p></li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+</div>
+<div class="section" id="networkgt">
+<span id="ngt"></span><h2>NetworkGT<a class="headerlink" href="#networkgt" title="Permalink to this headline">¶</a></h2>
+<p>This plugin has been built to <strong>only</strong> work with data extracted using another QGIS-plugin, <a class="reference external" href="https://github.com/BjornNyberg/NetworkGT">NetworkGT</a> (see: <a class="reference external" href="https://pubs.geoscienceworld.org/gsa/geosphere/article/531129/networkgt-a-gis-tool-for-geometric-and-topological">Nyberg et al., 2018</a>):</p>
+<blockquote>
+<div><p><em>The NetworkGT (Network Geometry and Topology) Toolbox is a set of tools designed for
+the geometric and topological analysis of fracture networks.</em></p>
+</div></blockquote>
+<p>If the input data (<em>traces</em>) you have can be processed in NetworkGT into <em>branches</em> and <em>nodes</em>
+it is suitable for this plugin. NetworkGT is available for both QGIS and ArcGIS
+and branch and node data from both <em>should</em> be valid inputs into this plugin (<em>as of 15.2.2020</em>).</p>
+</div>
+<div class="section" id="external-python-modules">
+<span id="id4"></span><h2>External Python modules<a class="headerlink" href="#external-python-modules" title="Permalink to this headline">¶</a></h2>
+<p>This plugin is dependant on external Python libraries (and their subsequent dependancies) that are not installed by default in QGIS.</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://gdal.org/">GDAL</a></p></li>
+<li><p><a class="reference external" href="https://fiona.readthedocs.io/en/latest/">Fiona</a></p></li>
+<li><p><a class="reference external" href="https://geopandas.org/">geopandas</a></p></li>
+<li><p><a class="reference external" href="https://github.com/marcharper/Python-ternary">Python-ternary</a></p></li>
+<li><p><a class="reference external" href="https://scikit-learn.org/stable/index.html">sklearn</a></p></li>
+<li><p><a class="reference external" href="https://seaborn.pydata.org/index.html">seaborn</a></p></li>
+</ul>
+<p>See <a class="reference internal" href="#installation"><span class="std std-ref">Installation</span></a> for installation guide.</p>
+</div>
+</div>
+<div class="section" id="doc">
+<h1><strong>Doc</strong><a class="headerlink" href="#doc" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="for-developers-plugin-documentation">
+<h2>For Developers: Plugin documentation<a class="headerlink" href="#for-developers-plugin-documentation" title="Permalink to this headline">¶</a></h2>
+<p>This plugin has been developed in PyCharm by setting the Python environment to mimic the OSGeo4W Shell. Good guide <a class="reference external" href="http://spatialgalaxy.net/2018/02/13/quick-guide-to-getting-started-with-pyqgis-3-on-windows/">here</a>.</p>
+<p>Documentation for Python modules has been created using Autodoc. Autodoc has trouble running without setting the matplotlib backend to Qt5Agg.
+If you wish to remake documentation: Check conf.py and replace my ‘QT_QPA_PLATFORM_PLUGIN_PATH’ with your own path.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="fracture_analysis_2d.html">fracture_analysis_2d package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="fracture_analysis_2d.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="fracture_analysis_2d.fracture_analysis_kit.html">fracture_analysis_2d.fracture_analysis_kit package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="fracture_analysis_2d.fracture_analysis_kit.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="fracture_analysis_2d.fracture_analysis_kit.html#module-fracture_analysis_2d.fracture_analysis_kit.analysis_and_plotting">fracture_analysis_2d.fracture_analysis_kit.analysis_and_plotting module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="fracture_analysis_2d.fracture_analysis_kit.html#module-fracture_analysis_2d.fracture_analysis_kit.main">fracture_analysis_2d.fracture_analysis_kit.main module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="fracture_analysis_2d.fracture_analysis_kit.html#module-fracture_analysis_2d.fracture_analysis_kit.multiple_target_areas">fracture_analysis_2d.fracture_analysis_kit.multiple_target_areas module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="fracture_analysis_2d.fracture_analysis_kit.html#module-fracture_analysis_2d.fracture_analysis_kit.qgis_tools">fracture_analysis_2d.fracture_analysis_kit.qgis_tools module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="fracture_analysis_2d.fracture_analysis_kit.html#module-fracture_analysis_2d.fracture_analysis_kit.target_area">fracture_analysis_2d.fracture_analysis_kit.target_area module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="fracture_analysis_2d.fracture_analysis_kit.html#module-fracture_analysis_2d.fracture_analysis_kit.tools">fracture_analysis_2d.fracture_analysis_kit.tools module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="fracture_analysis_2d.fracture_analysis_kit.html#module-fracture_analysis_2d.fracture_analysis_kit">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="fracture_analysis_2d.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fracture_analysis_2d.html#module-fracture_analysis_2d.config">fracture_analysis_2d.config module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fracture_analysis_2d.html#module-fracture_analysis_2d.fracture_analysis_2d">fracture_analysis_2d.fracture_analysis_2d module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fracture_analysis_2d.html#module-fracture_analysis_2d.fracture_analysis_2d_dialog">fracture_analysis_2d.fracture_analysis_2d_dialog module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fracture_analysis_2d.html#module-fracture_analysis_2d.resources">fracture_analysis_2d.resources module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fracture_analysis_2d.html#module-fracture_analysis_2d">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h1><strong>Indices and tables</strong><a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="installation.html" class="btn btn-neutral float-right" title="Installation Guide" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, Nikolas Ovaskainen
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
