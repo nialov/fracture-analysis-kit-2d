@@ -871,7 +871,9 @@ class MultiTargetAreaQGIS:
         tools.initialize_ternary_points(ax, tax)
         for idx, row in frame.iterrows():
             color_for_plot = color_dict[row['TargetAreaNodes'].name]
-            row['TargetAreaNodes'].plot_xyi_point(tax=tax, color_for_plot=color_for_plot)
+            nodeframe = row['TargetAreaNodes'].nodeframe
+            name = row['TargetAreaNodes'].name
+            row['TargetAreaNodes'].plot_xyi_point(nodeframe, name, tax=tax, color_for_plot=color_for_plot)
         tools.tern_plot_the_fing_lines(tax)
         tax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.15), title='XYI-Nodes', title_fontsize='xx-large',
                    prop={'family': 'Calibri', 'weight': 'heavy', 'size': 'x-large'}, edgecolor='black', ncol=2,
@@ -887,7 +889,9 @@ class MultiTargetAreaQGIS:
         # MAKE INDIVIDUAL XYI PLOTS
         for idx, row in frame.iterrows():
             color_for_plot = color_dict[row['TargetAreaNodes'].name]
-            row['TargetAreaNodes'].plot_xyi_plot(unified=unified, color_for_plot=color_for_plot, save=save,
+            nodeframe = row['TargetAreaNodes'].nodeframe
+            name = row['TargetAreaNodes'].name
+            row['TargetAreaNodes'].plot_xyi_plot(nodeframe, name, unified=unified, color_for_plot=color_for_plot, save=save,
                                                  savefolder=savefolder)
 
     def plot_branch_ternary(self, unified: bool, save=False, savefolder=''):

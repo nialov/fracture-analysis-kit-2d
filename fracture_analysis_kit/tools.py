@@ -851,7 +851,7 @@ def tern_plot_the_fing_lines(tax, cs_locs=(1.3, 1.5, 1.7, 1.9)):
         x2 = last_x
         point1 = tern_yi_func_perc(c, x1)
         point2 = tern_yi_func_perc(c, x2)
-        tax.line(point1, point2, alpha=0.4, color='k', zorder=-5, linestyle='dashed')
+        tax.line(point1, point2, alpha=0.4, color='k', zorder=-5, linestyle='dashed', linewidth=0.5)
         ax = plt.gca()
         rot = 6.5
         rot2 = 4.5
@@ -1602,7 +1602,7 @@ def initialize_ternary_points(ax, tax):
     ax.get_yaxis().set_visible(False)
     ax.set_frame_on(False)
     tax.boundary(linewidth=1.5)
-    tax.gridlines(linewidth=0.9, multiple=20, color='red', alpha=0.6)
+    tax.gridlines(linewidth=0.1, multiple=20, color='grey', alpha=0.6)
     tax.ticks(axis='lbr', linewidth=1, multiple=20, offset=0.035, tick_formats="%d%%", fontsize='small')
     tax.clear_matplotlib_ticks()
     tax.get_axes().axis('off')

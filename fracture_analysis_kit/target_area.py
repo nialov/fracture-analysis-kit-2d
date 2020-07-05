@@ -778,7 +778,8 @@ class TargetAreaNodes:
         self.name = name
         self.group = group
 
-    def plot_xyi_plot(self, unified: bool, color_for_plot='black', save=False, savefolder=''):
+    @staticmethod
+    def plot_xyi_plot(nodeframe, name, unified: bool, color_for_plot='black', save=False, savefolder=''):
         """
         Plot a XYI-node ternary plot to a new ternary figure. Single point in each figure.
 
@@ -791,9 +792,9 @@ class TargetAreaNodes:
         :param savefolder: Folder to save plot to
         :type savefolder: str
         """
-        xcount = len(self.nodeframe.loc[self.nodeframe['c'] == 'X'])
-        ycount = len(self.nodeframe.loc[self.nodeframe['c'] == 'Y'])
-        icount = len(self.nodeframe.loc[self.nodeframe['c'] == 'I'])
+        xcount = len(nodeframe.loc[nodeframe['c'] == 'X'])
+        ycount = len(nodeframe.loc[nodeframe['c'] == 'Y'])
+        icount = len(nodeframe.loc[nodeframe['c'] == 'I'])
 
         sumcount = xcount + ycount + icount
 
@@ -809,7 +810,7 @@ class TargetAreaNodes:
         fig, tax = ternary.figure(ax=ax, scale=scale)
         tools.initialize_ternary_points(ax, tax)
         tools.tern_plot_the_fing_lines(tax)
-        text = 'n: ' + str(len(self.nodeframe)) \
+        text = 'n: ' + str(len(nodeframe)) \
                + '\nX-nodes: ' + str(xcount) \
                + '\nY-nodes: ' + str(ycount) \
                + '\nI-nodes: ' + str(icount)
@@ -818,19 +819,20 @@ class TargetAreaNodes:
                 bbox=prop,
                 fontfamily='Calibri', ha='center')
 
-        tax.scatter(point, s=50, marker='o', label=self.name, alpha=1, zorder=4, color=color_for_plot)
+        tax.scatter(point, s=50, marker='o', label=name, alpha=1, zorder=4, color=color_for_plot)
         tax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.15),
                    prop={'family': 'Calibri', 'weight': 'heavy', 'size': 'x-large'}, edgecolor='black', ncol=2,
                    columnspacing=0.7, shadow=True)
         if save:
             if unified:
-                savename = Path(savefolder + f'/indiv/{self.name}_group_xyi_point.svg')
+                savename = Path(savefolder + f'/indiv/{name}_group_xyi_point.svg')
             else:
-                savename = Path(savefolder + f'/indiv/{self.name}_area_xyi_point.svg')
+                savename = Path(savefolder + f'/indiv/{name}_area_xyi_point.svg')
             plt.savefig(savename, dpi=150, bbox_inches='tight')
             plt.close()
 
-    def plot_xyi_point(self, tax, color_for_plot='black'):
+    @staticmethod
+    def plot_xyi_point(nodeframe, name, tax, color_for_plot='black'):
         """
         Plot a XYI-node ternary scatter point to a given tax.
 
@@ -840,16 +842,16 @@ class TargetAreaNodes:
         :type color_for_plot: str or tuple
         """
         # Setup
-        xcount = len(self.nodeframe.loc[self.nodeframe['c'] == 'X'])
-        ycount = len(self.nodeframe.loc[self.nodeframe['c'] == 'Y'])
-        icount = len(self.nodeframe.loc[self.nodeframe['c'] == 'I'])
+        xcount = len(nodeframe.loc[nodeframe['c'] == 'X'])
+        ycount = len(nodeframe.loc[nodeframe['c'] == 'Y'])
+        icount = len(nodeframe.loc[nodeframe['c'] == 'I'])
         sumcount = xcount + ycount + icount
         xp = 100 * xcount / sumcount
         yp = 100 * ycount / sumcount
         ip = 100 * icount / sumcount
         point = [(xp, ip, yp)]
         # Plotting
-        tax.scatter(point, marker='o', label=self.name, alpha=1, zorder=4, s=50, color=color_for_plot)
+        tax.scatter(point, marker='o', label=name, alpha=1, zorder=4, s=50, color=color_for_plot)
 
     def topology_parameters_2d_nodes(self):
         """

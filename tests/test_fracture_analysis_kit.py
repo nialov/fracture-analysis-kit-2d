@@ -34,6 +34,7 @@ class Helpers:
     point_2 = Point(1, 1)
     point_3 = Point(10, 10)
     node_frame = gpd.GeoDataFrame({"geometry": [point_1, point_2, point_3], "Class": ["X", "Y", "I"]})
+    node_frame["c"] = node_frame["Class"]
     area_1 = Polygon([(0, 0), (1, 1), (1, 0)])
     area_frame = gpd.GeoDataFrame({"geometry": [area_1]})
 
@@ -236,6 +237,7 @@ class TestQgisTools:
             df, crs = qgis_tools.layer_to_df(l)
             assert isinstance(df, pd.DataFrame)
             assert len(df) > 0
+            assert "geometry" in df.columns
             # TODO: Redo
             # assert len(crs.toProj()) != 0
 
@@ -250,10 +252,23 @@ class TestQgisTools:
             assert len(gdf) > 0
         assert isinstance(gdf.loc[0, "geometry"], shapely.geometry.Point)
 
-    class TestTargetArea:
 
-        def test_calc_anisotropy(self):
+class TestTargetArea:
 
-            result = target_area.TargetAreaLines.calc_anisotropy(Helpers.branch_frame)
+    def test_calc_anisotropy(self):
 
-            assert isinstance(result, np.ndarray)
+        result = target_area.TargetAreaLines.calc_anisotropy(Helpers.branch_frame)
+
+        assert isinstance(result, np.ndarray)
+
+    def test_plot_xyi_point(self):
+        fig, tax = ternary.figure()
+        target_area.TargetAreaNodes.plot_xyi_point(Helpers.node_frame, name="testing",
+                                                            tax=tax, color_for_plot="red")
+
+    def test_plot_xyi_plot(self):
+        nodeframe = Helpers.node_frame
+        name = "testing_plotting"
+        unified = False
+        target_area.TargetAreaNodes.plot_xyi_plot(nodeframe, name, unified)
+
