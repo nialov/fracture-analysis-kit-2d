@@ -174,7 +174,6 @@ class TestTools:
             assert should_be_there in file_as_str
 
 
-
 class TestMultipleTargetAreas:
 
     # noinspection PyPep8Naming
