@@ -165,7 +165,10 @@ class TargetAreaLines:
         :type savefolder: str
         """
         fig, ax = plt.subplots(figsize=(7, 7))
-        self.plot_length_distribution_ax(self.lineframe_main, self.name, ax, color_for_plot=color_for_plot)
+        normalize_for_power_law = True if fit is not None else False
+        xmin = 0 if fit is None else fit.xmin
+        self.plot_length_distribution_ax(self.lineframe_main, self.name, ax, color_for_plot=color_for_plot, normalize_for_powerlaw=normalize_for_power_law,
+                                         powerlaw_cut_off=xmin)
         tools.setup_ax_for_ld(ax, unified)
         if fit is not None:
             # Plot the given fit_distribution along with the scatter plot with original length data.
@@ -192,7 +195,8 @@ class TargetAreaLines:
         :type savefolder: str
         """
         fig, ax = plt.subplots(figsize=(7, 7))
-        self.plot_length_distribution_ax(self.lineframe_main, self.name, ax, color_for_plot=color_for_plot)
+        self.plot_length_distribution_ax(self.lineframe_main, self.name, ax, color_for_plot=color_for_plot, normalize_for_powerlaw=True,
+                                         powerlaw_cut_off=fit.power_law.xmin)
         tools.setup_ax_for_ld(ax, unified)
         if not len(fit_distributions) == 0:
             # Plot the given fit_distributions along with the scatter plot with original length data.
@@ -229,7 +233,7 @@ class TargetAreaLines:
                              f"fit_distribution: {fit_distribution}")
 
     @staticmethod
-    def plot_length_distribution_ax(lineframe, name, ax, color_for_plot='black'):
+    def plot_length_distribution_ax(lineframe, name, ax, color_for_plot='black', normalize_for_powerlaw=False, powerlaw_cut_off=0):
         """
         Plots a length distribution to a given ax.
 
@@ -242,6 +246,9 @@ class TargetAreaLines:
         # Plot length distribution
         # Transformed to pandas DataFrame to allow direct plotting through df class method.
         lineframe = pd.DataFrame(lineframe)
+        if normalize_for_powerlaw:
+            lineframe = lineframe.loc[lineframe["length"] > powerlaw_cut_off]
+            lineframe["y"] = lineframe["y"] / lineframe["y"].max()
         lineframe.plot.scatter(x='length', y='y', s=50
                                    , logx=True, logy=True, label=name, ax=ax, color=color_for_plot)
 
