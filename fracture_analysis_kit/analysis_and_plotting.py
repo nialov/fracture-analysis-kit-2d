@@ -10,7 +10,7 @@ from fracture_analysis_kit import qgis_tools as qgis_tools, multiple_target_area
 class MultiTargetAreaAnalysis:
 
     def __init__(
-            self, layer_table_df, plotting_directory, analysis_name, group_names_cutoffs_df, set_df, choose_your_analyses
+            self, layer_table_df, plotting_directory, analysis_name, group_names_cutoffs_df, set_df, choose_your_analyses, logger
     ):
         """
         Initializes data and user inputs for the analysis and plotting. Converts QGIS-layers to geopandas GeoDataFrames.
@@ -33,6 +33,7 @@ class MultiTargetAreaAnalysis:
         self.analysis_name = analysis_name
         self.analysis_traces = None
         self.analysis_branches = None
+        self.logger = logger
 
         # Convert QGIS-layers to GeoDataFrames
         # and drop unused columns to free memory
@@ -88,11 +89,11 @@ class MultiTargetAreaAnalysis:
             message="Initializing MultiTargetAreaQGIS objects for traces and branches."
             , tag=f'{__name__}', level=Qgis.Info)
 
-        self.analysis_traces = mta.MultiTargetAreaQGIS(self.layer_table_df, self.group_names_cutoffs_df, branches=False)
+        self.analysis_traces = mta.MultiTargetAreaQGIS(self.layer_table_df, self.group_names_cutoffs_df, branches=False, logger=self.logger)
         # Bar at 25
         if self.determine_branches:
             self.analysis_branches = mta.MultiTargetAreaQGIS(self.layer_table_df, self.group_names_cutoffs_df,
-                                                             branches=True)
+                                                             branches=True, logger=self.logger)
         # Bar at 45
         QgsMessageLog.logMessage(
             message="Calculating attributes for traces.", tag=f'{__name__}', level=Qgis.Info)

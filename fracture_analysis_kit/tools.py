@@ -17,6 +17,8 @@ from shapely import strtree
 from shapely.geometry import LineString
 from shapely.geometry import Point
 from shapely.ops import linemerge
+import powerlaw
+import logging
 
 import config
 # Own code imports
@@ -1689,3 +1691,57 @@ def create_azimuth_set_text(lineframe):
             text = text + '\n'
         t = t + text
     return t
+
+
+def report_powerlaw_fit_statistics(name: str, fit: powerlaw.Fit, logger: logging.Logger):
+    """
+    Writes powerlaw module Fit object statistics to a given logfile. Included powerlaw, lognormal and exponential fit
+    statistics and parameters.
+
+    :param name:
+    :type name:
+    :param fit:
+    :type fit:
+    :param logger:
+    :type logger:
+    :return:
+    :rtype:
+    """
+    power_law_exponent = -(fit.power_law.alpha - 1)
+    logger.info(f"----------------------------------------------------------")
+    logger.info(f"Powerlaw, lognormal and exponential statistics for {name}.")
+    # Power-law
+    logger.info(f"Powerlaw Parameters and Statistics.\n"
+                f"Power Law Exponent: {power_law_exponent}\n"
+                f"Power Law Sigma: {fit.power_law.sigma}\n"
+                f"Power Law Cut-Off: {fit.power_law.xmin}. Automatically solved cut-off: {fit.fixed_xmin}\n")
+    # Lognormal
+    logger.info(f"Lognormal Parameters and Statistics.\n"
+                f"Lognormal mu: {fit.lognormal.mu}\n"
+               f"Lognormal sigma: {fit.lognormal.sigma}\n")
+    # Exponent
+    logger.info(f"Exponential Parameters and Statistics.\n"
+                f"Exponential lambda: {fit.exponential.Lambda}\n")
+
+    # Kolmogorov-Smirnov test to assess the best fits to given length distribution.
+
+    logger.info("Kolmogorov-Smirnov test to assess the best fits to the given length distribution.")
+    logger.info("https://github.com/jeffalstott/powerlaw")
+    logger.info("R is the loglikelihood ratio between the two candidate distributions."
+                " This number will be positive if the data is more likely in the first distribution,"
+                " and negative if the data is more likely in the second distribution."
+                " The significance value for that direction is p.")
+
+    logger.info(f"Powerlaw versus lognormal.")
+    R, p = fit.distribution_compare("power_law", "lognormal")
+    logger.info(f"R: {R}, p: {p}")
+
+    logger.info(f"Powerlaw versus exponential.")
+    R, p = fit.distribution_compare("power_law", "exponential")
+    logger.info(f"R: {R}, p: {p}")
+
+    logger.info(f"Lognormal versus exponential.")
+    R, p = fit.distribution_compare("lognormal", "exponential")
+    logger.info(f"R: {R}, p: {p}")
+
+    logger.info(f"----------------------------------------------------------")

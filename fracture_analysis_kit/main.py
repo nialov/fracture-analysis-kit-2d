@@ -3,6 +3,8 @@ Main module for the control of analysis and plotting.
 """
 from qgis.core import QgsMessageLog, Qgis
 from qgis.core import QgsTask, QgsApplication
+import logging
+from pathlib import Path
 
 import config
 from fracture_analysis_kit import analysis_and_plotting as taaq
@@ -34,6 +36,9 @@ def main_multi_target_area(layer_table_df, results_folder, analysis_name, group_
     QgsMessageLog.logMessage(message="Setting up plotting directories.", tag=f'{__name__}', level=Qgis.Info)
     plotting_directory = qgis_tools.plotting_directories(results_folder, analysis_name)
 
+    # SETUP LOGGER
+    logger = initialize_analysis_logging(plotting_directory)
+
     # SETUP CONFIG PARAMETERS
     config.n_ta = len(layer_table_df)
     config.n_g = len(group_names_cutoffs_df)
@@ -44,7 +49,7 @@ def main_multi_target_area(layer_table_df, results_folder, analysis_name, group_
     QgsMessageLog.logMessage(message="Initializing MultiTargetAnalysis.", tag=f'{__name__}', level=Qgis.Info)
 
     mta_analysis = taaq.MultiTargetAreaAnalysis(layer_table_df, plotting_directory, analysis_name,
-                                                group_names_cutoffs_df, set_df, choose_your_analyses)
+                                                group_names_cutoffs_df, set_df, choose_your_analyses, logger)
 
 
     # Start analysis
@@ -61,6 +66,37 @@ def main_multi_target_area(layer_table_df, results_folder, analysis_name, group_
     # Return analysis object
     return mta_analysis
 
+def initialize_analysis_logging(plotting_directory):
+    """
+    Initializes a logger that collects all analysis statistics some of which are not drawn onto the finished
+    plots.
+
+    :param plotting_directory: The logger file is saved into the plotting_directory
+    :type plotting_directory: str
+    :return:
+    :rtype:
+    """
+    filename = Path(plotting_directory) / Path("analysis_statistics.txt")
+    if filename.exists():
+        # Should not happen. But remove if exists. TODO: Add qgis message
+        filename.unlink()
+    # TODO: Is basicConfig needed?
+    logging.basicConfig(filename=filename,
+                        filemode="w+",
+                        format="%(name)s %(levelname)s %(message)s",
+                        datefmt="%H:%M:%S'",
+                        level=logging.INFO)
+
+    logger = logging.getLogger("Analysis_Statistics")
+    logger.setLevel(logging.DEBUG)
+    filehandler = logging.FileHandler(filename)
+    filehandler.setFormatter(
+        logging.Formatter("%(asctime)s %(name)-12s %(levelname)-8s %(message)s")
+    )
+    logger.addHandler(filehandler)
+
+    logger.info("Analysis Statistics logfile initialized.")
+    return logger
 
 # def main_single_target_area(results_folder, name, trace_layer, branch_layer, node_layer, area_layer):
 #     raise NotImplementedError('Not implemented.')
