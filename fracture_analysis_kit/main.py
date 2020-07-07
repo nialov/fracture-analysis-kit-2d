@@ -91,7 +91,7 @@ def initialize_analysis_logging(plotting_directory):
     logger.setLevel(logging.DEBUG)
     filehandler = logging.FileHandler(filename)
     filehandler.setFormatter(
-        logging.Formatter("%(asctime)s %(name)-12s %(levelname)-8s %(message)s")
+        logging.Formatter("%(message)s")
     )
     logger.addHandler(filehandler)
 
