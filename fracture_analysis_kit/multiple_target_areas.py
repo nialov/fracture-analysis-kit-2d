@@ -3,6 +3,7 @@ Handles multiple given target areas and makes groups of them based on user input
 MultiTargetAreaQGIS-objects are made separately for trace and branch data. Both contain the same node data.
 """
 
+import itertools
 # Python Windows co-operation imports
 from pathlib import Path
 # Math and analysis imports
@@ -11,15 +12,13 @@ from pathlib import Path
 from textwrap import wrap
 
 import geopandas as gpd
-import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import powerlaw
 import shapely
 import sklearn.metrics as sklm
-import scipy
 import ternary
-import itertools
 from qgis.core import QgsMessageLog, Qgis
 
 # Own code imports
@@ -40,7 +39,7 @@ from fracture_analysis_kit import target_area as ta, tools
 
 class MultiTargetAreaQGIS:
 
-    def __init__(self, table_df, gnames_cutoffs_df, branches):
+    def __init__(self, table_df, gnames_cutoffs_df, branches, logger):
         """
         Class for operations with multiple target areas. Handles grouping, analysis and plotting of both individual
         target areas and grouped data.
@@ -79,6 +78,9 @@ class MultiTargetAreaQGIS:
         self.relations_set_counts_indiv = None
         self.relations_df = None
         self.unified_relations_df = None
+
+        # Logger for analysis statistics
+        self.logger = logger
 
         # Iterate over all target areas
         for _, row in table_df.iterrows():
@@ -251,7 +253,7 @@ class MultiTargetAreaQGIS:
         :raise ValueError: When there are too many values from np.polyfit i.e. values != 2.
         """
 
-        def create_text(lineframe_for_text, ax_for_text):
+        def create_text(lineframe_for_text, ax_for_text, unified, logger):
             """
             Sub-method to create Texts based on the length distribution DataFrame to a given ax.'
 
@@ -275,6 +277,11 @@ class MultiTargetAreaQGIS:
                              , fontsize='large', fontfamily='Calibri', linespacing=1.4)
             func_text = '$n (L) = {{{}}} * L^{{{}}}$'.format(np.round(c, 2), np.round(m, 2))
             ax_for_text.text(0.5, 1.02, func_text, transform=ax_for_text.transAxes, ha='center', fontsize='x-large')
+
+            # Save statistics to logfile
+            grouped_or_individual = "grouped" if unified else "all"
+            logger.info(f"Statistics for {grouped_or_individual} length distribution power-law fit plot: \n"
+                        f"MSLE: {msle}, R_squared: {r2score}")
 
         if unified:
             frame_lineframe_main_cut_concat = self.uniframe_lineframe_main_cut_concat
@@ -311,17 +318,17 @@ class MultiTargetAreaQGIS:
         except:
             try:
                 QgsMessageLog.logMessage(message='Trying to use np.polynomial.polynomial.polyfit\n'
-                                                 , tag=__name__, level=Qgis.Warning)
+                                         , tag=__name__, level=Qgis.Warning)
                 vals_not_in_order = np.polynomial.polynomial.polyfit(lineframe['logLen'].values[finite_value_indexes]
-                              , lineframe['logY'].values[finite_value_indexes]
-                              , deg=1)
+                                                                     , lineframe['logY'].values[finite_value_indexes]
+                                                                     , deg=1)
                 vals = list(reversed(vals_not_in_order))
             except:
                 QgsMessageLog.logMessage(message='Trying to use np.polynomial.polynomial.Polynomial.fit\n'
-                                                 , tag=__name__, level=Qgis.Warning)
+                                         , tag=__name__, level=Qgis.Warning)
                 polynom_val = np.polynomial.polynomial.Polynomial.fit(lineframe['logLen'].values[finite_value_indexes]
-                              , lineframe['logY'].values[finite_value_indexes]
-                              , deg=1)
+                                                                      , lineframe['logY'].values[finite_value_indexes]
+                                                                      , deg=1)
                 vals = list(reversed([coef for coef in polynom_val.identity()]))
         if len(vals) == 2:
             m, c = vals[0], vals[1]
@@ -334,7 +341,7 @@ class MultiTargetAreaQGIS:
         lineframe['y_fit'] = y_fit
         lineframe.plot(x='length', y='y_fit', color='k', ax=ax, label='Power Law Fit', linestyle='dashed', linewidth=2,
                        alpha=.8)
-        create_text(lineframe, ax)
+        create_text(lineframe, ax, unified, self.logger)
 
     def plot_lengths(self, unified: bool, save=False, savefolder='', use_sets=False):
         """
@@ -358,8 +365,20 @@ class MultiTargetAreaQGIS:
         color_dict = config.get_color_dict(unified)
 
         for idx, srs in frame.iterrows():
+            # Fit powerlaw, lognormal and exponential using powerlaw package to length data.
+            fit = powerlaw.Fit(srs['TargetAreaLines'].lineframe_main["length"])
+            tools.report_powerlaw_fit_statistics(srs['TargetAreaLines'].name, fit, self.logger)
             color_for_plot = color_dict[srs['TargetAreaLines'].name]
-            srs['TargetAreaLines'].plot_length_distribution(unified=unified, color_for_plot=color_for_plot)
+            fit_distributions = [config.POWERLAW, config.LOGNORMAL, config.EXPONENTIAL]
+            # Plot original data with all three fits individually.
+            for fit_distribution in fit_distributions:
+                srs['TargetAreaLines'].plot_length_distribution(unified=unified, color_for_plot=color_for_plot, save=save,
+                                                                savefolder=savefolder, fit=fit,
+                                                                fit_distribution=fit_distribution)
+            # Plot original data along with all three fits in the same plot.
+            srs['TargetAreaLines'].plot_length_distribution_with_all_fits(unified=unified, color_for_plot=color_for_plot, save=save,
+                                                   savefolder=savefolder, fit=fit, fit_distributions=fit_distributions)
+
         if use_sets:
             # TODO: reimplement set length distributions
             raise NotImplementedError('use_sets Not implemented')
@@ -891,7 +910,8 @@ class MultiTargetAreaQGIS:
             color_for_plot = color_dict[row['TargetAreaNodes'].name]
             nodeframe = row['TargetAreaNodes'].nodeframe
             name = row['TargetAreaNodes'].name
-            row['TargetAreaNodes'].plot_xyi_plot(nodeframe, name, unified=unified, color_for_plot=color_for_plot, save=save,
+            row['TargetAreaNodes'].plot_xyi_plot(nodeframe, name, unified=unified, color_for_plot=color_for_plot,
+                                                 save=save,
                                                  savefolder=savefolder)
 
     def plot_branch_ternary(self, unified: bool, save=False, savefolder=''):

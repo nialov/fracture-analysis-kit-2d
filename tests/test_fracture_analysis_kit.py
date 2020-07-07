@@ -7,6 +7,11 @@ import numpy as np
 import pandas as pd
 import geopandas as gpd
 import ternary
+import powerlaw
+import matplotlib.pyplot as plt
+import logging
+from pathlib import Path
+
 import config
 from fracture_analysis_kit import tools \
     , multiple_target_areas \
@@ -29,7 +34,7 @@ class Helpers:
                                      , "halved": halved_azimuths
                                      , "length": [line.length for line in [line_1, line_2, line_3]]})
 
-    trace_frame = gpd.GeoDataFrame({"geometry": [line_1, line_2]})
+    trace_frame = gpd.GeoDataFrame({"geometry": [line_1, line_2], "length": [line_1.length, line_2.length]})
     point_1 = Point(0.5, 0.5)
     point_2 = Point(1, 1)
     point_3 = Point(10, 10)
@@ -146,6 +151,29 @@ class TestTools:
         assert intersect_frame.node.iloc[0] == Point(0, 0)
         assert intersect_frame.sets.iloc[0] == (2, 1)
 
+    def test_report_powerlaw_fit_statistics(self, tmp_path):
+        filename = tmp_path / Path("test_logger.txt")
+        # filename.touch(exist_ok=True)
+        logging.basicConfig(filename=filename,
+                            filemode="w+",
+                            level=logging.DEBUG)
+        name = "testing_reporting"
+        fit = powerlaw.Fit(Helpers.trace_frame["length"])
+        logger = logging.getLogger("test_logger")
+        logger.setLevel(logging.DEBUG)
+        filehandler = logging.FileHandler(filename)
+        filehandler.setFormatter(
+            logging.Formatter("%(message)s")
+        )
+        logger.addHandler(filehandler)
+
+        tools.report_powerlaw_fit_statistics(name, fit, logger)
+        with filename.open(mode="r") as file:
+            should_be_there = "Powerlaw, lognormal and exp"
+            file_as_str = file.read()
+            assert should_be_there in file_as_str
+
+
 
 class TestMultipleTargetAreas:
 
@@ -203,6 +231,8 @@ class TestMultipleTargetAreas:
         dummy.layer_table_df = layer_table_df
         dummy.group_names_cutoffs_df = group_names_cutoffs_df
         dummy.set_df = set_df
+
+        dummy.logger = logging.getLogger()
 
         dummy.analysis()
 
@@ -271,4 +301,12 @@ class TestTargetArea:
         name = "testing_plotting"
         unified = False
         target_area.TargetAreaNodes.plot_xyi_plot(nodeframe, name, unified)
+
+    def test_plot_length_distribution_fit(self):
+        lineframe = Helpers.trace_frame
+        power_law_fit = powerlaw.Fit(lineframe["length"])
+        for fit_distribution in [config.POWERLAW, config.LOGNORMAL, config.EXPONENTIAL]:
+            fig, ax = plt.subplots()
+            result = target_area.TargetAreaLines.plot_length_distribution_fit(power_law_fit, fit_distribution, ax)
+            assert result is None
 

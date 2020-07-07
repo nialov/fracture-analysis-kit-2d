@@ -20,6 +20,7 @@ import seaborn as sns
 import ternary
 from qgis.core import QgsMessageLog, Qgis
 from scipy.interpolate import make_interp_spline, splrep, splev, CubicSpline
+import powerlaw
 
 import config
 # Own code imports
@@ -28,6 +29,8 @@ from fracture_analysis_kit import tools
 
 # from . import tools
 # from ... import config
+
+from config import POWERLAW, LOGNORMAL, EXPONENTIAL
 
 
 # Classes
@@ -148,11 +151,11 @@ class TargetAreaLines:
     def calc_curviness(self):
         self.lineframe_main['curviness'] = self.lineframe_main.geometry.apply(tools.curviness)
 
-    def plot_length_distribution(self, unified: bool, color_for_plot='black', save=False, savefolder=''):
+    def plot_length_distribution(self, unified: bool, color_for_plot='black', save=False, savefolder='', fit=None, fit_distribution=""):
         """
         Plots a length distribution to its own figure.
 
-        :param unified: Is data from target area or grouped data.
+        :param unified: Is data from target area or grouped data?
         :type unified: bool
         :param color_for_plot: Color for scatter plot points.
         :type color_for_plot: str or tuple
@@ -162,17 +165,68 @@ class TargetAreaLines:
         :type savefolder: str
         """
         fig, ax = plt.subplots(figsize=(7, 7))
-        name = self.name
-        lineframe_main = self.lineframe_main
-        self.plot_length_distribution_ax(lineframe_main, name, ax, color_for_plot=color_for_plot)
+        self.plot_length_distribution_ax(self.lineframe_main, self.name, ax, color_for_plot=color_for_plot)
         tools.setup_ax_for_ld(ax, unified)
+        if fit is not None:
+            # Plot the given fit_distribution along with the scatter plot with original length data.
+            self.plot_length_distribution_fit(fit, fit_distribution, ax)
         if save:
             if unified:
-                savename = Path(savefolder + f'/{name}_group_indiv_full.svg')
+                savename = Path(savefolder + f'/{self.name}_group_indiv_full_{fit_distribution}.svg')
             else:
-                savename = Path(savefolder + f'/{name}_area_indiv_full.svg')
+                savename = Path(savefolder + f'/{self.name}_area_indiv_full_{fit_distribution}.svg')
             plt.savefig(savename, dpi=150, bbox_inches='tight')
-            plt.close()
+        plt.close()
+
+    def plot_length_distribution_with_all_fits(self, unified: bool, color_for_plot='black', save=False, savefolder='', fit=None, fit_distributions=[]):
+        """
+        Plots a length distribution to its own figure along with powerlaw, lognormal and exponential fits.
+
+        :param unified: Is data from target area or grouped data?
+        :type unified: bool
+        :param color_for_plot: Color for scatter plot points.
+        :type color_for_plot: str or tuple
+        :param save: Whether to save
+        :type save: bool
+        :param savefolder: Folder to save to
+        :type savefolder: str
+        """
+        fig, ax = plt.subplots(figsize=(7, 7))
+        self.plot_length_distribution_ax(self.lineframe_main, self.name, ax, color_for_plot=color_for_plot)
+        tools.setup_ax_for_ld(ax, unified)
+        if not len(fit_distributions) == 0:
+            # Plot the given fit_distributions along with the scatter plot with original length data.
+            [self.plot_length_distribution_fit(fit, fit_distribution, ax) for fit_distribution in fit_distributions]
+        if save:
+            if unified:
+                savename = Path(savefolder + f'/{self.name}_group_indiv_full_all_fits.svg')
+            else:
+                savename = Path(savefolder + f'/{self.name}_area_indiv_full_all_fits.svg')
+            plt.savefig(savename, dpi=150, bbox_inches='tight')
+        plt.close()
+
+    @staticmethod
+    def plot_length_distribution_fit(fit: powerlaw.Fit, fit_distribution: str, ax: plt.Axes):
+        assert isinstance(fit, powerlaw.Fit)
+        if fit_distribution == POWERLAW:
+            fit.power_law.plot_ccdf(ax=ax, label="Power-law with cut-off", linestyle="--", color="red")
+            # Most difficult case due to cut-off.
+            # lineframe_main_cut_off = lineframe_main.loc[lineframe_main["length"] > fit.xmin]
+            # power_law_alpha = -(fit.power_law.alpha - 1)
+            # constant = lineframe_main_cut_off["y"].max() * 1 / max(lineframe_main["length"] ** power_law_alpha)
+            # lengths = lineframe_main_cut_off["length"]
+            # ys = constant * lineframe_main_cut_off["length"] ** power_law_alpha
+            # ax.plot(lengths, ys, linestyle="--", color="red")
+        elif fit_distribution == LOGNORMAL:
+            fit.lognormal.plot_ccdf(ax=ax, label="Lognormal with cut-off", linestyle="--", color="lime")
+        elif fit_distribution == EXPONENTIAL:
+            fit.exponential.plot_ccdf(ax=ax, label="Exponential with cut-off", linestyle="--", color="blue")
+        else:
+            QgsMessageLog.logMessage(message="Given fit_distribution does not fit a distribution string.\n"
+                                             f"fit_distribution: {fit_distribution}"
+                                     , tag=__name__, level=Qgis.Warning)
+            raise ValueError("Given fit_distribution does not fit a distribution string.\n"
+                             f"fit_distribution: {fit_distribution}")
 
     @staticmethod
     def plot_length_distribution_ax(lineframe, name, ax, color_for_plot='black'):
@@ -757,6 +811,7 @@ class TargetAreaLines:
         circle = patches.Circle((0, 0), 0.0025 * max_aniso, transform=ax.transData._b, edgecolor='black',
                                 facecolor='gray', zorder=10)
         ax.add_artist(circle)
+
 
 
 class TargetAreaNodes:

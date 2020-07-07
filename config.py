@@ -123,4 +123,6 @@ def styling_plots(style):
     # plt.rc('path', effects=[path_effects.withStroke(linewidth=5, foreground='w')])
     # plt.rc('xlabel', {'alpha':1})
 
-
+POWERLAW = "powerlaw"
+LOGNORMAL = "lognormal"
+EXPONENTIAL = "exponential"
