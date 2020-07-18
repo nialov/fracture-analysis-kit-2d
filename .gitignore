@@ -14,10 +14,9 @@
 /zip_build/fracture_analysis_2d/
 /zip_build/!README.txt
 /fracture_analysis_kit/requirements.txt
-/docs/test/
-/docs/backup/
 /.hypothesis/
 /.test/
 /.mypy_cache/
 /fracture_analysis_kit/saved_run_jsons/
 /test_run.json
+/docs_backup/
