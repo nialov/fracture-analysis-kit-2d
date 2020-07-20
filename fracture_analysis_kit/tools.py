@@ -1693,7 +1693,7 @@ def create_azimuth_set_text(lineframe):
     return t
 
 
-def report_powerlaw_fit_statistics(name: str, fit: powerlaw.Fit, logger: logging.Logger):
+def report_powerlaw_fit_statistics(name: str, fit: powerlaw.Fit, logger: logging.Logger, using_branches: bool):
     """
     Writes powerlaw module Fit object statistics to a given logfile. Included powerlaw, lognormal and exponential fit
     statistics and parameters.
@@ -1709,12 +1709,15 @@ def report_powerlaw_fit_statistics(name: str, fit: powerlaw.Fit, logger: logging
     """
     power_law_exponent = -(fit.power_law.alpha - 1)
     logger.info(f"----------------------------------------------------------")
-    logger.info(f"Powerlaw, lognormal and exponential statistics for {name}.")
+    traces_or_branches = "branches" if using_branches else "traces"
+    logger.info(f"Powerlaw, lognormal and exponential statistics for {name} {traces_or_branches}.")
+    logger.info(f"Cut-off: {fit.xmin}")
+    logger.info(f"Is the cut-off manual?: {fit.fixed_xmin}")
     # Power-law
     logger.info(f"Powerlaw Parameters and Statistics.\n"
                 f"Power Law Exponent: {power_law_exponent}\n"
                 f"Power Law Sigma: {fit.power_law.sigma}\n"
-                f"Power Law Cut-Off: {fit.power_law.xmin}. Automatically solved cut-off: {fit.fixed_xmin}\n")
+                f"Power Law Cut-Off: {fit.power_law.xmin}. Manually solved cut-off: {fit.fixed_xmin}\n")
     # Lognormal
     logger.info(f"Lognormal Parameters and Statistics.\n"
                 f"Lognormal mu: {fit.lognormal.mu}\n"

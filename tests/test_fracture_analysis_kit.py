@@ -167,7 +167,8 @@ class TestTools:
         )
         logger.addHandler(filehandler)
 
-        tools.report_powerlaw_fit_statistics(name, fit, logger)
+        using_branches = True
+        tools.report_powerlaw_fit_statistics(name, fit, logger, using_branches)
         with filename.open(mode="r") as file:
             should_be_there = "Powerlaw, lognormal and exp"
             file_as_str = file.read()

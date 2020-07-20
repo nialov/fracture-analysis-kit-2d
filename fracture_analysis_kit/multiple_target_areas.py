@@ -366,18 +366,33 @@ class MultiTargetAreaQGIS:
 
         for idx, srs in frame.iterrows():
             # Fit powerlaw, lognormal and exponential using powerlaw package to length data.
+            cut_off_length = srs['TargetAreaLines'].cut_off_length
+            # Two Fits, one with automatic cut-off and another with manual
             fit = powerlaw.Fit(srs['TargetAreaLines'].lineframe_main["length"])
-            tools.report_powerlaw_fit_statistics(srs['TargetAreaLines'].name, fit, self.logger)
+            fit_cut_off = powerlaw.Fit(srs['TargetAreaLines'].lineframe_main["length"], xmin=cut_off_length)
+            # Report both fits to logfile
+            tools.report_powerlaw_fit_statistics(srs['TargetAreaLines'].name, fit, self.logger, self.using_branches)
+            tools.report_powerlaw_fit_statistics(srs['TargetAreaLines'].name, fit_cut_off, self.logger, self.using_branches)
+            # Color used for scatter data
             color_for_plot = color_dict[srs['TargetAreaLines'].name]
             fit_distributions = [config.POWERLAW, config.LOGNORMAL, config.EXPONENTIAL]
             # Plot original data with all three fits individually.
             for fit_distribution in fit_distributions:
+                # Automatic cut-off
                 srs['TargetAreaLines'].plot_length_distribution(unified=unified, color_for_plot=color_for_plot, save=save,
                                                                 savefolder=savefolder, fit=fit,
                                                                 fit_distribution=fit_distribution)
+                # Manual cut-off
+                srs['TargetAreaLines'].plot_length_distribution(unified=unified, color_for_plot=color_for_plot, save=save,
+                                                                savefolder=savefolder, fit=fit_cut_off,
+                                                                fit_distribution=fit_distribution)
             # Plot original data along with all three fits in the same plot.
+            # Automatic
             srs['TargetAreaLines'].plot_length_distribution_with_all_fits(unified=unified, color_for_plot=color_for_plot, save=save,
                                                    savefolder=savefolder, fit=fit, fit_distributions=fit_distributions)
+            # Manual
+            srs['TargetAreaLines'].plot_length_distribution_with_all_fits(unified=unified, color_for_plot=color_for_plot, save=save,
+                                                                          savefolder=savefolder, fit=fit_cut_off, fit_distributions=fit_distributions)
 
         if use_sets:
             # TODO: reimplement set length distributions

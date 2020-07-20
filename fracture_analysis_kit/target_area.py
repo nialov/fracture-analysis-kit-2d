@@ -167,17 +167,35 @@ class TargetAreaLines:
         fig, ax = plt.subplots(figsize=(7, 7))
         normalize_for_power_law = True if fit is not None else False
         xmin = 0 if fit is None else fit.xmin
+        # scatter plot with original length data
         self.plot_length_distribution_ax(self.lineframe_main, self.name, ax, color_for_plot=color_for_plot, normalize_for_powerlaw=normalize_for_power_law,
                                          powerlaw_cut_off=xmin)
-        tools.setup_ax_for_ld(ax, unified)
         if fit is not None:
-            # Plot the given fit_distribution along with the scatter plot with original length data.
+            # Plot the given fit_distribution if it exists
             self.plot_length_distribution_fit(fit, fit_distribution, ax)
+        tools.setup_ax_for_ld(ax, unified)
+
+        # Setup same plot ax limits for all fit plots
+        # Based on original scatter length data
+        # (Instead of where the
+        # TODO: Is this wise? e.g. exponential trend won't show completely if ax limits from orig data)
+        # ax_xmin = self.lineframe_main["length"].min() if fit is None else fit.xmin
+        # ax_xmin = ax_xmin / 10
+        # ax_xmax = self.lineframe_main["length"].max()
+        # ax_xmax = ax_xmax * 10
+        # ax_ymin = self.lineframe_main["y"].min() / self.lineframe_main["y"].max()
+        # ax_ymin = ax_ymin / 10
+        # ax_ymax = 10
+        # ax.set_xlim(ax_xmin, ax_xmax)
+        # ax.set_xlim(ax_ymin, ax_ymax)
         if save:
-            if unified:
-                savename = Path(savefolder + f'/{self.name}_group_indiv_full_{fit_distribution}.svg')
-            else:
-                savename = Path(savefolder + f'/{self.name}_area_indiv_full_{fit_distribution}.svg')
+            group = "group" if unified else "area"
+            cut_off = "manual" if fit.fixed_xmin else "automatic"
+            savename = Path(savefolder + f"/{self.name}_{group}_indiv_{cut_off}_{fit_distribution}.svg")
+            # if unified:
+            #     savename = Path(savefolder + f'/{self.name}_group_indiv_full_{fit_distribution}.svg')
+            # else:
+            #     savename = Path(savefolder + f'/{self.name}_area_indiv_full_{fit_distribution}.svg')
             plt.savefig(savename, dpi=150, bbox_inches='tight')
         plt.close()
 
@@ -197,15 +215,18 @@ class TargetAreaLines:
         fig, ax = plt.subplots(figsize=(7, 7))
         self.plot_length_distribution_ax(self.lineframe_main, self.name, ax, color_for_plot=color_for_plot, normalize_for_powerlaw=True,
                                          powerlaw_cut_off=fit.power_law.xmin)
-        tools.setup_ax_for_ld(ax, unified)
         if not len(fit_distributions) == 0:
             # Plot the given fit_distributions along with the scatter plot with original length data.
             [self.plot_length_distribution_fit(fit, fit_distribution, ax) for fit_distribution in fit_distributions]
+        tools.setup_ax_for_ld(ax, unified)
         if save:
-            if unified:
-                savename = Path(savefolder + f'/{self.name}_group_indiv_full_all_fits.svg')
-            else:
-                savename = Path(savefolder + f'/{self.name}_area_indiv_full_all_fits.svg')
+            group = "group" if unified else "area"
+            cut_off = "manual" if fit.fixed_xmin else "automatic"
+            savename = Path(savefolder + f"/{self.name}_{group}_indiv_{cut_off}_all_fits.svg")
+            # if unified:
+            #     savename = Path(savefolder + f'/{self.name}_group_indiv_full_all_fits.svg')
+            # else:
+            #     savename = Path(savefolder + f'/{self.name}_area_indiv_full_all_fits.svg')
             plt.savefig(savename, dpi=150, bbox_inches='tight')
         plt.close()
 
@@ -213,7 +234,7 @@ class TargetAreaLines:
     def plot_length_distribution_fit(fit: powerlaw.Fit, fit_distribution: str, ax: plt.Axes):
         assert isinstance(fit, powerlaw.Fit)
         if fit_distribution == POWERLAW:
-            fit.power_law.plot_ccdf(ax=ax, label="Power-law with cut-off", linestyle="--", color="red")
+            fit.power_law.plot_ccdf(ax=ax, label="Power law", linestyle="--", color="red")
             # Most difficult case due to cut-off.
             # lineframe_main_cut_off = lineframe_main.loc[lineframe_main["length"] > fit.xmin]
             # power_law_alpha = -(fit.power_law.alpha - 1)
@@ -222,9 +243,9 @@ class TargetAreaLines:
             # ys = constant * lineframe_main_cut_off["length"] ** power_law_alpha
             # ax.plot(lengths, ys, linestyle="--", color="red")
         elif fit_distribution == LOGNORMAL:
-            fit.lognormal.plot_ccdf(ax=ax, label="Lognormal with cut-off", linestyle="--", color="lime")
+            fit.lognormal.plot_ccdf(ax=ax, label="Lognormal", linestyle="--", color="lime")
         elif fit_distribution == EXPONENTIAL:
-            fit.exponential.plot_ccdf(ax=ax, label="Exponential with cut-off", linestyle="--", color="blue")
+            fit.exponential.plot_ccdf(ax=ax, label="Exponential", linestyle="--", color="blue")
         else:
             QgsMessageLog.logMessage(message="Given fit_distribution does not fit a distribution string.\n"
                                              f"fit_distribution: {fit_distribution}"
