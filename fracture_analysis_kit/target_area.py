@@ -119,10 +119,10 @@ class TargetAreaLines:
         self.lineframe_main = self.lineframe_main.dropna(subset=['azimu'])
         self.lineframe_main['halved'] = self.lineframe_main.azimu.apply(tools.azimu_half)
 
-        # Allows plotting of azimuth TODO: Decrepid rose plotting method
+        # Allows plotting of azimuth
         # self.two_halves_non_weighted = tools.azimuth_plot_attributes(self.lineframe_main, weights=False)
         # self.two_halves_weighted = tools.azimuth_plot_attributes(self.lineframe_main, weights=True)
-        # Experimental azimuth
+        # Current azimuth plotting
         self.bin_width, self.bin_locs, self.number_of_azimuths = tools.azimuth_plot_attributes_experimental(
             lineframe=self.lineframe_main, weights=True)
         # Length distribution plot limits
