@@ -40,7 +40,7 @@ def pip_install_all(is_64, gdal_needed):
         install_these = [fiona_32] + base_install_these
 
     for inst in install_these:
-        subprocess.check_call([sys.executable, '-m', 'pip', 'install', inst, "-b", "."])
+        subprocess.check_call([sys.executable, '-m', 'pip', 'install', inst, "--user"])
 
 def is_installation_needed():
     try:
