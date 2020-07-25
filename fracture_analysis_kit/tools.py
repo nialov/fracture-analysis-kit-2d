@@ -17,6 +17,7 @@ from shapely import strtree
 from shapely.geometry import LineString
 from shapely.geometry import Point
 from shapely.ops import linemerge
+from shapely import prepared
 import powerlaw
 import logging
 
@@ -1413,10 +1414,19 @@ def line_start_point(line):
 
 
 def prepare_geometry_traces(traceframe):
+    """
+    Prepare tracefrace geometries for a spatial analysis (faster).
+    The try-except clause is required due to QGIS differences in the shapely package
+
+    :param traceframe:
+    :type traceframe:
+    :return:
+    :rtype:
+    """
     traces = traceframe.geometry.values
     traces = np.asarray(traces).tolist()
     trace_col = shapely.geometry.MultiLineString(traces)
-    prep_col = shapely.prepared.prep(trace_col)
+    prep_col = prepared.prep(trace_col)
     return prep_col, trace_col
 
     # traces_ls = []
