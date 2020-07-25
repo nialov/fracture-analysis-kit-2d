@@ -28,3 +28,7 @@ class TestConfig:
             result = config.get_color_dict(unified=unified)
             assert len(result) != 0
 
+    def test_default_analysis_choices(self):
+        # Test that all analyses are done by default
+        assert all(list(config.choose_your_analyses.values()))
+
