@@ -29,7 +29,7 @@ def pip_install_all(is_64, gdal_needed):
     :type gdal_needed: bool
     """
     os.chdir(Path(install_dir))
-    base_install_these = ["geopandas", "python-ternary", "sklearn", "seaborn"]
+    base_install_these = ["geopandas", "python-ternary", "sklearn", "seaborn", "powerlaw"]
     if is_64 and gdal_needed:
         install_these = [gdal_64, fiona_64] + base_install_these
     elif is_64:
