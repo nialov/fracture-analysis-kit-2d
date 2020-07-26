@@ -19,11 +19,8 @@ sys.path.insert(0, os.path.abspath('../../fracture_analysis_kit'))
 
 # -- Matplotlib backend setup ------------------------------------------------
 # Required for sphinx to succesfully autodoc plugin modules.
-
-# import matplotlib
-# # IMPORTANT! Change this to your own path if remaking docs is required.
-# os.environ['QT_QPA_PLATFORM_PLUGIN_PATH'] = r'F:\Program Files\QGIS 3.10\apps\Qt5\plugins'
-# matplotlib.use('Qt5Agg')
+import matplotlib
+matplotlib.use('Qt5Agg')
 
 # -- Project information -----------------------------------------------------
 
@@ -64,7 +61,6 @@ html_theme = 'sphinx_rtd_theme'
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 
-doctest_test_doctest_blocks = 'yes'
-
 # Mock QGIS imports
+# TODO: Is this necessary?
 autodoc_mock_imports = ["qgis", "geopandas", "ternary", "matplotlib", "seaborn", "pandas"]

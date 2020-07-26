@@ -1,5 +1,0 @@
-numpy==1.17.3
-scipy==1.1.0
-Shapely==1.6.4.post2
-config==0.4.2
-scikit_learn==0.22.1
