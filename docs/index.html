@@ -339,7 +339,7 @@ all <strong>required</strong> packages however when complemented with the QGIS e
 </div>
 <div class="section" id="make-bat">
 <h2>make.bat<a class="headerlink" href="#make-bat" title="Permalink to this headline">¶</a></h2>
-<p>The make.bat file in the root directory runs:</p>
+<p>The make.bat file in the root directory runs with plain:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">make</span>
 </pre></div>
 </div>
@@ -347,20 +347,23 @@ all <strong>required</strong> packages however when complemented with the QGIS e
 <li><p>Tests using pytest</p></li>
 <li><p>Updates requirements_dev.txt for currently installer pip packages</p></li>
 <li><p>sphinx to build documentation</p></li>
-<li><p>pb_tool to archive the plugin as an installable .zip file</p>
+<li><p>For pb_tool to archive the plugin as an installable .zip file:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">make</span> <span class="nb">zip</span>
+</pre></div>
+</div>
 <ul class="simple">
 <li><p>Requires a zip installer (e.g. 7zip) on PATH</p></li>
 </ul>
 </li>
-<li><p><strong>Optionally you can run</strong>:</p>
+<li><p>To deploy the plugin to your QGIS plugin folder:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">make</span> <span class="n">deploy</span>
 </pre></div>
 </div>
-</li>
-</ul>
-<p>to deploy the plugin to your QGIS plugin folder. This is the primary source installation method. See:</p>
 <ul class="simple">
-<li><p><a class="reference external" href="http://g-sherman.github.io/plugin_build_tool/">pb_tool</a></p></li>
+<li><p>This is the primary source installation method. See: <a class="reference external" href="http://g-sherman.github.io/plugin_build_tool/">pb_tool</a></p></li>
+<li><p>And check <em>./pb_tool.cfg</em> first</p></li>
+</ul>
+</li>
 </ul>
 </div>
 <div class="section" id="for-developers-plugin-documentation">

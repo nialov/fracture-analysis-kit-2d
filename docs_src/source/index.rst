@@ -183,24 +183,26 @@ To successfully run the plugin tests using pytest:
 make.bat
 ---------
 
-The make.bat file in the root directory runs::
+The make.bat file in the root directory runs with plain::
 
    make
 
 * Tests using pytest
 * Updates requirements_dev.txt for currently installer pip packages
 * sphinx to build documentation
-* pb_tool to archive the plugin as an installable .zip file
+
+* For pb_tool to archive the plugin as an installable .zip file::
+
+   make zip
 
   * Requires a zip installer (e.g. 7zip) on PATH
 
-* **Optionally you can run**::
+* To deploy the plugin to your QGIS plugin folder::
 
    make deploy
 
-to deploy the plugin to your QGIS plugin folder. This is the primary source installation method. See:
-
-* `pb_tool <http://g-sherman.github.io/plugin_build_tool/>`_
+  * This is the primary source installation method. See: `pb_tool <http://g-sherman.github.io/plugin_build_tool/>`_
+  * And check *./pb_tool.cfg* first
 
 
 For Developers: Plugin documentation

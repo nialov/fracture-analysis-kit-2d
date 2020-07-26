@@ -7,7 +7,6 @@ Subpackages
 .. toctree::
 
    fracture_analysis_2d.fracture_analysis_kit
-   fracture_analysis_2d.test
 
 Submodules
 ----------
