@@ -607,6 +607,8 @@ class FractureAnalysis2D:
             # )
     def read_multi_target_json(self):
         """
+        Not implemented.
+
         Reads a json with specs for running multi target analysis.
         Needs:(self.layer_table_df, results_folder, analysis_name, self.group_names_cutoffs_df, self.set_df, self.choose_your_analyses)
 

@@ -18,7 +18,8 @@ This QGIS plugin can be used to extract lineament & fracture size, abundance and
 from two-dimensional GIS polylines along with their topological branches and nodes.
 The results will be given as graphical plots.
 
-The plugin is **experimental** and installation requires the **manual installation** of a few external python libraries.
+The plugin is **experimental** and installation requires the **installation** of a few external python libraries.
+Installation is done using a Python script but requires some manual setup.
 
 This plugin uses four types of vector data as inputs:
 *traces* (Polylines), *branches* (Polylines), *nodes* (Points) and *areas* (Polygons).
@@ -34,10 +35,8 @@ Example plots
 -------------
 
 .. image:: imgs/collage1.png
-	:scale: 25 %
-	:align: center
-
-
+   :scale: 25 %
+   :align: center
 
 .. _installation:
 
@@ -65,8 +64,15 @@ own risk. Updates to this guide are not guaranteed when Python dependencies chan
 
    legacy-installation
 
-**Usage Help**
+**Usage Guide**
 ==================
+
+The plugin is controlled using a QGIS GUI interface. Guide to the interface is under **Usage Guide**.
+
+.. toctree::
+   :maxdepth: 2
+
+   usage
 
 
 **Dependencies and References**
@@ -77,26 +83,33 @@ References
 
 Both branches and nodes are derived from :ref:`ngt`.
 For their definition along with the definition of the plots and the plotted parameters,
-I refer you to multiple sources. Sources are in order of importance.
+I refer you to multiple sources.
 
 * `Nyberg et al., 2018 <https://pubs.geoscienceworld.org/gsa/geosphere/article/531129/networkgt-a-gis-tool-for-geometric-and-topological>`_
 
-	* *NetworkGT Plugin introduction and guide.*
+   * *NetworkGT Plugin introduction and guide.*
+   * `GitHub <https://github.com/BjornNyberg/NetworkGT>`_
 
 * `Sanderson and Nixon, 2015 <https://www.sciencedirect.com/science/article/pii/S0191814115000152>`_
 
-	* *Trace and branch size, abundance and topological parameter definitions.*
+   * *Trace and branch size, abundance and topological parameter definitions.*
 
 * My Master's Thesis, Ovaskainen, 2020
 
-	* *Plots used in my Thesis were done with an older version of the same code used for this plugin.*
+   * *Plots used in my Thesis were done with an older version of the same code used for this plugin.*
 
 * `Sanderson and Peacock, 2020 <https://www.sciencedirect.com/science/article/abs/pii/S001282521930594X>`_
 
-	* *Information about rose plots.*
+   * *Information about rose plots.*
+
+* `Alstott et al. 2014 <https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0085777>`_
+
+   * *Length distribution modelling using the Python 3 powerlaw package.*
+   * `GitHub <https://github.com/jeffalstott/powerlaw>`_
+
 * `Bonnet et al., 2001 <https://agupubs.onlinelibrary.wiley.com/doi/abs/10.1029/1999RG000074>`_
 
-	* *Length distribution modelling.*
+   * *Length distribution modelling.*
 
 .. _ngt:
 
@@ -105,8 +118,8 @@ NetworkGT
 
 This plugin has been built to **only** work with data extracted using another QGIS-plugin, NetworkGT_ (see: `Nyberg et al., 2018`__):
 
-	*The NetworkGT (Network Geometry and Topology) Toolbox is a set of tools designed for
-	the geometric and topological analysis of fracture networks.*
+   *The NetworkGT (Network Geometry and Topology) Toolbox is a set of tools designed for
+   the geometric and topological analysis of fracture networks.*
 
 If the input data (*traces*) you have can be processed in NetworkGT into *branches* and *nodes*
 it is suitable for this plugin. NetworkGT is available for both QGIS and ArcGIS
@@ -141,7 +154,7 @@ See :ref:`installation` for installation guide.
 .. _seaborn: https://seaborn.pydata.org/index.html
 .. _powerlaw: https://github.com/jeffalstott/powerlaw
 
-**Doc**
+**API Documentation**
 ==================
 
 For Developers: Plugin documentation
@@ -152,6 +165,10 @@ Good guide `here <http://spatialgalaxy.net/2018/02/13/quick-guide-to-getting-sta
 
 Documentation for Python modules has been created using Autodoc. Autodoc has trouble running without setting the matplotlib backend to Qt5Agg.
 If you wish to remake documentation: Check conf.py and replace my 'QT_QPA_PLATFORM_PLUGIN_PATH' with your own path.
+
+The requirements_dev.txt file contains all pip packages (custom) installed within my QGIS environment.
+It is therefore not *clean* and contains packages that are not required for development. It should contain
+all **required** packages however when complemented with the QGIS environment Python3 packages.
 
 .. toctree::
    :maxdepth: 4

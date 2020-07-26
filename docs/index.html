@@ -88,6 +88,9 @@
 <li class="toctree-l1"><a class="reference internal" href="legacy-installation.html"><strong>Legacy Installation Guide</strong></a></li>
 </ul>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="usage.html"><strong>Usage Guide</strong></a></li>
+</ul>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="fracture_analysis_2d.html">fracture_analysis_2d package</a></li>
 </ul>
 
@@ -163,7 +166,8 @@
 <p>This QGIS plugin can be used to extract lineament &amp; fracture size, abundance and topological parameters
 from two-dimensional GIS polylines along with their topological branches and nodes.
 The results will be given as graphical plots.</p>
-<p>The plugin is <strong>experimental</strong> and installation requires the <strong>manual installation</strong> of a few external python libraries.</p>
+<p>The plugin is <strong>experimental</strong> and installation requires the <strong>installation</strong> of a few external python libraries.
+Installation is done using a Python script but requires some manual setup.</p>
 <p>This plugin uses four types of vector data as inputs:
 <em>traces</em> (Polylines), <em>branches</em> (Polylines), <em>nodes</em> (Points) and <em>areas</em> (Polygons).</p>
 <p><em>Traces</em> can be manually or automatically digitized GIS polyline features from e.g.
@@ -208,8 +212,21 @@ own risk. Updates to this guide are not guaranteed when Python dependencies chan
 </ul>
 </div>
 </div>
-<div class="section" id="usage-help">
-<h1><strong>Usage Help</strong><a class="headerlink" href="#usage-help" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="usage-guide">
+<h1><strong>Usage Guide</strong><a class="headerlink" href="#usage-guide" title="Permalink to this headline">¶</a></h1>
+<p>The plugin is controlled using a QGIS GUI interface. Guide to the interface is under <strong>Usage Guide</strong>.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="usage.html"><strong>Usage Guide</strong></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="usage.html#outputs">Outputs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage.html#set-limits">Set limits</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage.html#grouping-data-and-cut-offs-for-length-distribution-modelling">Grouping data and cut-offs for length distribution modelling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage.html#input-data-table">Input data table</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage.html#miscellanous">Miscellanous</a></li>
+</ul>
+</li>
+</ul>
+</div>
 </div>
 <div class="section" id="dependencies-and-references">
 <h1><strong>Dependencies and References</strong><a class="headerlink" href="#dependencies-and-references" title="Permalink to this headline">¶</a></h1>
@@ -217,12 +234,13 @@ own risk. Updates to this guide are not guaranteed when Python dependencies chan
 <h2>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h2>
 <p>Both branches and nodes are derived from <a class="reference internal" href="#ngt"><span class="std std-ref">NetworkGT</span></a>.
 For their definition along with the definition of the plots and the plotted parameters,
-I refer you to multiple sources. Sources are in order of importance.</p>
+I refer you to multiple sources.</p>
 <ul>
 <li><p><a class="reference external" href="https://pubs.geoscienceworld.org/gsa/geosphere/article/531129/networkgt-a-gis-tool-for-geometric-and-topological">Nyberg et al., 2018</a></p>
 <blockquote>
 <div><ul class="simple">
 <li><p><em>NetworkGT Plugin introduction and guide.</em></p></li>
+<li><p><a class="reference external" href="https://github.com/BjornNyberg/NetworkGT">GitHub</a></p></li>
 </ul>
 </div></blockquote>
 </li>
@@ -247,6 +265,14 @@ I refer you to multiple sources. Sources are in order of importance.</p>
 </ul>
 </div></blockquote>
 </li>
+<li><p><a class="reference external" href="https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0085777">Alstott et al. 2014</a></p>
+<blockquote>
+<div><ul class="simple">
+<li><p><em>Length distribution modelling using the Python 3 powerlaw package.</em></p></li>
+<li><p><a class="reference external" href="https://github.com/jeffalstott/powerlaw">GitHub</a></p></li>
+</ul>
+</div></blockquote>
+</li>
 <li><p><a class="reference external" href="https://agupubs.onlinelibrary.wiley.com/doi/abs/10.1029/1999RG000074">Bonnet et al., 2001</a></p>
 <blockquote>
 <div><ul class="simple">
@@ -268,7 +294,7 @@ it is suitable for this plugin. NetworkGT is available for both QGIS and ArcGIS
 and branch and node data from both <em>should</em> be valid inputs into this plugin (<em>as of 15.2.2020</em>).</p>
 </div>
 <div class="section" id="external-python-modules">
-<span id="id4"></span><h2>External Python modules<a class="headerlink" href="#external-python-modules" title="Permalink to this headline">¶</a></h2>
+<span id="id5"></span><h2>External Python modules<a class="headerlink" href="#external-python-modules" title="Permalink to this headline">¶</a></h2>
 <p>This plugin is dependant on external Python libraries (and their subsequent dependancies) that are not installed by default in QGIS.</p>
 <ul class="simple">
 <li><p><a class="reference external" href="https://gdal.org/">GDAL</a></p></li>
@@ -282,14 +308,17 @@ and branch and node data from both <em>should</em> be valid inputs into this plu
 <p>See <a class="reference internal" href="#installation"><span class="std std-ref">Installation</span></a> for installation guide.</p>
 </div>
 </div>
-<div class="section" id="doc">
-<h1><strong>Doc</strong><a class="headerlink" href="#doc" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="api-documentation">
+<h1><strong>API Documentation</strong><a class="headerlink" href="#api-documentation" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="for-developers-plugin-documentation">
 <h2>For Developers: Plugin documentation<a class="headerlink" href="#for-developers-plugin-documentation" title="Permalink to this headline">¶</a></h2>
 <p>This plugin has been developed in PyCharm by setting the Python environment to mimic the OSGeo4W Shell.
 Good guide <a class="reference external" href="http://spatialgalaxy.net/2018/02/13/quick-guide-to-getting-started-with-pyqgis-3-on-windows/">here</a>.</p>
 <p>Documentation for Python modules has been created using Autodoc. Autodoc has trouble running without setting the matplotlib backend to Qt5Agg.
 If you wish to remake documentation: Check conf.py and replace my ‘QT_QPA_PLATFORM_PLUGIN_PATH’ with your own path.</p>
+<p>The requirements_dev.txt file contains all pip packages (custom) installed within my QGIS environment.
+It is therefore not <em>clean</em> and contains packages that are not required for development. It should contain
+all <strong>required</strong> packages however when complemented with the QGIS environment Python3 packages.</p>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="fracture_analysis_2d.html">fracture_analysis_2d package</a><ul>

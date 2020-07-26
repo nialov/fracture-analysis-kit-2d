@@ -1,0 +1,286 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Usage Guide &mdash; Fracture Analysis 2D 0.1alpha documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="fracture_analysis_2d package" href="fracture_analysis_2d.html" />
+    <link rel="prev" title="Legacy Installation Guide" href="legacy-installation.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Fracture Analysis 2D
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html"><strong>Installation Guide</strong></a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="legacy-installation.html"><strong>Legacy Installation Guide</strong></a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#"><strong>Usage Guide</strong></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#outputs">Outputs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#set-limits">Set limits</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#grouping-data-and-cut-offs-for-length-distribution-modelling">Grouping data and cut-offs for length distribution modelling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#input-data-table">Input data table</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#miscellanous">Miscellanous</a></li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="fracture_analysis_2d.html">fracture_analysis_2d package</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Fracture Analysis 2D</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li><strong>Usage Guide</strong></li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/usage.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="usage-guide">
+<h1><strong>Usage Guide</strong><a class="headerlink" href="#usage-guide" title="Permalink to this headline">¶</a></h1>
+<p>The whole functionality of the tool is accessible through a single GUI window within QGIS. In this window
+the data to analyze must be inputted along with the output folder, names, etc.</p>
+<div class="figure align-center" id="id1">
+<a class="reference internal image-reference" href="_images/GUI_window.png"><img alt="Fracture Analysis Kit 2D GUI window" src="_images/GUI_window.png" style="width: 777.0px; height: 574.5px;" /></a>
+<p class="caption"><span class="caption-text">The GUI window of Fracture Analysis Kit 2D.
+Hover over elements in QGIS such as buttons and prompts for short help texts and example inputs.</span><a class="headerlink" href="#id1" title="Permalink to this image">¶</a></p>
+</div>
+<div class="section" id="outputs">
+<h2>Outputs<a class="headerlink" href="#outputs" title="Permalink to this headline">¶</a></h2>
+<dl class="simple">
+<dt>Analysis Name</dt><dd><p>Name the current analysis. This will be used in the folder structure where plots are saved.</p>
+</dd>
+<dt>Output folder</dt><dd><p>Folder where analysis results are saved to.</p>
+</dd>
+</dl>
+</div>
+<div class="section" id="set-limits">
+<h2>Set limits<a class="headerlink" href="#set-limits" title="Permalink to this headline">¶</a></h2>
+<p>This table is used to input set ranges/limits for the analysis. This can be left blank in which case default
+sets are used.</p>
+<ul class="simple">
+<li><p>E.g. Set start = 10 -&gt; Set end = 30 -&gt; Press <strong>Add set</strong> -&gt; New set with the label <strong>1</strong> will be made.</p></li>
+<li><p>Repeat for more sets with incremental numbering (1, 2, 3, etc.)</p></li>
+</ul>
+</div>
+<div class="section" id="grouping-data-and-cut-offs-for-length-distribution-modelling">
+<h2>Grouping data and cut-offs for length distribution modelling<a class="headerlink" href="#grouping-data-and-cut-offs-for-length-distribution-modelling" title="Permalink to this headline">¶</a></h2>
+<p>If you have fracture data from multiple scales of observation, each scale can be grouped here
+and the scale-compassing datasets can be compared with each other e.g. in powerlaw length distribution
+modelling.</p>
+<p>Each group also shares a cut-off value (used in powerlaw modelling) for trace and branch data.
+Currently the powerlaw modelling done by the powerlaw Python package does two analyses:</p>
+<ol class="arabic simple">
+<li><p>powerlaw analysis with user inputted values (given here)</p></li>
+<li><p>powerlaw analysis with automatically derived cut-offs</p></li>
+</ol>
+<ul class="simple">
+<li><p>E.g. Group Name = KB -&gt; Cut Off Traces (m) = 1.8 -&gt; Cut Off Branches (m) = 1.6 -&gt; Press <strong>Add row</strong></p></li>
+</ul>
+</div>
+<div class="section" id="input-data-table">
+<h2>Input data table<a class="headerlink" href="#input-data-table" title="Permalink to this headline">¶</a></h2>
+<p>The input data table consists of rows each of which contain a trace, branch, node and area dataset along
+with a name (e.g. KB11) and a group.
+All must be given for each row to perform the analysis.</p>
+<p>Branch and node data can be acquired with NetworkGT using the trace and target area data.</p>
+</div>
+<div class="section" id="miscellanous">
+<h2>Miscellanous<a class="headerlink" href="#miscellanous" title="Permalink to this headline">¶</a></h2>
+<dl class="simple">
+<dt>Advanced</dt><dd><p>The plugin comes with a config.py Python file wherein some manual setup is possible.
+Most importantly the analyses which to perform can be chosen. On default all analyses are done which
+can be computationally intensive.</p>
+</dd>
+<dt><strong>?</strong></dt><dd><p>Opens this help documentation locally.</p>
+</dd>
+</dl>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="fracture_analysis_2d.html" class="btn btn-neutral float-right" title="fracture_analysis_2d package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="legacy-installation.html" class="btn btn-neutral float-left" title="Legacy Installation Guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Nikolas Ovaskainen
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
