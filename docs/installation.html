@@ -36,7 +36,7 @@
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="fracture_analysis_2d package" href="fracture_analysis_2d.html" />
+    <link rel="next" title="Legacy Installation Guide" href="legacy-installation.html" />
     <link rel="prev" title="Fracture Analysis 2D" href="index.html" /> 
 </head>
 
@@ -84,12 +84,19 @@
             
               <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#"><strong>Installation Guide</strong></a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#requirements">Requirements</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#external-python-module-installation-with-administrator-access">External Python module installation with administrator access</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#external-python-module-installation-without-administrator-access">External Python module installation without administrator access</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#plugin-installation-from-zip-file">Plugin installation from .zip file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#requirements-and-warnings">Requirements and warnings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#installation-using-the-installation-script">Installation using the installation script</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#info">Info</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#download-plugin-zip-and-install-it">Download plugin .zip and install it</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#running-installation-script-in-the-osgeo4wshell">Running installation script in the OSGeo4WShell</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#finalization">Finalization</a></li>
 </ul>
 </li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="legacy-installation.html"><strong>Legacy Installation Guide</strong></a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="fracture_analysis_2d.html">fracture_analysis_2d package</a></li>
@@ -160,180 +167,115 @@
             
   <div class="section" id="installation-guide">
 <h1><strong>Installation Guide</strong><a class="headerlink" href="#installation-guide" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="requirements">
-<h2>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline">¶</a></h2>
-<p>Plugin has <strong>only</strong> been tested on Windows. No functionality on other platforms guaranteed.</p>
+<div class="section" id="requirements-and-warnings">
+<h2>Requirements and warnings<a class="headerlink" href="#requirements-and-warnings" title="Permalink to this headline">¶</a></h2>
+<p>This plugin has <strong>only</strong> been tested on Windows. No functionality on other platforms guaranteed and
+the installation will be different that the one explained below.</p>
+<p>Installation requires external Python dependencies that need to be installed to the QGIS environment.
+This might cause issues and errors that I cannot predict especially when another module with
+external Python dependencies is installed.
+<strong>The entire risk as to the quality and performance is with you.</strong></p>
 </div>
-<div class="section" id="external-python-module-installation-with-administrator-access">
-<h2>External Python module installation with administrator access<a class="headerlink" href="#external-python-module-installation-with-administrator-access" title="Permalink to this headline">¶</a></h2>
-<p>First we will install <em>GDAL</em> and <em>Fiona</em>. Due to QGIS functionalities this cannot be done automatically through pip and instead we need to download the modules ourselves.
-Go to: <a class="reference external" href="https://www.lfd.uci.edu/~gohlke/pythonlibs/">https://www.lfd.uci.edu/~gohlke/pythonlibs/</a>
-and find the files listed below.</p>
-<p>You must download the right version depending on your operating system (32x OR 64x):</p>
+<div class="section" id="installation-using-the-installation-script">
+<h2>Installation using the installation script<a class="headerlink" href="#installation-using-the-installation-script" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="info">
+<h3>Info<a class="headerlink" href="#info" title="Permalink to this headline">¶</a></h3>
+<p>This plugin comes packed with a Python installation script that will install the plugin’s required
+Python dependencies.
+Also packed with the script are unofficial Windows Binaries for Python packages <em>fiona</em> and <em>GDAL</em>.</p>
+<p>These are from <a class="reference external" href="https://www.lfd.uci.edu/~gohlke/pythonlibs/">https://www.lfd.uci.edu/~gohlke/pythonlibs/</a></p>
+</div>
+<div class="section" id="download-plugin-zip-and-install-it">
+<h3>Download plugin .zip and install it<a class="headerlink" href="#download-plugin-zip-and-install-it" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>To start, download the plugin .zip file from: <a class="reference external" href="https://github.com/nialov/fracture-analysis-kit-2d">https://github.com/nialov/fracture-analysis-kit-2d</a></p>
 <ul>
-<li><p>GDAL</p>
-<blockquote>
-<div><ul class="simple">
-<li><p><em>GDAL-3.0.4-cp37-cp37m-win_amd64.whl (64-bit OS)</em></p></li>
-<li><p><strong>OR</strong></p></li>
-<li><p><em>GDAL-3.0.4-cp37-cp37m-win32.whl (32-bit OS)</em></p></li>
+<li><p>Scroll down on GitHub for instructions (<strong>Plugin Download</strong>).</p></li>
 </ul>
-</div></blockquote>
 </li>
-<li><p>Fiona</p>
-<blockquote>
-<div><ul class="simple">
-<li><p><em>Fiona-1.8.13-cp37-cp37m-win_amd64.whl (64-bit OS)</em></p></li>
-<li><p><strong>OR</strong></p></li>
-<li><p><em>Fiona-1.8.13-cp37-cp37m-win32.whl (32-bit OS)</em></p></li>
+<li><p>Next, open QGIS and install the plugin.</p>
+<ul>
+<li><p>In QGIS go to <em>Plugins</em> -&gt; <em>Manage and Install plugins…</em> -&gt; <em>Install from ZIP</em></p></li>
+<li><p>Select the downloaded .zip file -&gt; <em>Install Plugin</em></p></li>
+<li><p>This installation will most likely fail due to the lack of external Python dependencies,
+don’t worry about this.</p></li>
 </ul>
-</div></blockquote>
 </li>
 </ul>
-<p>Next up: Start up OSGeo4W Shell as <strong>administrator</strong> (<strong>Important!</strong>).</p>
-<p>This should pop up by searching in Windows start up menu.
-(Press windows key on your keyboard and type “OSGeo4W Shell”).</p>
-<p>First, the OSGeo4w Shell must run a py3_env.bat file that is located in “Your QGIS installation folder path”bin.</p>
-<p>So, to get there, you must type or copy in the OSGeo4W Shell:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="o">/</span><span class="n">D</span> <span class="s2">&quot;Your QGIS installation folder path without the quotes&quot;</span>\\<span class="nb">bin</span>
-</pre></div>
 </div>
-<p>Next up, run the py3_env.bat file by typing in the Shell:</p>
+<div class="section" id="running-installation-script-in-the-osgeo4wshell">
+<h3>Running installation script in the OSGeo4WShell<a class="headerlink" href="#running-installation-script-in-the-osgeo4wshell" title="Permalink to this headline">¶</a></h3>
+<ul>
+<li><p>Now to install external Python dependencies the complementary installation script is used.
+The installation script must be run from a command shell that is connected to the
+QGIS Python environment which is called <em>OSGeo4WShell</em>.
+Installing Python dependencies in the QGIS environment is done using the <em>OSGeo4WShell</em>.</p>
+<ul class="simple">
+<li><p>Easiest way to find the Shell is to:</p>
+<ul>
+<li><p>Press Windows key to open start menu</p></li>
+<li><p>Type: <em>OSGeo4WShell</em></p></li>
+<li><p>The executable should show up, just start it up.</p></li>
+</ul>
+</li>
+<li><p>The <em>OSGeo4WShell</em> can also be located by finding your QGIS installations. There it is named
+<em>OSGeo4W.bat</em>:</p>
+<ul>
+<li><p>Example locations:</p>
+<ul>
+<li><p>C:OSGeo4W64</p></li>
+<li><p>C:Program FilesQGIS</p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>First run a command in the OSGeo4WShell:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">py3_env</span>
 </pre></div>
 </div>
-<p>To install the just downloaded files the OSGeo4W Shell must be in the same directory as the downloaded files.
-Go to where your <em>GDAL-..-.whl</em> and <em>Fiona-…-.whl</em> files are and copy the url
-(Example URL: <em>F:\Users\nikke\Downloads</em>).</p>
-<p>We’ll change the OSGeo4W Shell location by typing or copying into the Shell:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="o">/</span><span class="n">D</span> <span class="s2">&quot;paste your url here without the quotes&quot;</span>
-</pre></div>
-</div>
-<div class="line-block">
-<div class="line">The <em>GDAL</em> and <em>Fiona</em> installation depends on which version of both you downloaded.</div>
-<div class="line"><strong>If you have the 64x bit version, type or copy these into the OSGeo4W Shell</strong></div>
-<div class="line"><em>Note: Install the GDAL file first.</em></div>
-</div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">GDAL</span><span class="o">-</span><span class="mf">3.0</span><span class="o">.</span><span class="mi">4</span><span class="o">-</span><span class="n">cp37</span><span class="o">-</span><span class="n">cp37m</span><span class="o">-</span><span class="n">win_amd64</span><span class="o">.</span><span class="n">whl</span>
-</pre></div>
-</div>
-<p>Press Enter and when installation is completed, type or copy:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">Fiona</span><span class="o">-</span><span class="mf">1.8</span><span class="o">.</span><span class="mi">13</span><span class="o">-</span><span class="n">cp37</span><span class="o">-</span><span class="n">cp37m</span><span class="o">-</span><span class="n">win_amd64</span><span class="o">.</span><span class="n">whl</span>
-</pre></div>
-</div>
-<p><strong>Else if you have the 32x bit versions, use these</strong>:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">GDAL</span><span class="o">-</span><span class="mf">3.0</span><span class="o">.</span><span class="mi">4</span><span class="o">-</span><span class="n">cp37</span><span class="o">-</span><span class="n">cp37m</span><span class="o">-</span><span class="n">win32</span><span class="o">.</span><span class="n">whl</span>
-</pre></div>
-</div>
-<p>Press Enter and when installation is completed, type or copy in to the Shell:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">Fiona</span><span class="o">-</span><span class="mf">1.8</span><span class="o">.</span><span class="mi">13</span><span class="o">-</span><span class="n">cp37</span><span class="o">-</span><span class="n">cp37m</span><span class="o">-</span><span class="n">win32</span><span class="o">.</span><span class="n">whl</span>
-</pre></div>
-</div>
-<p>Hopefully the installation succeeds without issues. Next up we will install <em>geopandas</em>.
-Type in the OSGeo4W Shell:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">geopandas</span>
-</pre></div>
-</div>
-<p>Next, we will install <em>python-ternary</em>. Type in the OSGeo4W Shell:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">python</span><span class="o">-</span><span class="n">ternary</span>
-</pre></div>
-</div>
-<p>Next, we will install <em>sklearn</em>. Type in the OSGeo4W Shell:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">sklearn</span>
-</pre></div>
-</div>
-<p>Next, we will install <em>seaborn</em>. Type in the OSGeo4W Shell:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">seaborn</span>
-</pre></div>
-</div>
-<p><strong>And we are done! Installing the plugin itself is easy.</strong></p>
-</div>
-<div class="section" id="external-python-module-installation-without-administrator-access">
-<h2>External Python module installation without administrator access<a class="headerlink" href="#external-python-module-installation-without-administrator-access" title="Permalink to this headline">¶</a></h2>
-<p>First we will install <em>GDAL</em> and <em>Fiona</em>. Due to QGIS functionalities this cannot be done automatically through pip and instead we need to download the modules ourselves.
-Go to: <a class="reference external" href="https://www.lfd.uci.edu/~gohlke/pythonlibs/">https://www.lfd.uci.edu/~gohlke/pythonlibs/</a>
-and find the files listed below.
-You must download the right version depending on your operating system (32x OR 64x):</p>
+<ul class="simple">
+<li><p>As the name suggests, this will initialize OSGeo4WShell to use Python 3 instead of Python 2.</p></li>
+</ul>
+</li>
+<li><p>The OSGeo4WShell prompt must now be changed to the same directory where the plugin was installed by QGIS</p>
 <ul>
-<li><p>GDAL</p>
-<blockquote>
-<div><ul class="simple">
-<li><p><em>GDAL-3.0.4-cp37-cp37m-win_amd64.whl (64-bit OS)</em></p></li>
-<li><p><strong>OR</strong></p></li>
-<li><p><em>GDAL-3.0.4-cp37-cp37m-win32.whl (32-bit OS)</em></p></li>
-</ul>
-</div></blockquote>
+<li><p>Typical location:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">F</span><span class="p">:</span>\<span class="n">Users</span>\<span class="n">your</span><span class="o">-</span><span class="n">username</span><span class="o">-</span><span class="n">here</span>\<span class="n">AppData</span>\<span class="n">Roaming</span>\<span class="n">QGIS</span>\<span class="n">QGIS3</span>\<span class="n">profiles</span>\<span class="n">default</span>\<span class="n">python</span>\<span class="n">plugins</span>\<span class="n">fracture_analysis_2d</span>
+</pre></div>
+</div>
 </li>
-<li><p>Fiona</p>
-<blockquote>
-<div><ul class="simple">
-<li><p><em>Fiona-1.8.13-cp37-cp37m-win_amd64.whl (64-bit OS)</em></p></li>
-<li><p><strong>OR</strong></p></li>
-<li><p><em>Fiona-1.8.13-cp37-cp37m-win32.whl (32-bit OS)</em></p></li>
-</ul>
-</div></blockquote>
+<li><p>The plugin directory can also be located by trying to install the plugin, the directory is printed out
+in the error message when installation fails.</p></li>
+<li><p>To change directory, type in the shell with <strong>your plugin path</strong> after the <em>cd</em>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="n">F</span><span class="p">:</span>\<span class="n">Users</span>\<span class="n">your</span><span class="o">-</span><span class="n">username</span><span class="o">-</span><span class="n">here</span>\<span class="n">AppData</span>\<span class="n">Roaming</span>\<span class="n">QGIS</span>\<span class="n">QGIS3</span>\<span class="n">profiles</span>\<span class="n">default</span>\<span class="n">python</span>\<span class="n">plugins</span>\<span class="n">fracture_analysis_2d</span>
+</pre></div>
+</div>
 </li>
 </ul>
-<p>Next up: Start up OSGeo4W Shell.</p>
-<p>This should pop up by searching for it in the Windows start up menu.
-(Press windows key on your keyboard and just type “OSGeo4W Shell”).</p>
-<p>First, the OSGeo4w Shell must run a py3_env.bat file that is located in “Your QGIS installation folder path”bin.
-Sometimes the OSGeo4W Shell properly starts there and you can skip this part but if not:</p>
-<p>You must type or copy in the OSGeo4W Shell:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="o">/</span><span class="n">D</span> <span class="s2">&quot;Your QGIS installation folder path without the quotes&quot;</span>\<span class="nb">bin</span>
+</li>
+<li><p>Now the hard part is over and the installation script can be run to install Python dependencies.
+Type in the OSGeo4WShell:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">install_script</span><span class="o">.</span><span class="n">py</span>
 </pre></div>
 </div>
-<p>To install the just downloaded files the OSGeo4W Shell must be in the same directory as the downloaded files.
-Go to where your <em>GDAL-..-.whl</em> and <em>Fiona-…-.whl</em> files are and copy the url
-(Example URL: <em>F:\Users\nikke\Downloads</em>).</p>
-<p>We’ll change the OSGeo4W Shell location by typing or copying into the Shell:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="o">/</span><span class="n">D</span> <span class="s2">&quot;paste your url here without the quotes&quot;</span>
-</pre></div>
+</li>
+<li><p>Installation errors will be printed out if encountered.</p></li>
+</ul>
 </div>
-<div class="line-block">
-<div class="line">The <em>GDAL</em> and <em>Fiona</em> installation depends on which version of both you downloaded.</div>
-<div class="line"><strong>If you have the 64x bit version, type or copy these into the OSGeo4W Shell</strong></div>
-<div class="line"><em>Note: Install the GDAL file first.</em></div>
+<div class="section" id="finalization">
+<h3>Finalization<a class="headerlink" href="#finalization" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>If all went well with the dependency installation now the plugin can be fully installed.</p>
+<ul>
+<li><p>Go back to QGIS and install the plugin from the .zip for the final time.</p></li>
+<li><p>The installation should succeed without any pop-up errors or warnings.</p></li>
+</ul>
+</li>
+<li><p>Installation complete!</p></li>
+</ul>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">GDAL</span><span class="o">-</span><span class="mf">3.0</span><span class="o">.</span><span class="mi">4</span><span class="o">-</span><span class="n">cp37</span><span class="o">-</span><span class="n">cp37m</span><span class="o">-</span><span class="n">win_amd64</span><span class="o">.</span><span class="n">whl</span> <span class="o">--</span><span class="n">user</span>
-</pre></div>
-</div>
-<p>Press Enter and when installation is completed, type or copy:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">Fiona</span><span class="o">-</span><span class="mf">1.8</span><span class="o">.</span><span class="mi">13</span><span class="o">-</span><span class="n">cp37</span><span class="o">-</span><span class="n">cp37m</span><span class="o">-</span><span class="n">win_amd64</span><span class="o">.</span><span class="n">whl</span> <span class="o">--</span><span class="n">user</span>
-</pre></div>
-</div>
-<p><strong>Else if you have the 32x bit versions, use these</strong>:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">GDAL</span><span class="o">-</span><span class="mf">3.0</span><span class="o">.</span><span class="mi">4</span><span class="o">-</span><span class="n">cp37</span><span class="o">-</span><span class="n">cp37m</span><span class="o">-</span><span class="n">win32</span><span class="o">.</span><span class="n">whl</span> <span class="o">--</span><span class="n">user</span>
-</pre></div>
-</div>
-<p>Press Enter and when installation is completed, type or copy in to the Shell:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">Fiona</span><span class="o">-</span><span class="mf">1.8</span><span class="o">.</span><span class="mi">13</span><span class="o">-</span><span class="n">cp37</span><span class="o">-</span><span class="n">cp37m</span><span class="o">-</span><span class="n">win32</span><span class="o">.</span><span class="n">whl</span> <span class="o">--</span><span class="n">user</span>
-</pre></div>
-</div>
-<p>Hopefully the installation succeeds without issues. Next up we will install <em>geopandas</em>.
-Type in the OSGeo4W Shell:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">geopandas</span> <span class="o">--</span><span class="n">user</span>
-</pre></div>
-</div>
-<p>Next, we will install <em>python-ternary</em>. Type in the OSGeo4W Shell:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">python</span><span class="o">-</span><span class="n">ternary</span> <span class="o">--</span><span class="n">user</span>
-</pre></div>
-</div>
-<p>Next, we will install <em>sklearn</em>. Type in the OSGeo4W Shell:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">sklearn</span> <span class="o">--</span><span class="n">user</span>
-</pre></div>
-</div>
-<p>Next, we will install <em>seaborn</em>. Type in the OSGeo4W Shell:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">seaborn</span> <span class="o">--</span><span class="n">user</span>
-</pre></div>
-</div>
-<p><strong>And we are done! Installing the plugin itself is easy.</strong></p>
-</div>
-<div class="section" id="plugin-installation-from-zip-file">
-<h2>Plugin installation from .zip file<a class="headerlink" href="#plugin-installation-from-zip-file" title="Permalink to this headline">¶</a></h2>
-<p>After installing Python modules, you may install the plugin in QGIS.
-Go to <em>Plugins</em> -&gt; <em>Manage and Install Plugins…</em> and choose <em>Install from ZIP</em>.
-Input the .zip file with the plugin and install (<em>fracture_analysis_2d.zip</em>).</p>
 </div>
 </div>
 
@@ -345,7 +287,7 @@ Input the .zip file with the plugin and install (<em>fracture_analysis_2d.zip</e
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="fracture_analysis_2d.html" class="btn btn-neutral float-right" title="fracture_analysis_2d package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="legacy-installation.html" class="btn btn-neutral float-right" title="Legacy Installation Guide" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="index.html" class="btn btn-neutral float-left" title="Fracture Analysis 2D" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

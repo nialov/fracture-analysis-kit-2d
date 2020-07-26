@@ -84,6 +84,9 @@
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="installation.html"><strong>Installation Guide</strong></a></li>
 </ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="legacy-installation.html"><strong>Legacy Installation Guide</strong></a></li>
+</ul>
 <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="fracture_analysis_2d.html">fracture_analysis_2d package</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="fracture_analysis_2d.html#subpackages">Subpackages</a><ul class="current">
@@ -1327,11 +1330,24 @@ the trace GeoDataFrame with only two sets. Returns only nodes that intersect tra
 <dl class="function">
 <dt id="fracture_analysis_2d.fracture_analysis_kit.tools.prepare_geometry_traces">
 <code class="sig-prename descclassname">fracture_analysis_2d.fracture_analysis_kit.tools.</code><code class="sig-name descname">prepare_geometry_traces</code><span class="sig-paren">(</span><em class="sig-param">traceframe</em><span class="sig-paren">)</span><a class="headerlink" href="#fracture_analysis_2d.fracture_analysis_kit.tools.prepare_geometry_traces" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Prepare tracefrace geometries for a spatial analysis (faster).
+The try-except clause is required due to QGIS differences in the shapely package</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>traceframe</strong> – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="function">
 <dt id="fracture_analysis_2d.fracture_analysis_kit.tools.report_powerlaw_fit_statistics">
-<code class="sig-prename descclassname">fracture_analysis_2d.fracture_analysis_kit.tools.</code><code class="sig-name descname">report_powerlaw_fit_statistics</code><span class="sig-paren">(</span><em class="sig-param">name: str</em>, <em class="sig-param">fit: powerlaw.Fit</em>, <em class="sig-param">logger: logging.Logger</em><span class="sig-paren">)</span><a class="headerlink" href="#fracture_analysis_2d.fracture_analysis_kit.tools.report_powerlaw_fit_statistics" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">fracture_analysis_2d.fracture_analysis_kit.tools.</code><code class="sig-name descname">report_powerlaw_fit_statistics</code><span class="sig-paren">(</span><em class="sig-param">name: str</em>, <em class="sig-param">fit: powerlaw.Fit</em>, <em class="sig-param">logger: logging.Logger</em>, <em class="sig-param">using_branches: bool</em><span class="sig-paren">)</span><a class="headerlink" href="#fracture_analysis_2d.fracture_analysis_kit.tools.report_powerlaw_fit_statistics" title="Permalink to this definition">¶</a></dt>
 <dd><p>Writes powerlaw module Fit object statistics to a given logfile. Included powerlaw, lognormal and exponential fit
 statistics and parameters.</p>
 <dl class="field-list simple">

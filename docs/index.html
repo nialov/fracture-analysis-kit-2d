@@ -85,6 +85,9 @@
 <li class="toctree-l1"><a class="reference internal" href="installation.html"><strong>Installation Guide</strong></a></li>
 </ul>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="legacy-installation.html"><strong>Legacy Installation Guide</strong></a></li>
+</ul>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="fracture_analysis_2d.html">fracture_analysis_2d package</a></li>
 </ul>
 
@@ -177,15 +180,29 @@ or from drone orthophotography of bedrock outcrop surfaces.
 <div class="section" id="installation">
 <span id="id1"></span><h1><strong>Installation</strong><a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
 <p>The plugin is <strong>experimental</strong> and installation requires the <strong>manual installation</strong> of a few external Python libraries.
-Installation requirements and guide below. Start by installing the external Python libraries.
-Installing with administrator privileges is recommended to avoid collisions with other user Python installations.</p>
+Installation requirements and guide below.</p>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="installation.html"><strong>Installation Guide</strong></a><ul>
-<li class="toctree-l2"><a class="reference internal" href="installation.html#requirements">Requirements</a></li>
-<li class="toctree-l2"><a class="reference internal" href="installation.html#external-python-module-installation-with-administrator-access">External Python module installation with administrator access</a></li>
-<li class="toctree-l2"><a class="reference internal" href="installation.html#external-python-module-installation-without-administrator-access">External Python module installation without administrator access</a></li>
-<li class="toctree-l2"><a class="reference internal" href="installation.html#plugin-installation-from-zip-file">Plugin installation from .zip file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#requirements-and-warnings">Requirements and warnings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#installation-using-the-installation-script">Installation using the installation script</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="legacy-installation">
+<h1>Legacy Installation<a class="headerlink" href="#legacy-installation" title="Permalink to this headline">¶</a></h1>
+<p><strong>WARNING</strong></p>
+<p><strong>This is the legacy installation method without the complementary installation script. Usage entirely at your
+own risk. Updates to this guide are not guaranteed when Python dependencies change.</strong></p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="legacy-installation.html"><strong>Legacy Installation Guide</strong></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="legacy-installation.html#requirements-and-warnings">Requirements and warnings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="legacy-installation.html#external-python-module-installation-with-administrator-access">External Python module installation with administrator access</a></li>
+<li class="toctree-l2"><a class="reference internal" href="legacy-installation.html#external-python-module-installation-without-administrator-access">External Python module installation without administrator access</a></li>
+<li class="toctree-l2"><a class="reference internal" href="legacy-installation.html#plugin-installation-from-zip-file">Plugin installation from .zip file</a></li>
 </ul>
 </li>
 </ul>
@@ -260,6 +277,7 @@ and branch and node data from both <em>should</em> be valid inputs into this plu
 <li><p><a class="reference external" href="https://github.com/marcharper/Python-ternary">Python-ternary</a></p></li>
 <li><p><a class="reference external" href="https://scikit-learn.org/stable/index.html">sklearn</a></p></li>
 <li><p><a class="reference external" href="https://seaborn.pydata.org/index.html">seaborn</a></p></li>
+<li><p><a class="reference external" href="https://github.com/jeffalstott/powerlaw">powerlaw</a></p></li>
 </ul>
 <p>See <a class="reference internal" href="#installation"><span class="std std-ref">Installation</span></a> for installation guide.</p>
 </div>
@@ -268,7 +286,8 @@ and branch and node data from both <em>should</em> be valid inputs into this plu
 <h1><strong>Doc</strong><a class="headerlink" href="#doc" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="for-developers-plugin-documentation">
 <h2>For Developers: Plugin documentation<a class="headerlink" href="#for-developers-plugin-documentation" title="Permalink to this headline">¶</a></h2>
-<p>This plugin has been developed in PyCharm by setting the Python environment to mimic the OSGeo4W Shell. Good guide <a class="reference external" href="http://spatialgalaxy.net/2018/02/13/quick-guide-to-getting-started-with-pyqgis-3-on-windows/">here</a>.</p>
+<p>This plugin has been developed in PyCharm by setting the Python environment to mimic the OSGeo4W Shell.
+Good guide <a class="reference external" href="http://spatialgalaxy.net/2018/02/13/quick-guide-to-getting-started-with-pyqgis-3-on-windows/">here</a>.</p>
 <p>Documentation for Python modules has been created using Autodoc. Autodoc has trouble running without setting the matplotlib backend to Qt5Agg.
 If you wish to remake documentation: Check conf.py and replace my ‘QT_QPA_PLATFORM_PLUGIN_PATH’ with your own path.</p>
 <div class="toctree-wrapper compound">
