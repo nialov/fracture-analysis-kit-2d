@@ -3,6 +3,8 @@ from hypothesis.strategies import floats, text, lists
 from hypothesis import given, settings
 import shapely
 from shapely.geometry import Point, LineString, Polygon
+from shapely.prepared import PreparedGeometry
+from shapely import strtree
 import numpy as np
 import pandas as pd
 import geopandas as gpd
@@ -24,6 +26,10 @@ class Helpers:
     line_1 = LineString([(0, 0), (0.5, 0.5)])
     line_2 = LineString([(0, 0), (0.5, -0.5)])
     line_3 = LineString([(0, 0), (1, 0)])
+    line_1_sp = Point(list(line_1.coords)[0])
+    line_2_sp = Point(list(line_2.coords)[0])
+    line_1_ep = Point(list(line_1.coords)[-1])
+    line_2_ep = Point(list(line_2.coords)[-1])
     halved_azimuths = []
     for line in [line_1, line_2, line_2]:
         halved_azimuths.append(tools.azimu_half(tools.calc_azimu(line)))
@@ -34,7 +40,9 @@ class Helpers:
                                      , "halved": halved_azimuths
                                      , "length": [line.length for line in [line_1, line_2, line_3]]})
 
-    trace_frame = gpd.GeoDataFrame({"geometry": [line_1, line_2], "length": [line_1.length, line_2.length]})
+    trace_frame = gpd.GeoDataFrame({"geometry": [line_1, line_2], "length": [line_1.length, line_2.length],
+                                    "startpoint": [line_1_sp, line_2_sp],
+                                    "endpoint": [line_1_ep, line_2_ep]})
     point_1 = Point(0.5, 0.5)
     point_2 = Point(1, 1)
     point_3 = Point(10, 10)
@@ -173,6 +181,22 @@ class TestTools:
             should_be_there = "Powerlaw, lognormal and exp"
             file_as_str = file.read()
             assert should_be_there in file_as_str
+
+    def test_prepare_geometry_traces(self):
+        traceframe = Helpers.trace_frame
+        prep_col, trace_col = tools.prepare_geometry_traces(traceframe)
+        assert isinstance(trace_col, shapely.geometry.MultiLineString)
+        assert isinstance(prep_col, PreparedGeometry)
+
+    def test_make_point_tree(self):
+        traceframe = Helpers.trace_frame
+        tree = tools.make_point_tree(traceframe)
+        assert isinstance(tree, strtree.STRtree)
+        # take a point from the input traceframe and see if query from tree returns it
+        point_buffer = traceframe.startpoint.iloc[0].buffer(0.2)
+        queried = [o.wkt for o in tree.query(point_buffer)]
+        # this depends on the setup of 'traceframe' and if it changes it errors
+        assert len(queried) >= 1
 
 
 class TestMultipleTargetAreas:
