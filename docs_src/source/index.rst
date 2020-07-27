@@ -63,7 +63,7 @@ own risk. Updates to this guide are not guaranteed when Python dependencies chan
 **Usage Guide**
 ==================
 
-The plugin is controlled using a QGIS GUI interface. Guide to the interface is under **Usage Guide**.
+The plugin is controlled using a QGIS GUI interface. Guide below.
 
 .. toctree::
    :maxdepth: 2
@@ -110,7 +110,7 @@ I refer you to multiple sources.
 .. _ngt:
 
 NetworkGT
--------------
+~~~~~~~~~~
 
 This plugin has been built to **only** work with data extracted using another QGIS-plugin, NetworkGT_ (see: `Nyberg et al., 2018`__):
 
@@ -120,7 +120,6 @@ This plugin has been built to **only** work with data extracted using another QG
 If the input data (*traces*) you have can be processed in NetworkGT into *branches* and *nodes*
 it is suitable for this plugin. NetworkGT is available for both QGIS and ArcGIS
 and branch and node data from both *should* be valid inputs into this plugin (*as of 15.2.2020*).
-
 
 .. _NetworkGT: https://github.com/BjornNyberg/NetworkGT
 .. _Nyberg2018: https://pubs.geoscienceworld.org/gsa/geosphere/article/531129/networkgt-a-gis-tool-for-geometric-and-topological
@@ -153,8 +152,8 @@ See :ref:`installation` for installation guide.
 **Development**
 =====================
 
-This plugin has been developed in PyCharm by setting the Python environment to mimic the OSGeo4W Shell.
-Good guide `here <http://spatialgalaxy.net/2018/02/13/quick-guide-to-getting-started-with-pyqgis-3-on-windows/>`_.
+This plugin has been developed in PyCharm by setting the Python environment to mimic the environment of OSGeo4W Shell.
+Good guide for setup `here <http://spatialgalaxy.net/2018/02/13/quick-guide-to-getting-started-with-pyqgis-3-on-windows/>`_.
 
 Documentation for Python modules has been created using Autodoc. Autodoc has trouble running without setting the matplotlib backend to Qt5Agg.
 If you wish to remake documentation: Check conf.py and replace my 'QT_QPA_PLATFORM_PLUGIN_PATH' with your own path.

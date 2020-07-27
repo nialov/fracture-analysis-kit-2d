@@ -35,6 +35,14 @@ fracture\_analysis\_2d.fracture\_analysis\_2d\_dialog module
    :undoc-members:
    :show-inheritance:
 
+fracture\_analysis\_2d.install\_script module
+---------------------------------------------
+
+.. automodule:: fracture_analysis_2d.install_script
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 fracture\_analysis\_2d.resources module
 ---------------------------------------
 

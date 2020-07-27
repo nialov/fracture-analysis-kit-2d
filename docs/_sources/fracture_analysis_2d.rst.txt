@@ -7,7 +7,6 @@ Subpackages
 .. toctree::
 
    fracture_analysis_2d.fracture_analysis_kit
-   fracture_analysis_2d.test
 
 Submodules
 ----------
@@ -32,6 +31,14 @@ fracture\_analysis\_2d.fracture\_analysis\_2d\_dialog module
 ------------------------------------------------------------
 
 .. automodule:: fracture_analysis_2d.fracture_analysis_2d_dialog
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+fracture\_analysis\_2d.install\_script module
+---------------------------------------------
+
+.. automodule:: fracture_analysis_2d.install_script
    :members:
    :undoc-members:
    :show-inheritance:
