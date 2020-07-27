@@ -83,7 +83,7 @@ def initialize_analysis_logging(plotting_directory):
     # TODO: Is basicConfig needed?
     logging.basicConfig(filename=filename,
                         filemode="w+",
-                        format="%(name)s %(levelname)s %(message)s",
+                        format="> %(message)s",
                         datefmt="%H:%M:%S'",
                         level=logging.INFO)
 
