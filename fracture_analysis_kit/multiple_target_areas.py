@@ -309,34 +309,18 @@ class MultiTargetAreaQGIS:
                 raise ValueError(f"No valid values in lineframe in length distribution modelling.\n"
                                  f"lineframe['logLen'].values: {lineframe['logLen'].values}")
         # TODO: Fix this polyfit mess.
-        try:
-            QgsMessageLog.logMessage(message='Trying to use np.polyfit\n'
-                                     , tag=__name__, level=Qgis.Info)
-            vals = np.polyfit(lineframe['logLen'].values[finite_value_indexes]
-                              , lineframe['logY'].values[finite_value_indexes]
-                              , deg=1)
-        except:
-            try:
-                QgsMessageLog.logMessage(message='Trying to use np.polynomial.polynomial.polyfit\n'
-                                         , tag=__name__, level=Qgis.Warning)
-                vals_not_in_order = np.polynomial.polynomial.polyfit(lineframe['logLen'].values[finite_value_indexes]
-                                                                     , lineframe['logY'].values[finite_value_indexes]
-                                                                     , deg=1)
-                vals = list(reversed(vals_not_in_order))
-            except:
-                QgsMessageLog.logMessage(message='Trying to use np.polynomial.polynomial.Polynomial.fit\n'
-                                         , tag=__name__, level=Qgis.Warning)
-                polynom_val = np.polynomial.polynomial.Polynomial.fit(lineframe['logLen'].values[finite_value_indexes]
-                                                                      , lineframe['logY'].values[finite_value_indexes]
-                                                                      , deg=1)
-                vals = list(reversed([coef for coef in polynom_val.identity()]))
+        QgsMessageLog.logMessage(message='Fitting powerlaw with np.polynomial.polynomial.polyfit\n'
+                                 , tag=__name__, level=Qgis.Warning)
+        vals = np.polynomial.polynomial.polyfit(lineframe['logLen'].values[finite_value_indexes]
+                                                             , lineframe['logY'].values[finite_value_indexes]
+                                                             , deg=1)
         if len(vals) == 2:
-            m, c = vals[0], vals[1]
+            m, c = vals[1], vals[0]
         else:
             QgsMessageLog.logMessage(message='Too many values from np.polyfit, 2 expected.\n'
-                                             f'vals: {vals}', tag=__name__, level=Qgis.Critical)
+                                             f'vals: c: {vals[0]} m: {vals[1]}', tag=__name__, level=Qgis.Critical)
             raise ValueError('Too many values from np.polyfit, 2 expected.\n'
-                             f'vals: {vals}')
+                             f'vals: c: {vals[0]} m: {vals[1]}')
         y_fit = np.exp(m * lineframe['logLen'].values + c)  # calculate the fitted values of y
         lineframe['y_fit'] = y_fit
         lineframe.plot(x='length', y='y_fit', color='k', ax=ax, label='Power Law Fit', linestyle='dashed', linewidth=2,
