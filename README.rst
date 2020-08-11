@@ -19,7 +19,7 @@ or from drone orthophotography of bedrock outcrop surfaces.
 *Branches* and *nodes* are derived from `NetworkGT`_.
 *Areas* are the interpretation boundaries of the traces and branches.
 
-.. figure:: images/collage1.png
+.. figure:: docs_src/source/imgs/collage1.png
 	:alt: Example plots
 	:align: center
 	
