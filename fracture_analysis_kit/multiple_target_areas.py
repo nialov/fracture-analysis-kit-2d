@@ -14,6 +14,7 @@ from textwrap import wrap
 import geopandas as gpd
 import matplotlib.pyplot as plt
 import numpy as np
+from numpy.linalg import LinAlgError
 import pandas as pd
 import powerlaw
 import shapely
@@ -311,9 +312,19 @@ class MultiTargetAreaQGIS:
         # TODO: Fix this polyfit mess.
         QgsMessageLog.logMessage(message='Fitting powerlaw with np.polynomial.polynomial.polyfit\n'
                                  , tag=__name__, level=Qgis.Warning)
-        vals = np.polynomial.polynomial.polyfit(lineframe['logLen'].values[finite_value_indexes]
-                                                             , lineframe['logY'].values[finite_value_indexes]
-                                                             , deg=1)
+        try:
+            vals = np.polynomial.polynomial.polyfit(lineframe['logLen'].values[finite_value_indexes]
+                                                                 , lineframe['logY'].values[finite_value_indexes]
+                                                                 , deg=1)
+        except LinAlgError:
+            QgsMessageLog.logMessage(message='Failed to fit with np.polynomial.polynomial.polyfit. Trying with'
+                                             'np.polynomial.polynomial.Polynomial.fit'
+                                     , tag=__name__, level=Qgis.Warning)
+            polynom_val = np.polynomial.polynomial.Polynomial.fit(lineframe['logLen'].values[finite_value_indexes]
+                                                                      , lineframe['logY'].values[finite_value_indexes]
+                                                                      , deg=1)
+            vals = [coef for coef in polynom_val.identity()]
+
         if len(vals) == 2:
             m, c = vals[1], vals[0]
         else:
