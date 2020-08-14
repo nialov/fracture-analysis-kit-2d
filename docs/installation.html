@@ -177,10 +177,11 @@
 <h2>Requirements and warnings<a class="headerlink" href="#requirements-and-warnings" title="Permalink to this headline">¶</a></h2>
 <p>This plugin has <strong>only</strong> been tested on Windows. No functionality on other platforms guaranteed and
 the installation will be different than the one explained below.</p>
-<p>Installation requires external Python dependencies that need to be installed to the QGIS environment.
+<p>Installation requires external Python dependencies that need to be installed to the QGIS OSGeo
+environment.
 This might cause issues and errors that I cannot predict especially when another module with
-external Python dependencies is installed.
-<strong>The entire risk as to the quality and performance of this plugin is with you.</strong></p>
+external Python dependencies is installed in the same environment.
+<strong>The entire risk as to the quality and performance of this plugin and its installation is with you.</strong></p>
 </div>
 <div class="section" id="installation-using-the-installation-script">
 <h2>Installation using the installation script<a class="headerlink" href="#installation-using-the-installation-script" title="Permalink to this headline">¶</a></h2>
@@ -204,7 +205,7 @@ Also packed with the script are unofficial Windows Binaries for Python packages 
 <li><p>In QGIS go to <em>Plugins</em> -&gt; <em>Manage and Install Plugins…</em> -&gt; <em>Install from ZIP</em></p></li>
 <li><p>Select the downloaded .zip file -&gt; <em>Install Plugin</em></p></li>
 <li><p>This installation will most likely fail due to the lack of external Python dependencies,
-don’t worry about this.</p></li>
+don’t worry about this. Installation of these is covered next.</p></li>
 </ul>
 </li>
 </ul>
@@ -214,14 +215,22 @@ don’t worry about this.</p></li>
 <ul>
 <li><p>Now to install external Python dependencies the complementary installation script is used.
 The installation script must be run from a command shell that is connected to the
-QGIS Python environment which is called <em>OSGeo4WShell</em>.
+QGIS Python environment. The shell is named <em>OSGeo4WShell</em>.
 Installing Python dependencies in the QGIS environment is done using the <em>OSGeo4WShell</em>.</p>
 <ul class="simple">
 <li><p>Easiest way to find the Shell is to:</p>
 <ul>
 <li><p>Press Windows key to open start menu</p></li>
 <li><p>Type: <em>OSGeo4WShell</em></p></li>
-<li><p>The executable should show up, just start it up.</p></li>
+<li><p>The executable should show up, just start it up.</p>
+<ul>
+<li><p>However, if you believe you have other tools connected that might have their own
+OSGeo4WShell associated with them, you might consider checking the location associated
+with the windows shortcut (Right click shortcut -&gt; <em>Open file location</em> -&gt; Right click the
+next shortcut -&gt; <em>Open file location</em>). The location should either be in OSGeo4W64 or QGIS
+directories.</p></li>
+</ul>
+</li>
 </ul>
 </li>
 <li><p>The <em>OSGeo4WShell</em> can also be located by finding your QGIS installations. There it is named

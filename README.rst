@@ -22,7 +22,7 @@ or from drone orthophotography of bedrock outcrop surfaces.
 .. figure:: images/collage1.png
 	:alt: Example plots
 	:align: center
-	
+
 	*Example plots from the plugin.*
 
 
@@ -56,8 +56,8 @@ Plugin Download
 
 **Plugin Download** `Here as a .zip file <zip_build/fracture_analysis_2d.zip>`_ *(Click download inside)*
 
-Plugin Installation
--------------------
+Plugin Installation and Updating
+---------------------------------
 
 Download the `Help Documentation`_ and follow the instructions there.
 

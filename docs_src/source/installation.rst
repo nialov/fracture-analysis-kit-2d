@@ -7,10 +7,11 @@ Requirements and warnings
 This plugin has **only** been tested on Windows. No functionality on other platforms guaranteed and
 the installation will be different than the one explained below.
 
-Installation requires external Python dependencies that need to be installed to the QGIS environment.
+Installation requires external Python dependencies that need to be installed to the QGIS OSGeo
+environment.
 This might cause issues and errors that I cannot predict especially when another module with
-external Python dependencies is installed.
-**The entire risk as to the quality and performance of this plugin is with you.**
+external Python dependencies is installed in the same environment.
+**The entire risk as to the quality and performance of this plugin and its installation is with you.**
 
 Installation using the installation script
 ------------------------------------------
@@ -36,14 +37,14 @@ Download plugin .zip and install it
   * In QGIS go to *Plugins* -> *Manage and Install Plugins...* -> *Install from ZIP*
   * Select the downloaded .zip file -> *Install Plugin*
   * This installation will most likely fail due to the lack of external Python dependencies,
-    don't worry about this.
+    don't worry about this. Installation of these is covered next.
 
 Running installation script in the OSGeo4WShell
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 * Now to install external Python dependencies the complementary installation script is used.
   The installation script must be run from a command shell that is connected to the
-  QGIS Python environment which is called *OSGeo4WShell*.
+  QGIS Python environment. The shell is named *OSGeo4WShell*.
   Installing Python dependencies in the QGIS environment is done using the *OSGeo4WShell*.
 
   * Easiest way to find the Shell is to:
@@ -51,6 +52,12 @@ Running installation script in the OSGeo4WShell
     * Press Windows key to open start menu
     * Type: *OSGeo4WShell*
     * The executable should show up, just start it up.
+
+      * However, if you believe you have other tools connected that might have their own
+        OSGeo4WShell associated with them, you might consider checking the location associated
+        with the windows shortcut (Right click shortcut -> *Open file location* -> Right click the
+        next shortcut -> *Open file location*). The location should either be in OSGeo4W64 or QGIS
+        directories.
 
   * The *OSGeo4WShell* can also be located by finding your QGIS installations. There it is named
     *OSGeo4W.bat*:
