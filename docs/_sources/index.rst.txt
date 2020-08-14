@@ -1,8 +1,3 @@
-.. Fracture Analysis 2D documentation master file, created by
-   sphinx-quickstart on Sat Feb 15 14:33:49 2020.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
 **Fracture Analysis 2D**
 ================================================
 
@@ -164,7 +159,8 @@ See :ref:`installation` for installation guide.
 This plugin has been developed in PyCharm by setting the Python environment to mimic the environment of OSGeo4W Shell.
 Good guide for setup `here <http://spatialgalaxy.net/2018/02/13/quick-guide-to-getting-started-with-pyqgis-3-on-windows/>`_.
 
-Documentation for Python modules has been created using Autodoc. Autodoc has trouble running without setting the matplotlib backend to Qt5Agg.
+Documentation for Python modules has been created using `Autodoc <https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html>`_.
+Autodoc has trouble running without setting the matplotlib backend to Qt5Agg.
 If you wish to remake documentation: Check conf.py and replace my 'QT_QPA_PLATFORM_PLUGIN_PATH' with your own path.
 
 The requirements_dev.txt file contains all pip packages (custom) installed within my QGIS environment.

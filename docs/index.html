@@ -328,7 +328,8 @@ and branch and node data from both <em>should</em> be valid inputs into this plu
 <h1><strong>Development</strong><a class="headerlink" href="#development" title="Permalink to this headline">¶</a></h1>
 <p>This plugin has been developed in PyCharm by setting the Python environment to mimic the environment of OSGeo4W Shell.
 Good guide for setup <a class="reference external" href="http://spatialgalaxy.net/2018/02/13/quick-guide-to-getting-started-with-pyqgis-3-on-windows/">here</a>.</p>
-<p>Documentation for Python modules has been created using Autodoc. Autodoc has trouble running without setting the matplotlib backend to Qt5Agg.
+<p>Documentation for Python modules has been created using <a class="reference external" href="https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html">Autodoc</a>.
+Autodoc has trouble running without setting the matplotlib backend to Qt5Agg.
 If you wish to remake documentation: Check conf.py and replace my ‘QT_QPA_PLATFORM_PLUGIN_PATH’ with your own path.</p>
 <p>The requirements_dev.txt file contains all pip packages (custom) installed within my QGIS environment.
 It is therefore not <em>clean</em> and contains packages that are not required for development. It should contain
