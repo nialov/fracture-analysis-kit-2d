@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Search &mdash; Fracture Analysis 2D 0.1alpha documentation</title>
+  <title>Updating Guide &mdash; Fracture Analysis 2D 0.1alpha documentation</title>
   
 
   
@@ -20,7 +20,6 @@
   
 
   
-    
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -35,9 +34,10 @@
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
-    <script type="text/javascript" src="_static/searchtools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="#" /> 
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="fracture_analysis_2d package" href="fracture_analysis_2d.html" />
+    <link rel="prev" title="Usage Guide" href="usage.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -64,7 +64,7 @@
 
           
 <div role="search">
-  <form id="rtd-search-form" class="wy-form" action="#" method="get">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
@@ -91,8 +91,12 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="usage.html"><strong>Usage Guide</strong></a></li>
 </ul>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="updating-guide.html"><strong>Updating Guide</strong></a></li>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#"><strong>Updating Guide</strong></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#warning">Warning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#updating">Updating</a></li>
+</ul>
+</li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="fracture_analysis_2d.html">fracture_analysis_2d package</a></li>
@@ -142,12 +146,14 @@
     
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
-      <li>Search</li>
+      <li><strong>Updating Guide</strong></li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
+            <a href="_sources/updating-guide.rst.txt" rel="nofollow"> View page source</a>
+          
         
       </li>
     
@@ -159,23 +165,56 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <noscript>
-  <div id="fallback" class="admonition warning">
-    <p class="last">
-      Please activate JavaScript to enable the search functionality.
-    </p>
-  </div>
-  </noscript>
+  <div class="section" id="updating-guide">
+<h1><strong>Updating Guide</strong><a class="headerlink" href="#updating-guide" title="Permalink to this headline">¶</a></h1>
+<p>This page contains the guide for updating the plugin. Updating consists of firstly removing
+the plugin from QGIS and then installing it again.</p>
+<div class="section" id="warning">
+<span id="updating-warning"></span><h2>Warning<a class="headerlink" href="#warning" title="Permalink to this headline">¶</a></h2>
+<p>If you wish to update the plugin with commits made to GitHub there is a chance that Python module
+requirements have changed. This might require re-running the <strong>updated</strong> installation script.
+If you encounter error messages demanding installation of new plugins during the Updating process,
+see <a class="reference internal" href="installation.html"><span class="doc">Installation Guide</span></a>
+and re-run the installation script as documented there <strong>after downloading the new .zip file</strong>.</p>
+</div>
+<div class="section" id="updating">
+<h2>Updating<a class="headerlink" href="#updating" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>Download the new plugin .zip file from <a class="reference external" href="https://github.com/nialov/fracture-analysis-kit-2d">GitHub</a></p></li>
+<li><p>Open QGIS and uninstall the current plugin installation:</p>
+<ul>
+<li><p><em>Plugins</em> -&gt; <em>Manage and Install Plugins…</em> -&gt; <em>Installed</em> -&gt; <em>2D Fracture Analysis Kit</em>
+-&gt; <em>Uninstall Plugin</em> -&gt; <em>Yes</em></p></li>
+</ul>
+</li>
+<li><p>Restart QGIS (Close and open up again)</p></li>
+<li><p>Now to install the updated plugin:</p>
+<ul>
+<li><p><em>Plugins</em> -&gt; <em>Manage and Install Plugins…</em> -&gt; <em>Install from ZIP</em> -&gt; <em>…</em>
+-&gt; Choose the downloaded .zip file -&gt; <em>Install Plugin</em> -&gt; <em>Yes</em></p></li>
+<li><p>If an error message pop-ups demanding installation of additional Python modules,
+see <a class="reference internal" href="#updating-warning"><span class="std std-ref">Warning</span></a></p></li>
+</ul>
+</li>
+</ul>
+<p>Plugin updated, congratulations!</p>
+</div>
+</div>
 
-  
-  <div id="search-results">
-  
-  </div>
 
            </div>
            
           </div>
           <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="fracture_analysis_2d.html" class="btn btn-neutral float-right" title="fracture_analysis_2d package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="usage.html" class="btn btn-neutral float-left" title="Usage Guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
   
 
   <hr/>
@@ -215,14 +254,7 @@
   
   
     
-  
-  <script type="text/javascript">
-    jQuery(function() { Search.loadIndex("searchindex.js"); });
-  </script>
-  
-  <script type="text/javascript" id="searchindexloader"></script>
    
-
 
 </body>
 </html>

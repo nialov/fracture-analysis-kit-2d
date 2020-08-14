@@ -5,12 +5,12 @@ Requirements and warnings
 --------------------------
 
 This plugin has **only** been tested on Windows. No functionality on other platforms guaranteed and
-the installation will be different that the one explained below.
+the installation will be different than the one explained below.
 
 Installation requires external Python dependencies that need to be installed to the QGIS environment.
 This might cause issues and errors that I cannot predict especially when another module with
 external Python dependencies is installed.
-**The entire risk as to the quality and performance is with you.**
+**The entire risk as to the quality and performance of this plugin is with you.**
 
 Installation using the installation script
 ------------------------------------------
@@ -33,7 +33,7 @@ Download plugin .zip and install it
 
 * Next, open QGIS and install the plugin.
 
-  * In QGIS go to *Plugins* -> *Manage and Install plugins...* -> *Install from ZIP*
+  * In QGIS go to *Plugins* -> *Manage and Install Plugins...* -> *Install from ZIP*
   * Select the downloaded .zip file -> *Install Plugin*
   * This installation will most likely fail due to the lack of external Python dependencies,
     don't worry about this.
@@ -70,14 +70,14 @@ Running installation script in the OSGeo4WShell
 
   * Typical location::
 
-        F:\Users\your-username-here\AppData\Roaming\QGIS\QGIS3\profiles\default\python\plugins\fracture_analysis_2d
+        C:\Users\your-username-here\AppData\Roaming\QGIS\QGIS3\profiles\default\python\plugins\fracture_analysis_2d
 
   * The plugin directory can also be located by trying to install the plugin, the directory is printed out
     in the error message when installation fails.
 
-  * To change directory, type in the shell with **your plugin path** after the *cd*::
+  * To change directory, type in the shell with **your plugin installation path** after the *cd*::
 
-        cd F:\Users\your-username-here\AppData\Roaming\QGIS\QGIS3\profiles\default\python\plugins\fracture_analysis_2d
+        cd C:\Users\your-username-here\AppData\Roaming\QGIS\QGIS3\profiles\default\python\plugins\fracture_analysis_2d
 
 * Now the hard part is over and the installation script can be run to install Python dependencies.
   Type in the OSGeo4WShell::
@@ -92,6 +92,10 @@ Finalization
 * If all went well with the dependency installation now the plugin can be fully installed.
 
   * Go back to QGIS and install the plugin from the .zip for the final time.
+
+    * *Plugins* -> *Manage and Install Plugins...* -> *Install from ZIP* -> *...*
+      -> Choose the downloaded .zip file -> *Install Plugin* -> *Yes*
+
   * The installation should succeed without any pop-up errors or warnings.
 
 * Installation complete!

@@ -70,6 +70,15 @@ The plugin is controlled using a QGIS GUI interface. Guide below.
 
    usage
 
+**Updating Guide**
+==================
+
+Contains guide for updating the plugin.
+
+.. toctree::
+   :maxdepth: 2
+
+   updating-guide
 
 **Dependencies and References**
 ===============================

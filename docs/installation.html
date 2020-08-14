@@ -102,6 +102,9 @@
 <li class="toctree-l1"><a class="reference internal" href="usage.html"><strong>Usage Guide</strong></a></li>
 </ul>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="updating-guide.html"><strong>Updating Guide</strong></a></li>
+</ul>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="fracture_analysis_2d.html">fracture_analysis_2d package</a></li>
 </ul>
 
@@ -173,11 +176,11 @@
 <div class="section" id="requirements-and-warnings">
 <h2>Requirements and warnings<a class="headerlink" href="#requirements-and-warnings" title="Permalink to this headline">¶</a></h2>
 <p>This plugin has <strong>only</strong> been tested on Windows. No functionality on other platforms guaranteed and
-the installation will be different that the one explained below.</p>
+the installation will be different than the one explained below.</p>
 <p>Installation requires external Python dependencies that need to be installed to the QGIS environment.
 This might cause issues and errors that I cannot predict especially when another module with
 external Python dependencies is installed.
-<strong>The entire risk as to the quality and performance is with you.</strong></p>
+<strong>The entire risk as to the quality and performance of this plugin is with you.</strong></p>
 </div>
 <div class="section" id="installation-using-the-installation-script">
 <h2>Installation using the installation script<a class="headerlink" href="#installation-using-the-installation-script" title="Permalink to this headline">¶</a></h2>
@@ -198,7 +201,7 @@ Also packed with the script are unofficial Windows Binaries for Python packages 
 </li>
 <li><p>Next, open QGIS and install the plugin.</p>
 <ul>
-<li><p>In QGIS go to <em>Plugins</em> -&gt; <em>Manage and Install plugins…</em> -&gt; <em>Install from ZIP</em></p></li>
+<li><p>In QGIS go to <em>Plugins</em> -&gt; <em>Manage and Install Plugins…</em> -&gt; <em>Install from ZIP</em></p></li>
 <li><p>Select the downloaded .zip file -&gt; <em>Install Plugin</em></p></li>
 <li><p>This installation will most likely fail due to the lack of external Python dependencies,
 don’t worry about this.</p></li>
@@ -245,14 +248,14 @@ Installing Python dependencies in the QGIS environment is done using the <em>OSG
 <li><p>The OSGeo4WShell prompt must now be changed to the same directory where the plugin was installed by QGIS</p>
 <ul>
 <li><p>Typical location:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">F</span><span class="p">:</span>\<span class="n">Users</span>\<span class="n">your</span><span class="o">-</span><span class="n">username</span><span class="o">-</span><span class="n">here</span>\<span class="n">AppData</span>\<span class="n">Roaming</span>\<span class="n">QGIS</span>\<span class="n">QGIS3</span>\<span class="n">profiles</span>\<span class="n">default</span>\<span class="n">python</span>\<span class="n">plugins</span>\<span class="n">fracture_analysis_2d</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">C</span><span class="p">:</span>\<span class="n">Users</span>\<span class="n">your</span><span class="o">-</span><span class="n">username</span><span class="o">-</span><span class="n">here</span>\<span class="n">AppData</span>\<span class="n">Roaming</span>\<span class="n">QGIS</span>\<span class="n">QGIS3</span>\<span class="n">profiles</span>\<span class="n">default</span>\<span class="n">python</span>\<span class="n">plugins</span>\<span class="n">fracture_analysis_2d</span>
 </pre></div>
 </div>
 </li>
 <li><p>The plugin directory can also be located by trying to install the plugin, the directory is printed out
 in the error message when installation fails.</p></li>
-<li><p>To change directory, type in the shell with <strong>your plugin path</strong> after the <em>cd</em>:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="n">F</span><span class="p">:</span>\<span class="n">Users</span>\<span class="n">your</span><span class="o">-</span><span class="n">username</span><span class="o">-</span><span class="n">here</span>\<span class="n">AppData</span>\<span class="n">Roaming</span>\<span class="n">QGIS</span>\<span class="n">QGIS3</span>\<span class="n">profiles</span>\<span class="n">default</span>\<span class="n">python</span>\<span class="n">plugins</span>\<span class="n">fracture_analysis_2d</span>
+<li><p>To change directory, type in the shell with <strong>your plugin installation path</strong> after the <em>cd</em>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="n">C</span><span class="p">:</span>\<span class="n">Users</span>\<span class="n">your</span><span class="o">-</span><span class="n">username</span><span class="o">-</span><span class="n">here</span>\<span class="n">AppData</span>\<span class="n">Roaming</span>\<span class="n">QGIS</span>\<span class="n">QGIS3</span>\<span class="n">profiles</span>\<span class="n">default</span>\<span class="n">python</span>\<span class="n">plugins</span>\<span class="n">fracture_analysis_2d</span>
 </pre></div>
 </div>
 </li>
@@ -272,7 +275,12 @@ Type in the OSGeo4WShell:</p>
 <ul class="simple">
 <li><p>If all went well with the dependency installation now the plugin can be fully installed.</p>
 <ul>
-<li><p>Go back to QGIS and install the plugin from the .zip for the final time.</p></li>
+<li><p>Go back to QGIS and install the plugin from the .zip for the final time.</p>
+<ul>
+<li><p><em>Plugins</em> -&gt; <em>Manage and Install Plugins…</em> -&gt; <em>Install from ZIP</em> -&gt; <em>…</em>
+-&gt; Choose the downloaded .zip file -&gt; <em>Install Plugin</em> -&gt; <em>Yes</em></p></li>
+</ul>
+</li>
 <li><p>The installation should succeed without any pop-up errors or warnings.</p></li>
 </ul>
 </li>

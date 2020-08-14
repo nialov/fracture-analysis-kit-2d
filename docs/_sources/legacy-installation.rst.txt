@@ -5,7 +5,7 @@ Requirements and warnings
 -------------------------
 
 This plugin has **only** been tested on Windows. No functionality on other platforms guaranteed and
-the installation will be different that the one explained below.
+the installation will be different than the one explained below.
 
 Installation requires external Python dependencies that need to be installed to the QGIS environment.
 This might cause issues and errors that I cannot predict especially when another module with
