@@ -45,6 +45,16 @@ def main_multi_target_area(layer_table_df, results_folder, analysis_name, group_
     config.ta_list = layer_table_df.Name.tolist()
     config.g_list = group_names_cutoffs_df.Group.tolist()
 
+    # SAVE ANALYSIS SETTINGS AND INPUTS INTO LOGGER
+    logger.info("Analysis Settings and Inputs")
+    logger.info("-----------------------------------")
+    logger.info(f"Layer table DataFrame:\n {layer_table_df.to_string()}")
+    logger.info(f"Results folder:\n {results_folder}")
+    logger.info(f"Analysis name:\n {analysis_name}")
+    logger.info(f"Group names and Cut-offs DataFrame:\n {group_names_cutoffs_df.to_string()}")
+    logger.info(f"Set DataFrame:\n {set_df.to_string()}")
+    logger.info(f"Chosen analyses from config.py file:\n {choose_your_analyses}")
+
     # START __init__
     QgsMessageLog.logMessage(message="Initializing MultiTargetAnalysis.", tag=f'{__name__}', level=Qgis.Info)
 

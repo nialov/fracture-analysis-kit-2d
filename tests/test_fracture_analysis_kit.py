@@ -19,7 +19,8 @@ from fracture_analysis_kit import tools \
     , multiple_target_areas \
     , analysis_and_plotting \
     , qgis_tools \
-    , target_area
+    , target_area \
+    , main
 
 
 class Helpers:
@@ -334,3 +335,13 @@ class TestTargetArea:
             result = target_area.TargetAreaLines.plot_length_distribution_fit(power_law_fit, fit_distribution, ax)
             assert result is None
 
+class TestMain:
+
+    def test_initialize_analysis_logging(self, tmp_path):
+        logger = main.initialize_analysis_logging(str(tmp_path))
+        assert isinstance(logger, logging.Logger)
+        logged_str = "HELLO-THIS-SHOULD-BE-IN-LOGGER-FILE"
+        logger.info(logged_str)
+        with open(tmp_path / "analysis_statistics.txt", mode="r") as logfile:
+            log_contents = logfile.read()
+            assert logged_str in log_contents
