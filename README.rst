@@ -45,7 +45,11 @@ __ Nyberg2018_
 
 Help Documentation
 ------------------
-**Help Documentation Download** `Here <zip_build/help.zip>`_ *(Click download inside)*
+**Online Help Documentation**
+
+* Online help is hosted on GitHub Pages: `Help Documentation <https://nialov.github.io/fracture-analysis-kit-2d/index.html>`_
+
+Optionally: **Help Documentation Download** `Here <zip_build/help.zip>`_ *(Click download inside)*
 
 Download the .zip-file and unzip the file to a folder of your choosing.
 
@@ -59,7 +63,7 @@ Plugin Download
 Plugin Installation and Updating
 ---------------------------------
 
-Download the `Help Documentation`_ and follow the instructions there.
+See the `Help Documentation`_ and follow the instructions there.
 
 Sample Data
 -----------
