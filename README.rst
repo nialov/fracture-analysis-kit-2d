@@ -49,10 +49,10 @@ Help Documentation
 
 * Online help is hosted on GitHub Pages: `Help Documentation <https://nialov.github.io/fracture-analysis-kit-2d/index.html>`_
 
-Optionally: **Help Documentation Download** `Here <zip_build/help.zip>`_ *(Click download inside)*
+If you want a local copy of the Help Documentation:
+Download `Here <zip_build/help.zip>`_ *(Click download inside after following the link)*
 
 Download the .zip-file and unzip the file to a folder of your choosing.
-
 Then open index.html in the folder. It should open the Help Documentation in your native browser.
 
 Plugin Download
