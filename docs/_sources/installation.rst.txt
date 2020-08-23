@@ -62,10 +62,10 @@ Running installation script in the OSGeo4WShell
   * The *OSGeo4WShell* can also be located by finding your QGIS installations. There it is named
     *OSGeo4W.bat*:
 
-    * Example locations:
+    * Example locations::
 
-      * C:\OSGeo4W64
-      * C:\Program Files\QGIS
+        C:\OSGeo4W64
+        C:\Program Files\QGIS
 
 * First run a command in the OSGeo4WShell::
 

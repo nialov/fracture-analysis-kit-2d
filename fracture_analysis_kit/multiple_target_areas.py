@@ -313,6 +313,7 @@ class MultiTargetAreaQGIS:
         QgsMessageLog.logMessage(message='Fitting powerlaw with np.polynomial.polynomial.polyfit\n'
                                  , tag=__name__, level=Qgis.Warning)
         try:
+            # vals[0] == constant, vals[1] == exponent
             vals = np.polynomial.polynomial.polyfit(lineframe['logLen'].values[finite_value_indexes]
                                                                  , lineframe['logY'].values[finite_value_indexes]
                                                                  , deg=1)
@@ -323,10 +324,12 @@ class MultiTargetAreaQGIS:
             polynom_val = np.polynomial.polynomial.Polynomial.fit(lineframe['logLen'].values[finite_value_indexes]
                                                                       , lineframe['logY'].values[finite_value_indexes]
                                                                       , deg=1)
-            vals = [coef for coef in polynom_val.identity()]
+            # vals = [coef for coef in polynom_val.identity()]
+            vals = polynom_val.convert(domain=(-1, 1)).coef
 
         if len(vals) == 2:
-            m, c = vals[1], vals[0]
+            # c = constant, m = exponent
+            c, m = vals[0], vals[1]
         else:
             QgsMessageLog.logMessage(message='Too many values from np.polyfit, 2 expected.\n'
                                              f'vals: c: {vals[0]} m: {vals[1]}', tag=__name__, level=Qgis.Critical)
