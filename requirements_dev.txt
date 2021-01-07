@@ -32,7 +32,7 @@ joblib==0.14.1
 jsonschema==2.6.0
 jupyter-core==4.4.0
 kiwisolver==1.1.0
-lxml==4.3.3
+lxml==4.6.2
 MarkupSafe==1.1.1
 matplotlib==3.2.1
 meshio==4.0.11
